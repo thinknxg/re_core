@@ -1,0 +1,42 @@
+[
+ {
+  "doctype": "Role",
+  "name": "RE Manager",
+  "role_name": "RE Manager",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "Property Manager",
+  "role_name": "Property Manager",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "Leasing Officer",
+  "role_name": "Leasing Officer",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "Maintenance Supervisor",
+  "role_name": "Maintenance Supervisor",
+  "desk_access": 1,
+  "disabled": 0,
+  "is_custom": 0
+ },
+ {
+  "doctype": "Role",
+  "name": "Tenant",
+  "role_name": "Tenant",
+  "desk_access": 0,
+  "disabled": 0,
+  "is_custom": 0
+ }
+]

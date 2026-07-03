@@ -1,0 +1,157 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "",
+ "creation": "2026-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "invoicing_sb",
+  "rent_item",
+  "invoice_lead_days",
+  "col_break_1",
+  "auto_create_pdcs",
+  "overdue_grace_days",
+  "deposit_sb",
+  "deposit_liability_account",
+  "col_break_2",
+  "deposit_bank_account",
+  "expiry_sb",
+  "expiring_flag_days",
+  "renewal_todo_days",
+  "portal_sb",
+  "welcome_email_template"
+ ],
+ "fields": [
+  {
+   "fieldname": "invoicing_sb",
+   "fieldtype": "Section Break",
+   "label": "Invoicing"
+  },
+  {
+   "description": "Non-stock service item used on rent Sales Invoices",
+   "fieldname": "rent_item",
+   "fieldtype": "Link",
+   "label": "Rent Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "default": 7,
+   "description": "Create the Sales Invoice this many days before the installment due date",
+   "fieldname": "invoice_lead_days",
+   "fieldtype": "Int",
+   "label": "Invoice Lead Days"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break",
+   "label": "Col Break 1"
+  },
+  {
+   "fieldname": "auto_create_pdcs",
+   "fieldtype": "Check",
+   "label": "Draft PDCs on Lease Submit"
+  },
+  {
+   "default": 3,
+   "fieldname": "overdue_grace_days",
+   "fieldtype": "Int",
+   "label": "Overdue Grace Days"
+  },
+  {
+   "fieldname": "deposit_sb",
+   "fieldtype": "Section Break",
+   "label": "Security Deposits"
+  },
+  {
+   "description": "Deposits Held liability account; leave blank to skip Journal Entries",
+   "fieldname": "deposit_liability_account",
+   "fieldtype": "Link",
+   "label": "Deposit Liability Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "col_break_2",
+   "fieldtype": "Column Break",
+   "label": "Col Break 2"
+  },
+  {
+   "fieldname": "deposit_bank_account",
+   "fieldtype": "Link",
+   "label": "Deposit Receipt Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "expiry_sb",
+   "fieldtype": "Section Break",
+   "label": "Lease Expiry Pipeline"
+  },
+  {
+   "default": 90,
+   "description": "Mark lease as Expiring this many days before end date",
+   "fieldname": "expiring_flag_days",
+   "fieldtype": "Int",
+   "label": "Expiring Flag Days"
+  },
+  {
+   "default": 60,
+   "description": "Create a renewal follow-up ToDo this many days before end date",
+   "fieldname": "renewal_todo_days",
+   "fieldtype": "Int",
+   "label": "Renewal Todo Days"
+  },
+  {
+   "fieldname": "portal_sb",
+   "fieldtype": "Section Break",
+   "label": "Tenant Portal"
+  },
+  {
+   "fieldname": "welcome_email_template",
+   "fieldtype": "Link",
+   "label": "Welcome Email Template",
+   "options": "Email Template"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 0,
+ "issingle": 1,
+ "istable": 0,
+ "links": [],
+ "modified": "2026-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "Property Settings",
+ "naming_rule": "",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "RE Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

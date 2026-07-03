@@ -1,0 +1,232 @@
+[
+ {
+  "doctype": "Workspace",
+  "name": "Property Ops",
+  "label": "Property Ops",
+  "title": "Property Ops",
+  "module": "RE Core",
+  "public": 1,
+  "is_hidden": 0,
+  "icon": "organization",
+  "content": "[{\"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\">Property Operations</span>\", \"col\": 12}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Portfolio\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Leasing\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Collections & Maintenance\", \"col\": 4}}, {\"type\": \"card\", \"data\": {\"card_name\": \"Reports\", \"col\": 4}}]",
+  "links": [
+   {
+    "type": "Card Break",
+    "label": "Portfolio",
+    "hidden": 0,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Property",
+    "link_type": "DocType",
+    "link_to": "Property",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Unit",
+    "link_type": "DocType",
+    "link_to": "Unit",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Property Owner",
+    "link_type": "DocType",
+    "link_to": "Property Owner",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Amenity",
+    "link_type": "DocType",
+    "link_to": "Amenity",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Card Break",
+    "label": "Leasing",
+    "hidden": 0,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Lease Contract",
+    "link_type": "DocType",
+    "link_to": "Lease Contract",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Tenant",
+    "link_type": "DocType",
+    "link_to": "Tenant",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Rent Schedule",
+    "link_type": "DocType",
+    "link_to": "Rent Schedule",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Security Deposit",
+    "link_type": "DocType",
+    "link_to": "Security Deposit",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Card Break",
+    "label": "Collections & Maintenance",
+    "hidden": 0,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Post Dated Cheque",
+    "link_type": "DocType",
+    "link_to": "Post Dated Cheque",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Maintenance Request",
+    "link_type": "DocType",
+    "link_to": "Maintenance Request",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Maintenance Job",
+    "link_type": "DocType",
+    "link_to": "Maintenance Job",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Move In Out Inspection",
+    "link_type": "DocType",
+    "link_to": "Move In Out Inspection",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Property Settings",
+    "link_type": "DocType",
+    "link_to": "Property Settings",
+    "hidden": 0,
+    "is_query_report": false,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Card Break",
+    "label": "Reports",
+    "hidden": 0,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Rent Roll",
+    "link_type": "Report",
+    "link_to": "Rent Roll",
+    "hidden": 0,
+    "is_query_report": 1,
+    "onboard": 0,
+    "link_count": 0
+   },
+   {
+    "type": "Link",
+    "label": "Owner Statement",
+    "link_type": "Report",
+    "link_to": "Owner Statement",
+    "hidden": 0,
+    "is_query_report": 1,
+    "onboard": 0,
+    "link_count": 0
+   }
+  ],
+  "shortcuts": [
+   {
+    "type": "DocType",
+    "label": "New Lease",
+    "link_to": "Lease Contract",
+    "doc_view": "New"
+   },
+   {
+    "type": "DocType",
+    "label": "Units",
+    "link_to": "Unit",
+    "doc_view": "List",
+    "stats_filter": "{\"status\": \"Vacant\"}",
+    "color": "Green"
+   },
+   {
+    "type": "DocType",
+    "label": "Overdue PDCs",
+    "link_to": "Post Dated Cheque",
+    "doc_view": "List",
+    "stats_filter": "{\"status\": \"Bounced\"}",
+    "color": "Red"
+   },
+   {
+    "type": "DocType",
+    "label": "Open Maintenance",
+    "link_to": "Maintenance Request",
+    "doc_view": "List",
+    "stats_filter": "{\"status\": \"Open\"}",
+    "color": "Orange"
+   }
+  ],
+  "charts": [],
+  "number_cards": [],
+  "custom_blocks": [],
+  "quick_lists": [],
+  "roles": [],
+  "sequence_id": 99.0,
+  "type": "Workspace"
+ }
+]

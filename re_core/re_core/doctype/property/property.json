@@ -1,0 +1,278 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:PROP-{YYYY}-{####}",
+ "creation": "2026-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_sb",
+  "property_name",
+  "property_type",
+  "status",
+  "col_break_1",
+  "owner_ref",
+  "company",
+  "total_units",
+  "addr_sb",
+  "country",
+  "city",
+  "area",
+  "address_line",
+  "col_break_2",
+  "latitude",
+  "longitude",
+  "compliance_sb",
+  "municipality_ref",
+  "ejari_number",
+  "col_break_3",
+  "rera_permit",
+  "tawtheeq_ref",
+  "media_sb",
+  "cover_image",
+  "photos",
+  "amenities",
+  "notes_sb",
+  "notes"
+ ],
+ "fields": [
+  {
+   "fieldname": "basic_sb",
+   "fieldtype": "Section Break",
+   "label": "Property"
+  },
+  {
+   "fieldname": "property_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Property Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "property_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Property Type",
+   "options": "\nApartment Building\nVilla\nVilla Compound\nCommercial Tower\nMixed Use\nLand",
+   "reqd": 1
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nUnder Development\nSold\nArchived"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break",
+   "label": "Col Break 1"
+  },
+  {
+   "fieldname": "owner_ref",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Owner",
+   "options": "Property Owner",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "owner_ref.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_units",
+   "fieldtype": "Int",
+   "label": "Total Units",
+   "read_only": 1
+  },
+  {
+   "fieldname": "addr_sb",
+   "fieldtype": "Section Break",
+   "label": "Location"
+  },
+  {
+   "default": "Oman",
+   "fieldname": "country",
+   "fieldtype": "Select",
+   "label": "Country",
+   "options": "\nOman\nUnited Arab Emirates\nSaudi Arabia\nBahrain\nQatar\nKuwait",
+   "reqd": 1
+  },
+  {
+   "default": "Muscat",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "City"
+  },
+  {
+   "fieldname": "area",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Area / Wilaya"
+  },
+  {
+   "fieldname": "address_line",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "col_break_2",
+   "fieldtype": "Column Break",
+   "label": "Col Break 2"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude",
+   "precision": 6
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude",
+   "precision": 6
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "compliance_sb",
+   "fieldtype": "Section Break",
+   "label": "Compliance"
+  },
+  {
+   "fieldname": "municipality_ref",
+   "fieldtype": "Data",
+   "label": "Municipality Reference"
+  },
+  {
+   "depends_on": "eval:doc.country=='United Arab Emirates'",
+   "fieldname": "ejari_number",
+   "fieldtype": "Data",
+   "label": "Ejari Number"
+  },
+  {
+   "fieldname": "col_break_3",
+   "fieldtype": "Column Break",
+   "label": "Col Break 3"
+  },
+  {
+   "depends_on": "eval:doc.country=='United Arab Emirates'",
+   "fieldname": "rera_permit",
+   "fieldtype": "Data",
+   "label": "RERA Permit"
+  },
+  {
+   "depends_on": "eval:doc.country=='United Arab Emirates'",
+   "fieldname": "tawtheeq_ref",
+   "fieldtype": "Data",
+   "label": "Tawtheeq Reference"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "media_sb",
+   "fieldtype": "Section Break",
+   "label": "Media & Amenities"
+  },
+  {
+   "fieldname": "cover_image",
+   "fieldtype": "Attach Image",
+   "label": "Cover Image"
+  },
+  {
+   "fieldname": "photos",
+   "fieldtype": "Table",
+   "label": "Photos",
+   "options": "Property Photo"
+  },
+  {
+   "fieldname": "amenities",
+   "fieldtype": "Table MultiSelect",
+   "label": "Amenities",
+   "options": "Property Amenity"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "notes_sb",
+   "fieldtype": "Section Break",
+   "label": "Notes Sb"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Text Editor",
+   "label": "Notes"
+  }
+ ],
+ "image_field": "cover_image",
+ "index_web_pages_for_search": 0,
+ "is_submittable": 0,
+ "issingle": 0,
+ "istable": 0,
+ "links": [],
+ "modified": "2026-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "Property",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "RE Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Property Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Leasing Officer",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Maintenance Supervisor",
+   "share": 1,
+   "write": 0
+  }
+ ],
+ "search_fields": "property_name,city,area",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "property_name",
+ "track_changes": 1
+}

@@ -1,0 +1,229 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:UNIT-{#####}",
+ "creation": "2026-01-01 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "basic_sb",
+  "property",
+  "unit_no",
+  "unit_title",
+  "floor",
+  "col_break_1",
+  "unit_type",
+  "usage",
+  "status",
+  "specs_sb",
+  "area_sqm",
+  "bedrooms",
+  "bathrooms",
+  "col_break_2",
+  "furnishing",
+  "parking_slots",
+  "fin_sb",
+  "annual_rent",
+  "col_break_3",
+  "current_lease",
+  "company"
+ ],
+ "fields": [
+  {
+   "fieldname": "basic_sb",
+   "fieldtype": "Section Break",
+   "label": "Unit"
+  },
+  {
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Property",
+   "options": "Property",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Unit No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "unit_title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Unit Title",
+   "read_only": 1
+  },
+  {
+   "fieldname": "floor",
+   "fieldtype": "Data",
+   "label": "Floor"
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break",
+   "label": "Col Break 1"
+  },
+  {
+   "fieldname": "unit_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Unit Type",
+   "options": "\nStudio\n1BR\n2BR\n3BR\n4BR+\nPenthouse\nShop\nOffice\nWarehouse",
+   "reqd": 1
+  },
+  {
+   "default": "Residential",
+   "description": "Drives VAT treatment: Oman residential leases are VAT-exempt",
+   "fieldname": "usage",
+   "fieldtype": "Select",
+   "label": "Usage",
+   "options": "Residential\nCommercial"
+  },
+  {
+   "default": "Vacant",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Vacant\nReserved\nOccupied\nUnder Maintenance\nBlocked",
+   "read_only": 1
+  },
+  {
+   "fieldname": "specs_sb",
+   "fieldtype": "Section Break",
+   "label": "Specifications"
+  },
+  {
+   "fieldname": "area_sqm",
+   "fieldtype": "Float",
+   "label": "Area (sqm)"
+  },
+  {
+   "fieldname": "bedrooms",
+   "fieldtype": "Int",
+   "label": "Bedrooms"
+  },
+  {
+   "fieldname": "bathrooms",
+   "fieldtype": "Int",
+   "label": "Bathrooms"
+  },
+  {
+   "fieldname": "col_break_2",
+   "fieldtype": "Column Break",
+   "label": "Col Break 2"
+  },
+  {
+   "default": "Unfurnished",
+   "fieldname": "furnishing",
+   "fieldtype": "Select",
+   "label": "Furnishing",
+   "options": "Unfurnished\nSemi Furnished\nFully Furnished"
+  },
+  {
+   "fieldname": "parking_slots",
+   "fieldtype": "Int",
+   "label": "Parking Slots"
+  },
+  {
+   "fieldname": "fin_sb",
+   "fieldtype": "Section Break",
+   "label": "Financials"
+  },
+  {
+   "fieldname": "annual_rent",
+   "fieldtype": "Currency",
+   "label": "Asking Annual Rent"
+  },
+  {
+   "fieldname": "col_break_3",
+   "fieldtype": "Column Break",
+   "label": "Col Break 3"
+  },
+  {
+   "fieldname": "current_lease",
+   "fieldtype": "Link",
+   "label": "Current Lease",
+   "options": "Lease Contract",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "property.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 0,
+ "issingle": 0,
+ "istable": 0,
+ "links": [],
+ "modified": "2026-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "Unit",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "RE Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Property Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Leasing Officer",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Maintenance Supervisor",
+   "share": 1,
+   "write": 0
+  }
+ ],
+ "search_fields": "unit_no,property",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "unit_title",
+ "track_changes": 1
+}
