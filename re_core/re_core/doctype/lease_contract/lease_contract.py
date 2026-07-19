@@ -9,10 +9,15 @@ FREQUENCY_COUNT = {"Annual": 1, "Semi-Annual": 2, "Quarterly": 4}
 class LeaseContract(Document):
     # ------------------------------------------------------------ validate
     def validate(self):
+        self._set_company()
         self._validate_dates()
         self._validate_unit()
         self._compute_totals()
         self.title = f"{self.tenant_name or self.tenant} @ {self.unit}"
+
+    def _set_company(self):
+        if not self.company and self.property:
+            self.company = frappe.db.get_value("Property", self.property, "company")
 
     def _validate_dates(self):
         if getdate(self.end_date) <= getdate(self.start_date):
@@ -83,6 +88,31 @@ class LeaseContract(Document):
         deposit.insert(ignore_permissions=True)
         return deposit
 
+    def _flag_security_deposit(self, reason):
+        if not self.security_deposit:
+            return
+        status = frappe.db.get_value("Security Deposit", self.security_deposit, "status")
+        if status != "Held":
+            return
+        deposit = frappe.get_doc("Security Deposit", self.security_deposit)
+        deposit.add_comment(
+            "Comment",
+            _("Lease {0} {1} — deposit needs refund/deduction review.").format(self.name, reason)
+        )
+        for user in frappe.get_all("Has Role",
+                                   filters={"role": "RE Manager", "parenttype": "User"},
+                                   pluck="parent"):
+            if frappe.db.get_value("User", user, "enabled"):
+                frappe.get_doc({
+                    "doctype": "Notification Log",
+                    "for_user": user,
+                    "type": "Alert",
+                    "document_type": "Security Deposit",
+                    "document_name": self.security_deposit,
+                    "subject": _("Security Deposit {0} needs review — lease {1} {2}")
+                               .format(self.security_deposit, self.name, reason),
+                }).insert(ignore_permissions=True)
+
     def _draft_pdcs(self, schedule):
         for row in schedule.installments:
             pdc = frappe.new_doc("Post Dated Cheque")
@@ -99,6 +129,7 @@ class LeaseContract(Document):
     def on_cancel(self):
         self.db_set("status", "Terminated")
         frappe.db.set_value("Unit", self.unit, {"status": "Vacant", "current_lease": None})
+        self._flag_security_deposit(_("was cancelled"))
         if self.rent_schedule:
             frappe.db.set_value("Rent Schedule", self.rent_schedule, "status", "Cancelled")
             for row in frappe.get_all("Rent Installment",
@@ -115,6 +146,7 @@ class LeaseContract(Document):
             frappe.throw(_("Only Active or Expiring leases can be terminated."))
         self.db_set("status", "Terminated")
         frappe.db.set_value("Unit", self.unit, {"status": "Vacant", "current_lease": None})
+        self._flag_security_deposit(_("was terminated early"))
         if reason:
             self.add_comment("Comment", _("Terminated: {0}").format(reason))
         for row in frappe.get_all("Rent Installment",

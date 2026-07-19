@@ -10,6 +10,7 @@ required_apps = ["erpnext"]
 after_install = "re_core.install.after_install"
 
 fixtures = [
+    {"doctype": "Custom Field", "filters": [["dt", "=", "Unit"], ["fieldname", "=", "published_to_portal"]]},
     {"dt": "Role", "filters": [["name", "in", [
         "RE Manager", "Property Manager", "Leasing Officer",
         "Maintenance Supervisor", "Tenant",
