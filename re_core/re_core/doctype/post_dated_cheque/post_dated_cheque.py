@@ -31,6 +31,17 @@ class PostDatedCheque(Document):
         if pe:
             self.db_set("payment_entry", pe)
         self._update_installment("Paid")
+        self._trigger_owner_remittance()
+
+    def _trigger_owner_remittance(self):
+        """Owner remittance only fires once this PDC (and its rent installment)
+        is actually Cleared - not at Sales Invoice submit time."""
+        inst = self._installment()
+        if not (inst and inst.sales_invoice):
+            return
+        from re_core.re_core.owner_remittance import create_owner_remittance
+        si = frappe.get_doc("Sales Invoice", inst.sales_invoice)
+        create_owner_remittance(si)
 
     @frappe.whitelist()
     def mark_bounced(self, reason=None):

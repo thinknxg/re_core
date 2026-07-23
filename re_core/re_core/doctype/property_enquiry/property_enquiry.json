@@ -1,0 +1,24 @@
+{
+  "doctype": "DocType",
+  "name": "Property Enquiry",
+  "module": "RE Core",
+  "custom": 0,
+  "naming_rule": "By fieldname",
+  "autoname": "field:enquiry_id",
+  "fields": [
+    {"fieldname": "enquiry_id", "label": "Enquiry ID", "fieldtype": "Data", "hidden": 1},
+    {"fieldname": "unit", "label": "Unit", "fieldtype": "Link", "options": "Unit", "reqd": 1},
+    {"fieldname": "customer", "label": "Customer", "fieldtype": "Link", "options": "Customer", "reqd": 1},
+    {"fieldname": "column_break_1", "fieldtype": "Column Break"},
+    {"fieldname": "enquiry_type", "label": "Type", "fieldtype": "Select", "options": "General Enquiry\nSite Visit Request\nPrice Negotiation", "default": "General Enquiry"},
+    {"fieldname": "status", "label": "Status", "fieldtype": "Select", "options": "New\nAssigned\nIn Progress\nClosed", "default": "New"},
+    {"fieldname": "section_break_1", "fieldtype": "Section Break"},
+    {"fieldname": "message", "label": "Message", "fieldtype": "Small Text"},
+    {"fieldname": "linked_lead", "label": "Linked Lead", "fieldtype": "Link", "options": "Lead", "read_only": 1, "description": "Auto-created in re_crm when this enquiry is submitted"},
+    {"fieldname": "assigned_to_user", "label": "Assigned To", "fieldtype": "Link", "options": "User"}
+  ],
+  "permissions": [
+    {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
+    {"role": "Sales User", "read": 1, "write": 1, "create": 1}
+  ]
+}

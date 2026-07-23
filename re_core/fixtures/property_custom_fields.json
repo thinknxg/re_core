@@ -1,0 +1,45 @@
+[
+  {
+    "doctype": "Custom Field",
+    "name": "Property-portal_section",
+    "dt": "Property",
+    "fieldname": "portal_section",
+    "label": "Listing Portal",
+    "fieldtype": "Section Break",
+    "insert_after": "status",
+    "collapsible": 1
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Property-is_live",
+    "dt": "Property",
+    "fieldname": "is_live",
+    "label": "Live on Portal",
+    "fieldtype": "Check",
+    "insert_after": "portal_section",
+    "default": "0",
+    "description": "Toggle to publish this property on the customer listing portal"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Property-published_on",
+    "dt": "Property",
+    "fieldname": "published_on",
+    "label": "Published On",
+    "fieldtype": "Datetime",
+    "insert_after": "is_live",
+    "read_only": 1
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Property-portal_visibility",
+    "dt": "Property",
+    "fieldname": "portal_visibility",
+    "label": "Portal Visibility",
+    "fieldtype": "Select",
+    "options": "Draft\nLive\nUnder Offer\nSold - Hidden",
+    "default": "Draft",
+    "insert_after": "published_on",
+    "description": "Draft/Sold-Hidden never show on portal even if Live checkbox is on. Under Offer shows with a badge but blocks new enquiries."
+  }
+]

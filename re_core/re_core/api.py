@@ -960,32 +960,24 @@ def get_pdc_list(tenant=None, lease_contract=None, status=None):
 @frappe.whitelist()
 def update_pdc_status(name, status, deposit_date=None, clearance_date=None, bounce_reason=None):
     doc = frappe.get_doc("Post Dated Cheque", name)
-    doc.status = status
+
     if deposit_date:
         doc.deposit_date = deposit_date
     if clearance_date:
         doc.clearance_date = clearance_date
-    if bounce_reason:
-        doc.bounce_reason = bounce_reason
-    doc.save()
 
-    # Cascade PDC status to the linked Rent Installment, if any.
-    installment_status_map = {
-        "Cleared": "Paid",
-        "Bounced": "Bounced",
-        "Returned": "Cancelled",
-    }
-    new_installment_status = installment_status_map.get(status)
-    if new_installment_status:
-        installment_parent = frappe.db.get_value("Rent Installment", {"pdc": name}, "parent")
-        if installment_parent:
-            schedule_doc = frappe.get_doc("Rent Schedule", installment_parent)
-            for row in schedule_doc.installments:
-                if row.pdc == name:
-                    row.status = new_installment_status
-            schedule_doc.save()
+    if status == "Deposited":
+        doc.mark_deposited()
+    elif status == "Cleared":
+        doc.mark_cleared()
+    elif status == "Bounced":
+        doc.mark_bounced(reason=bounce_reason)
+    else:
+        # Fallback for statuses without a dedicated lifecycle method (e.g. "Returned", "Replaced")
+        doc._move(status)
 
-    return {"name": doc.name, "status": doc.status}
+    doc.reload()
+    return {"name": doc.name, "status": doc.status, "payment_entry": doc.payment_entry}
 
 
 # ─────────────────────────────────────────────

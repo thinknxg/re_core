@@ -47,3 +47,13 @@ has_permission = {
     "Maintenance Request": "re_core.permissions.has_permission",
     "Tenant": "re_core.permissions.has_permission",
 }
+
+doctype_js = {
+"Property": "public/js/property_live_toggle.js"
+}
+
+doc_events = {
+"Post Dated Cheque": {
+"on_submit": "re_core.re_core.pdc_bank_sync.sync_bank_to_payment_entry"
+},
+}

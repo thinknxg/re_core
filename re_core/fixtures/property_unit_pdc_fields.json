@@ -1,0 +1,204 @@
+[
+  {
+    "doctype": "Custom Field",
+    "name": "Property-ownership_section",
+    "dt": "Property",
+    "fieldname": "ownership_section",
+    "label": "Ownership & Billing",
+    "fieldtype": "Section Break",
+    "insert_after": "status",
+    "collapsible": 1
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Property-ownership_type",
+    "dt": "Property",
+    "fieldname": "ownership_type",
+    "label": "Ownership Type",
+    "fieldtype": "Select",
+    "options": "Company\nLandlord",
+    "default": "Company",
+    "insert_after": "ownership_section",
+    "reqd": 1
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Property-column_break_ownership",
+    "dt": "Property",
+    "fieldname": "column_break_ownership",
+    "fieldtype": "Column Break",
+    "insert_after": "owner_ref"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Property-management_fee_type",
+    "dt": "Property",
+    "fieldname": "management_fee_type",
+    "label": "Management Fee Type",
+    "fieldtype": "Select",
+    "options": "Percentage\nFixed Amount",
+    "default": "Percentage",
+    "insert_after": "column_break_ownership",
+    "depends_on": "eval:doc.ownership_type=='Landlord'"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Property-management_fee_value",
+    "dt": "Property",
+    "fieldname": "management_fee_value",
+    "label": "Management Fee Value",
+    "fieldtype": "Float",
+    "insert_after": "management_fee_type",
+    "depends_on": "eval:doc.ownership_type=='Landlord'",
+    "description": "If type is Percentage, enter e.g. 10 for 10%. If Fixed Amount, enter the flat currency value deducted each cycle."
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Property-onetime_commission",
+    "dt": "Property",
+    "fieldname": "onetime_commission",
+    "label": "Onetime Commission",
+    "fieldtype": "Currency",
+    "insert_after": "management_fee_value",
+    "depends_on": "eval:doc.ownership_type=='Landlord'",
+    "description": "Deducted only once, alongside the first tenant invoice for each new lease."
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Property-no_of_floors",
+    "dt": "Property",
+    "fieldname": "no_of_floors",
+    "label": "No. of Floors",
+    "fieldtype": "Int",
+    "insert_after": "onetime_commission"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Unit-ownership_section",
+    "dt": "Unit",
+    "fieldname": "ownership_section",
+    "label": "Ownership & Billing",
+    "fieldtype": "Section Break",
+    "insert_after": "property",
+    "collapsible": 1,
+    "description": "Auto-populated from Property when this Unit's Property field is set. Values below are editable per-unit overrides (e.g. 2BR vs luxury units billed at different rates)."
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Unit-ownership_type",
+    "dt": "Unit",
+    "fieldname": "ownership_type",
+    "label": "Ownership Type",
+    "fieldtype": "Select",
+    "options": "Company\nLandlord",
+    "insert_after": "ownership_section",
+    "read_only": 1,
+    "description": "Fetched from Property - not editable here."
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Unit-owner",
+    "dt": "Unit",
+    "fieldname": "owner_ref",
+    "label": "Owner",
+    "fieldtype": "Link",
+    "options": "Property Owner",
+    "insert_after": "ownership_type",
+    "read_only": 1,
+    "depends_on": "eval:doc.ownership_type=='Landlord'"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Unit-column_break_ownership",
+    "dt": "Unit",
+    "fieldname": "column_break_ownership",
+    "fieldtype": "Column Break",
+    "insert_after": "owner_ref"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Unit-management_fee_type",
+    "dt": "Unit",
+    "fieldname": "management_fee_type",
+    "label": "Management Fee Type",
+    "fieldtype": "Select",
+    "options": "Percentage\nFixed Amount",
+    "insert_after": "column_break_ownership",
+    "depends_on": "eval:doc.ownership_type=='Landlord'",
+    "description": "Editable override - defaults from Property but can differ per unit."
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Unit-management_fee_value",
+    "dt": "Unit",
+    "fieldname": "management_fee_value",
+    "label": "Management Fee Value",
+    "fieldtype": "Float",
+    "insert_after": "management_fee_type",
+    "depends_on": "eval:doc.ownership_type=='Landlord'"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Unit-onetime_commission",
+    "dt": "Unit",
+    "fieldname": "onetime_commission",
+    "label": "Onetime Commission",
+    "fieldtype": "Currency",
+    "insert_after": "management_fee_value",
+    "depends_on": "eval:doc.ownership_type=='Landlord'"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Post Dated Cheque-bank_account",
+    "dt": "Post Dated Cheque",
+    "fieldname": "bank_account",
+    "label": "Bank Account",
+    "fieldtype": "Link",
+    "options": "Bank Account",
+    "insert_after": "bank",
+    "description": "Links to core Bank Account doctype. Editable during cheque edit AND at submit time - see pdc_bank_sync.py for the submit-time Payment Entry sync."
+  },
+  {
+    "doctype": "Property Setter",
+    "name": "Unit-floor-fieldtype",
+    "doc_type": "Unit",
+    "field_name": "floor",
+    "property": "fieldtype",
+    "property_type": "Select",
+    "value": "Select",
+    "doctype_or_field": "DocField"
+  },
+  {
+    "doctype": "Property Setter",
+    "name": "Unit-floor-options",
+    "doc_type": "Unit",
+    "field_name": "floor",
+    "property": "options",
+    "property_type": "Text",
+    "value": "Ground Floor\nFirst Floor\nSecond Floor\nThird Floor\nFourth Floor\nFifth Floor\nSixth Floor\nSeventh Floor",
+    "doctype_or_field": "DocField"
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Purchase Invoice-custom_lease_contract",
+    "dt": "Purchase Invoice",
+    "fieldname": "custom_lease_contract",
+    "label": "Lease Contract",
+    "fieldtype": "Link",
+    "options": "Lease Contract",
+    "insert_after": "supplier",
+    "description": "Auto-set by owner_remittance.py - traces which lease this owner payout relates to."
+  },
+  {
+    "doctype": "Custom Field",
+    "name": "Purchase Invoice-custom_source_sales_invoice",
+    "dt": "Purchase Invoice",
+    "fieldname": "custom_source_sales_invoice",
+    "label": "Source Sales Invoice",
+    "fieldtype": "Link",
+    "options": "Sales Invoice",
+    "insert_after": "custom_lease_contract",
+    "read_only": 1,
+    "description": "Auto-set by owner_remittance.py - the tenant invoice that triggered this owner remittance."
+  }
+]

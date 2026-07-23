@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Listings — RE Core</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,650&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14231F;
+    --ink-soft:#2A3B33;
+    --stone:#EFEAE1;
+    --stone-deep:#E3DCCE;
+    --paper:#FBF9F4;
+    --moss:#3F5443;
+    --moss-deep:#2C3D30;
+    --brass:#A98A4D;
+    --brass-soft:#C7AD79;
+    --sage:#C9D4C4;
+    --rust:#9B5A44;
+    --line: rgba(20,35,31,0.14);
+    --line-strong: rgba(20,35,31,0.28);
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--stone);
+    font-family:'Inter',sans-serif; color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--brass-soft); color:var(--ink);}
+  a{color:inherit;}
+  button{font-family:inherit; cursor:pointer;}
+  .mono{font-family:'IBM Plex Mono',monospace; letter-spacing:0.01em;}
+  .serif{font-family:'Fraunces',serif;}
+  :focus-visible{outline:2px solid var(--brass); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  /* ===== Background texture: faint blueprint grid ===== */
+  .blueprint-bg{
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    background-position: -1px -1px;
+  }
+
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+
+  /* ===== Header ===== */
+  header.site{
+    position:sticky; top:0; z-index:40;
+    background:rgba(239,234,225,0.92); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  header.site .wrap{display:flex; align-items:center; justify-content:space-between; padding-top:20px; padding-bottom:20px;}
+  .brand{display:flex; align-items:baseline; gap:6px;}
+  .brand-mark{font-family:'Fraunces',serif; font-weight:650; font-size:23px; letter-spacing:-0.01em;}
+  .brand-mark .accent{color:var(--brass);}
+  .brand-sub{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); opacity:0.7;}
+  .header-right{display:flex; align-items:center; gap:22px;}
+  .nav-link{font-size:13.5px; font-weight:500; color:var(--ink-soft); text-decoration:none; position:relative; padding-bottom:2px;}
+  .nav-link.active{color:var(--ink);}
+  .nav-link.active::after{content:''; position:absolute; left:0; right:0; bottom:-4px; height:2px; background:var(--brass);}
+  .wishlist-chip{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; background:var(--white); border:1px solid var(--line); border-radius:20px; padding:7px 14px 7px 12px;}
+  .wishlist-chip svg{width:15px; height:15px;}
+  .count-badge{background:var(--moss); color:var(--stone); font-family:'IBM Plex Mono',monospace; font-size:10.5px; border-radius:10px; padding:1px 6px; min-width:16px; text-align:center;}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--moss);color:var(--stone);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;font-family:'Fraunces',serif;}
+
+  /* ===== Hero / search ===== */
+  .hero{padding:56px 0 34px; position:relative;}
+  .hero .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--brass); margin-bottom:14px; display:flex; align-items:center; gap:10px;}
+  .hero .eyebrow::before{content:''; width:22px; height:1px; background:var(--brass);}
+  .hero h1{font-family:'Fraunces',serif; font-weight:600; font-size:clamp(32px,4.4vw,50px); line-height:1.06; letter-spacing:-0.015em; margin:0 0 12px; max-width:620px;}
+  .hero h1 em{font-style:italic; font-weight:500; color:var(--moss);}
+  .hero p.lede{font-size:15.5px; color:var(--ink-soft); max-width:460px; line-height:1.55; margin:0;}
+  .stat-strip{display:flex; gap:36px; margin-top:30px;}
+  .stat{border-left:1px solid var(--line-strong); padding-left:14px;}
+  .stat b{display:block; font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:500;}
+  .stat span{font-size:11.5px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.06em;}
+
+  /* ===== Filter bar ===== */
+  .filter-bar{
+    position:sticky; top:73px; z-index:30;
+    background:var(--paper); border:1px solid var(--line); border-radius:14px;
+    padding:16px 18px; margin:28px 0 30px;
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    box-shadow:0 10px 30px -18px rgba(20,35,31,0.35);
+  }
+  .filter-group{display:flex; flex-direction:column; gap:3px; min-width:0;}
+  .filter-group label{font-family:'IBM Plex Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); padding-left:2px;}
+  .filter-group select, .filter-group input{
+    appearance:none; border:1px solid var(--line-strong); background:var(--white);
+    border-radius:8px; padding:8px 30px 8px 11px; font-size:13px; color:var(--ink);
+    font-family:'Inter',sans-serif; min-width:120px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%232A3B33' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 11px center;
+  }
+  .filter-group input[type=text]{background-image:none; padding-right:11px; min-width:150px;}
+  .filter-divider{width:1px; align-self:stretch; background:var(--line); margin:0 2px;}
+  .btn-clear{margin-left:auto; font-size:12.5px; color:var(--ink-soft); background:none; border:none; text-decoration:underline; text-underline-offset:3px;}
+  .btn-apply{background:var(--moss); color:var(--stone); border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600;}
+  .btn-apply:hover{background:var(--moss-deep);}
+
+  /* ===== Result meta ===== */
+  .result-meta{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px;}
+  .result-meta .count{font-size:13.5px; color:var(--ink-soft);}
+  .result-meta .count b{color:var(--ink); font-weight:600;}
+  .sort-select{font-family:'IBM Plex Mono',monospace; font-size:12px; background:none; border:none; color:var(--ink-soft); border-bottom:1px dotted var(--line-strong);}
+
+  /* ===== Property grid ===== */
+  .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px; padding-bottom:70px;}
+  @media (max-width:980px){.grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:680px){.grid{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--paper); border:1px solid var(--line); border-radius:16px;
+    overflow:hidden; cursor:pointer; transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  }
+  .card:hover{transform:translateY(-3px); box-shadow:0 22px 40px -24px rgba(20,35,31,0.45); border-color:var(--line-strong);}
+  .card-media{position:relative; height:190px; background:linear-gradient(135deg,var(--sage),var(--stone-deep)); overflow:hidden;}
+  .card-media img{width:100%; height:100%; object-fit:cover; display:block;}
+  .status-tag{position:absolute; top:12px; left:12px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; padding:4px 9px; border-radius:20px; background:rgba(20,35,31,0.82); color:var(--stone);}
+  .status-tag.offer{background:rgba(169,138,77,0.92);}
+  .wish-btn{position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%; background:rgba(251,249,244,0.9); border:none; display:flex; align-items:center; justify-content:center; transition:transform .15s ease;}
+  .wish-btn:hover{transform:scale(1.08);}
+  .wish-btn svg{width:16px; height:16px; stroke:var(--ink); fill:none; stroke-width:1.6;}
+  .wish-btn.active svg{fill:var(--rust); stroke:var(--rust);}
+  .card-body{padding:16px 18px 18px;}
+  .card-price{font-family:'IBM Plex Mono',monospace; font-size:19px; font-weight:500; color:var(--moss-deep); margin-bottom:3px;}
+  .card-price span{font-size:11px; color:var(--ink-soft); font-weight:400; margin-left:3px;}
+  .card-title{font-family:'Fraunces',serif; font-size:17px; font-weight:500; margin:0 0 3px;}
+  .card-loc{font-size:12.5px; color:var(--ink-soft); margin-bottom:12px;}
+  /* signature: dimension-line spec row */
+  .dim-row{display:flex; align-items:center; gap:0; border-top:1px dashed var(--line-strong); padding-top:10px;}
+  .dim-item{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); display:flex; flex-direction:column; gap:1px; flex:1;}
+  .dim-item b{color:var(--ink); font-size:13px; font-weight:500;}
+  .dim-item span{font-size:9px; text-transform:uppercase; letter-spacing:0.06em;}
+  .dim-sep{width:1px; height:22px; background:var(--line-strong); margin:0 10px;}
+
+  /* ===== Detail / dossier overlay ===== */
+  .dossier-overlay{
+    position:fixed; inset:0; background:rgba(20,35,31,0.55); backdrop-filter:blur(3px);
+    z-index:100; display:none; align-items:flex-start; justify-content:center;
+    padding:38px 20px; overflow-y:auto;
+  }
+  .dossier-overlay.open{display:flex;}
+  .dossier{
+    background:var(--paper); width:100%; max-width:980px; border-radius:18px; overflow:hidden;
+    border:1px solid var(--line-strong); animation:rise .28s ease;
+  }
+  @keyframes rise{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+  .dossier-head{position:relative; height:340px; background:linear-gradient(135deg,var(--sage),var(--stone-deep));}
+  .dossier-head img{width:100%; height:100%; object-fit:cover;}
+  .dossier-close{position:absolute; top:16px; right:16px; width:38px; height:38px; border-radius:50%; background:rgba(251,249,244,0.92); border:none; display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .dossier-badge{position:absolute; bottom:16px; left:16px; background:rgba(20,35,31,0.85); color:var(--stone); font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.07em; padding:5px 12px; border-radius:20px;}
+
+  .dossier-body{padding:34px 40px 40px;}
+  .dossier-top{display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:6px;}
+  .dossier-title{font-family:'Fraunces',serif; font-size:28px; font-weight:600; letter-spacing:-0.01em; margin:0 0 4px;}
+  .dossier-loc{font-size:13.5px; color:var(--ink-soft);}
+  .dossier-price{font-family:'IBM Plex Mono',monospace; font-size:26px; font-weight:500; color:var(--moss-deep); white-space:nowrap;}
+  .dossier-price span{display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); font-weight:400; margin-top:2px;}
+
+  /* dimension line ruler across full width - signature element */
+  .ruler{display:flex; margin:26px 0; border-top:1px solid var(--line-strong); border-bottom:1px solid var(--line-strong); padding:16px 0;}
+  .ruler-item{flex:1; text-align:center; position:relative;}
+  .ruler-item:not(:last-child)::after{content:''; position:absolute; right:0; top:4px; bottom:4px; width:1px; background:var(--line);}
+  .ruler-item b{display:block; font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:500;}
+  .ruler-item span{font-size:10px; text-transform:uppercase; letter-spacing:0.07em; color:var(--ink-soft);}
+
+  .dossier-grid{display:grid; grid-template-columns:1.5fr 1fr; gap:40px; margin-top:8px;}
+  @media (max-width:760px){.dossier-grid{grid-template-columns:1fr;}}
+  .section-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.09em; color:var(--brass); margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .section-label::before{content:''; width:16px; height:1px; background:var(--brass);}
+  .dossier-desc{font-size:14.5px; line-height:1.7; color:var(--ink-soft); margin-bottom:28px;}
+  .amenities{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:28px;}
+  .amenity-tag{font-size:12px; background:var(--sage); color:var(--moss-deep); padding:6px 12px; border-radius:20px; font-weight:500;}
+
+  /* side panel: actions */
+  .side-panel{display:flex; flex-direction:column; gap:14px;}
+  .panel-card{border:1px solid var(--line); border-radius:12px; padding:18px; background:var(--white);}
+  .panel-card h4{font-family:'Fraunces',serif; font-size:15.5px; margin:0 0 12px; font-weight:600;}
+  .btn-primary{width:100%; background:var(--moss); color:var(--stone); border:none; border-radius:8px; padding:12px; font-size:13.5px; font-weight:600; margin-bottom:9px;}
+  .btn-primary:hover{background:var(--moss-deep);}
+  .btn-secondary{width:100%; background:var(--white); color:var(--ink); border:1px solid var(--line-strong); border-radius:8px; padding:11px; font-size:13.5px; font-weight:600;}
+  .btn-secondary:hover{background:var(--stone);}
+  .btn-secondary.active{background:var(--rust); color:var(--white); border-color:var(--rust);}
+
+  /* EMI calculator - signature widget */
+  .emi-row{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+  .emi-row label{font-size:12px; color:var(--ink-soft);}
+  .emi-row .val{font-family:'IBM Plex Mono',monospace; font-size:12.5px; font-weight:500;}
+  .emi-row input[type=range]{width:100%; accent-color:var(--moss);}
+  .emi-result{margin-top:14px; padding-top:14px; border-top:1px dashed var(--line-strong); text-align:center;}
+  .emi-result .amt{font-family:'IBM Plex Mono',monospace; font-size:24px; font-weight:600; color:var(--moss-deep);}
+  .emi-result .lbl{font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); margin-top:2px;}
+
+  /* forms (enquiry / site visit) */
+  .form-panel{display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--line-strong);}
+  .form-panel.open{display:block;}
+  .form-panel input, .form-panel select, .form-panel textarea{
+    width:100%; border:1px solid var(--line-strong); border-radius:7px; padding:9px 11px;
+    font-family:'Inter',sans-serif; font-size:13px; margin-bottom:9px; background:var(--paper);
+  }
+  .form-panel textarea{resize:vertical; min-height:60px;}
+  .form-panel .submit-mini{background:var(--brass); color:var(--white); border:none; border-radius:7px; padding:9px; width:100%; font-size:12.5px; font-weight:600;}
+  .toast{position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--ink); color:var(--stone); padding:12px 22px; border-radius:10px; font-size:13px; opacity:0; pointer-events:none; transition:all .3s ease; z-index:200; font-weight:500;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .empty-state{text-align:center; padding:80px 20px; color:var(--ink-soft);}
+  .empty-state .serif{font-size:22px; color:var(--ink); margin-bottom:8px; display:block;}
+</style>
+</head>
+<body class="blueprint-bg">
+
+<header class="site">
+  <div class="wrap">
+    <div class="brand">
+      <span class="brand-mark">RE<span class="accent">·</span>Core</span>
+    </div>
+    <nav class="header-right">
+      <a class="nav-link active" href="#">Listings</a>
+      <a class="nav-link" href="#">Visits</a>
+      <button class="wishlist-chip" id="wishlistChip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-4.35-9.5-8.5C.9 9.2 2.4 5.5 6 5.5c2 0 3.3 1 4 2 0 0-.5 0 0 0s2-2 4-2c3.6 0 5.1 3.7 3.5 7C19 16.65 12 21 12 21z"/></svg>
+        Saved <span class="count-badge" id="wishCount">0</span>
+      </button>
+      <div class="avatar">S</div>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Property Listings</div>
+    <h1>Find the address<br><em>you'll write next.</em></h1>
+    <p class="lede">Live availability across every listing on your file — updated the moment a unit is marked live.</p>
+    <div class="stat-strip">
+      <div class="stat"><b id="statTotal">0</b><span>Vacant units</span></div>
+      <div class="stat"><b id="statOffer">0</b><span>Reserved</span></div>
+      <div class="stat"><b>4</b><span>Locations</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+
+  <div class="filter-bar" id="filterBar">
+    <div class="filter-group">
+      <label>Location</label>
+      <select id="fLocation">
+        <option value="">All locations</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Type</label>
+      <select id="fType">
+        <option value="">All types</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Bedrooms</label>
+      <select id="fBeds">
+        <option value="">Any</option>
+        <option value="1">1+</option>
+        <option value="2">2+</option>
+        <option value="3">3+</option>
+        <option value="4">4+</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Min annual rent</label>
+      <select id="fMin">
+        <option value="">No min</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Max annual rent</label>
+      <select id="fMax">
+        <option value="">No max</option>
+      </select>
+    </div>
+    <div class="filter-divider"></div>
+    <button class="btn-clear" id="clearFilters">Clear</button>
+    <button class="btn-apply" id="applyFilters">Apply</button>
+  </div>
+
+  <div class="result-meta">
+    <div class="count"><b id="resultCount">0</b> properties found</div>
+    <select class="sort-select" id="sortSelect">
+      <option value="newest">Sort — Newest</option>
+      <option value="price_asc">Sort — Rent ↑</option>
+      <option value="price_desc">Sort — Rent ↓</option>
+    </select>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- ===== Dossier overlay ===== -->
+<div class="dossier-overlay" id="overlay">
+  <div class="dossier" id="dossier"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   BACKEND WIRING
+   ============================================================ */
+
+// 1) Mapped to your real Unit + Property schema (Unit is the actual listing;
+//    Property is the parent building). Fix the two amenities/photos calls in
+//    listing_portal.py once you confirm those child doctype names.
+const FIELD_MAP = {
+  id:        'name',            // Unit name (e.g. UNIT-00003)
+  title:     'unit_title',
+  unitNo:    'unit_no',
+  floor:     'floor',
+  location:  'location',        // derived client-side from city + area
+  type:      'unit_type',       // Studio / 1BR / 2BR / 3BR / 4BR+ / Penthouse / Shop / Office / Warehouse
+  usage:     'usage',           // Residential / Commercial
+  rent:      'annual_rent',
+  beds:      'bedrooms',
+  baths:     'bathrooms',
+  sqm:       'area_sqm',
+  furnishing:'furnishing',
+  parking:   'parking_slots',
+  status:    'status',          // Vacant / Reserved / Occupied / Under Maintenance / Blocked
+  img:       'cover_image',
+  building:  'property_name',
+  amenities: 'amenities'
+};
+
+// 2) Point this at your site if the portal page is ever served from
+//    a different origin than the Frappe backend (usually not needed).
+const API_BASE = '';
+
+function normalizeProperty(raw){
+  const p = {};
+  for(const key in FIELD_MAP){
+    if(key === 'location') continue; // derived below
+    p[key] = raw[FIELD_MAP[key]];
+  }
+  p.location = [raw.area, raw.city].filter(Boolean).join(', ');
+  if(typeof p.amenities === 'string'){
+    p.amenities = p.amenities.split(',').map(a=>a.trim()).filter(Boolean);
+  }
+  if(!Array.isArray(p.amenities)) p.amenities = [];
+  p.rent = Number(p.rent) || 0;
+  p.beds = Number(p.beds) || 0;
+  p.baths = Number(p.baths) || 0;
+  p.sqm = Number(p.sqm) || 0;
+  p.parking = Number(p.parking) || 0;
+  if(!p.img) p.img = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80';
+  return p;
+}
+
+let CSRF_TOKEN = '';
+
+async function loadCsrfToken(){
+  try{
+    const res = await fetch(`${API_BASE}/api/method/re_core.re_core.listing_portal_api.listing_portal.get_csrf_token`);
+    const data = await res.json();
+    CSRF_TOKEN = data.message || '';
+  }catch(err){
+    console.warn('Could not fetch CSRF token — write actions may fail if logged in.', err);
+  }
+}
+
+async function frappeCall(method, args){
+  const res = await fetch(`${API_BASE}/api/method/${method}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Frappe-CSRF-Token': CSRF_TOKEN
+    },
+    body: JSON.stringify(args || {})
+  });
+  if(!res.ok){
+    const errText = await res.text();
+    throw new Error(`${method} failed (${res.status}): ${errText.slice(0,200)}`);
+  }
+  const data = await res.json();
+  return data.message;
+}
+
+let PROPERTIES = [];
+let wishlist = new Set();
+let activeFilters = {};
+
+async function loadProperties(filters={}){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><span class="serif">Loading listings…</span></div>`;
+  try{
+    const raw = await frappeCall('re_core.re_core.listing_portal_api.listing_portal.get_live_properties', filters);
+    PROPERTIES = (raw || []).map(normalizeProperty);
+  }catch(err){
+    console.error(err);
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <span class="serif">Couldn't load listings</span>
+      ${err.message}<br><br>Check the FIELD_MAP at the top of the script matches your Property doctype.
+    </div>`;
+    document.getElementById('resultCount').textContent = 0;
+    return;
+  }
+  populateFilterOptions();
+  renderGrid();
+}
+
+function rent(n){ return '﷼ ' + Math.round(n).toLocaleString('en-US'); }
+
+function populateFilterOptions(){
+  const locs = [...new Set(PROPERTIES.map(p=>p.location).filter(Boolean))].sort();
+  const types = [...new Set(PROPERTIES.map(p=>p.type).filter(Boolean))].sort();
+  document.getElementById('fLocation').innerHTML = '<option value="">All locations</option>' + locs.map(l=>`<option value="${l}">${l}</option>`).join('');
+  document.getElementById('fType').innerHTML = '<option value="">All types</option>' + types.map(t=>`<option value="${t}">${t}</option>`).join('');
+  const rents = [30000,50000,75000,100000,150000,200000];
+  document.getElementById('fMin').innerHTML = '<option value="">No min</option>' + rents.map(b=>`<option value="${b}">${rent(b)}/yr</option>`).join('');
+  document.getElementById('fMax').innerHTML = '<option value="">No max</option>' + rents.map(b=>`<option value="${b}">${rent(b)}/yr</option>`).join('');
+}
+
+function getFiltered(){
+  let list = PROPERTIES.filter(p=>{
+    if(activeFilters.location && p.location !== activeFilters.location) return false;
+    if(activeFilters.type && p.type !== activeFilters.type) return false;
+    if(activeFilters.beds && p.beds < Number(activeFilters.beds)) return false;
+    if(activeFilters.min && p.rent < Number(activeFilters.min)) return false;
+    if(activeFilters.max && p.rent > Number(activeFilters.max)) return false;
+    return true;
+  });
+  const sort = document.getElementById('sortSelect').value;
+  if(sort==='price_asc') list = [...list].sort((a,b)=>a.rent-b.rent);
+  if(sort==='price_desc') list = [...list].sort((a,b)=>b.rent-a.rent);
+  return list;
+}
+
+const STATUS_CLASS = { 'Vacant':'', 'Reserved':'offer', 'Under Maintenance':'offer' };
+
+function cardTemplate(p){
+  return `
+    <div class="card" data-id="${p.id}">
+      <div class="card-media">
+        <img src="${p.img}" alt="${p.title || p.building}" loading="lazy">
+        <div class="status-tag ${STATUS_CLASS[p.status] || ''}">${p.status}</div>
+        <button class="wish-btn ${wishlist.has(p.id)?'active':''}" data-wish="${p.id}" aria-label="Save unit">
+          <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.5-8.5C.9 9.2 2.4 5.5 6 5.5c2 0 3.3 1 4 2 0 0-.5 0 0 0s2-2 4-2c3.6 0 5.1 3.7 3.5 7C19 16.65 12 21 12 21z"/></svg>
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="card-price">${rent(p.rent)}<span>/ year</span></div>
+        <h3 class="card-title">${p.title || p.type + ' · ' + p.building}</h3>
+        <div class="card-loc">${p.building}${p.location ? ' — ' + p.location : ''} · ${p.type}</div>
+        <div class="dim-row">
+          <div class="dim-item"><b>${p.beds===0?'Studio':p.beds}</b><span>Beds</span></div>
+          <div class="dim-sep"></div>
+          <div class="dim-item"><b>${p.baths}</b><span>Baths</span></div>
+          <div class="dim-sep"></div>
+          <div class="dim-item"><b>${p.sqm.toLocaleString()}</b><span>Sq M</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderGrid(){
+  const list = getFiltered();
+  const grid = document.getElementById('grid');
+  document.getElementById('resultCount').textContent = list.length;
+  document.getElementById('statTotal').textContent = PROPERTIES.filter(p=>p.status==='Vacant').length;
+  document.getElementById('statOffer').textContent = PROPERTIES.filter(p=>p.status==='Reserved').length;
+
+  if(list.length===0){
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+      <span class="serif">No units match those filters</span>
+      Try widening your rent range or clearing a filter.
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(cardTemplate).join('');
+}
+
+async function toggleWish(id, btn){
+  const wasSaved = wishlist.has(id);
+  // optimistic UI update
+  if(wasSaved){ wishlist.delete(id); btn?.classList.remove('active'); }
+  else{ wishlist.add(id); btn?.classList.add('active'); showToast('Saved to your wishlist'); }
+  document.getElementById('wishCount').textContent = wishlist.size;
+
+  try{
+    await frappeCall('re_core.re_core.listing_portal_api.listing_portal.toggle_wishlist', {unit: id});
+  }catch(err){
+    console.error(err);
+    // revert on failure
+    if(wasSaved){ wishlist.add(id); btn?.classList.add('active'); }
+    else{ wishlist.delete(id); btn?.classList.remove('active'); }
+    document.getElementById('wishCount').textContent = wishlist.size;
+    showToast("Couldn't update wishlist — try again");
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function cheques(annualRent, count){
+  return Math.round(annualRent / count);
+}
+
+function openDossier(id){
+  const p = PROPERTIES.find(x=>x.id===id);
+  if(!p) return;
+  const dossier = document.getElementById('dossier');
+  const desc = p.desc || `${p.type} unit${p.floor ? ' on floor ' + p.floor : ''} at ${p.building}${p.location ? ', ' + p.location : ''}.${p.furnishing ? ' ' + p.furnishing + '.' : ''}`;
+  dossier.innerHTML = `
+    <div class="dossier-head">
+      <img src="${p.img}" alt="${p.title || p.building}">
+      <button class="dossier-close" id="closeDossier">&times;</button>
+      <div class="dossier-badge">${p.status} · Ref ${p.id}</div>
+    </div>
+    <div class="dossier-body">
+      <div class="dossier-top">
+        <div>
+          <h2 class="dossier-title">${p.title || (p.type + ' · ' + p.building)}</h2>
+          <div class="dossier-loc">${p.building}${p.location ? ' — ' + p.location : ''} · ${p.type}</div>
+        </div>
+        <div class="dossier-price">${rent(p.rent)}<span>Annual rent</span></div>
+      </div>
+
+      <div class="ruler">
+        <div class="ruler-item"><b>${p.beds===0?'Studio':p.beds}</b><span>Bedrooms</span></div>
+        <div class="ruler-item"><b>${p.baths}</b><span>Bathrooms</span></div>
+        <div class="ruler-item"><b>${p.sqm.toLocaleString()}</b><span>Sq M</span></div>
+        <div class="ruler-item"><b class="mono">${p.sqm ? Math.round(p.rent/p.sqm) : '—'}</b><span>﷼ / Sq M / Yr</span></div>
+      </div>
+
+      <div class="dossier-grid">
+        <div>
+          <div class="section-label">Description</div>
+          <p class="dossier-desc">${desc}</p>
+          <div class="section-label">Amenities</div>
+          <div class="amenities">${p.amenities.length ? p.amenities.map(a=>`<span class="amenity-tag">${a}</span>`).join('') : '<span class="amenity-tag">Not listed</span>'}</div>
+        </div>
+
+        <div class="side-panel">
+          <div class="panel-card">
+            <button class="btn-primary" id="btnEnquire">Send enquiry</button>
+            <button class="btn-secondary" id="btnVisit">Book a site visit</button>
+            <button class="btn-secondary ${wishlist.has(p.id)?'active':''}" id="btnWish" data-wish="${p.id}">
+              ${wishlist.has(p.id)?'Saved to wishlist':'Save to wishlist'}
+            </button>
+
+            <div class="form-panel" id="enquireForm">
+              <input type="text" placeholder="Your name" id="enqName">
+              <input type="text" placeholder="Phone number" id="enqPhone">
+              <textarea placeholder="Message (optional)" id="enqMsg"></textarea>
+              <button class="submit-mini" id="submitEnquiry">Submit enquiry</button>
+            </div>
+            <div class="form-panel" id="visitForm">
+              <input type="date" id="visitDate">
+              <select id="visitSlot">
+                <option>10:00 - 12:00</option>
+                <option>12:00 - 14:00</option>
+                <option>14:00 - 16:00</option>
+                <option>16:00 - 18:00</option>
+              </select>
+              <button class="submit-mini" id="submitVisit">Confirm visit</button>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <h4>Payment plan</h4>
+            <div class="emi-row"><label>Cheques per year</label><span class="val mono" id="chequeCountVal">4</span></div>
+            <input type="range" min="1" max="12" step="1" value="4" id="chequeSlider" list="chequeTicks">
+            <datalist id="chequeTicks"><option value="1"></option><option value="2"></option><option value="4"></option><option value="6"></option><option value="12"></option></datalist>
+            <div class="emi-result">
+              <div class="amt mono" id="chequeAmt">—</div>
+              <div class="lbl" id="chequeLbl">Per cheque</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('closeDossier').onclick = closeDossier;
+  document.getElementById('btnWish').onclick = (e)=>{ toggleWish(p.id, null); e.target.textContent = wishlist.has(p.id)?'Saved to wishlist':'Save to wishlist'; e.target.classList.toggle('active'); };
+  document.getElementById('btnEnquire').onclick = ()=>{ document.getElementById('enquireForm').classList.toggle('open'); document.getElementById('visitForm').classList.remove('open'); };
+  document.getElementById('btnVisit').onclick = ()=>{ document.getElementById('visitForm').classList.toggle('open'); document.getElementById('enquireForm').classList.remove('open'); };
+  document.getElementById('submitEnquiry').onclick = async (e)=>{
+    const btn = e.target;
+    const name = document.getElementById('enqName').value.trim();
+    const phone = document.getElementById('enqPhone').value.trim();
+    const message = document.getElementById('enqMsg').value.trim();
+    if(!name || !phone){ showToast('Name and phone are required'); return; }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try{
+      await frappeCall('re_core.re_core.listing_portal_api.listing_portal.submit_enquiry', {
+        unit: p.id, name, phone, message
+      });
+      showToast('Enquiry sent — an agent will follow up shortly');
+      document.getElementById('enquireForm').classList.remove('open');
+    }catch(err){
+      console.error(err);
+      showToast("Couldn't send enquiry — try again");
+    }finally{
+      btn.disabled = false; btn.textContent = 'Submit enquiry';
+    }
+  };
+  document.getElementById('submitVisit').onclick = async (e)=>{
+    const btn = e.target;
+    const date = document.getElementById('visitDate').value;
+    const slot = document.getElementById('visitSlot').value;
+    if(!date){ showToast('Pick a date first'); return; }
+    btn.disabled = true; btn.textContent = 'Booking…';
+    try{
+      await frappeCall('re_core.re_core.listing_portal_api.listing_portal.book_site_visit', {
+        unit: p.id, visit_date: date, visit_time_slot: slot
+      });
+      showToast('Site visit requested — you\'ll get a confirmation shortly');
+      document.getElementById('visitForm').classList.remove('open');
+    }catch(err){
+      console.error(err);
+      showToast("Couldn't book visit — try again");
+    }finally{
+      btn.disabled = false; btn.textContent = 'Confirm visit';
+    }
+  };
+
+  function updateChequePlan(){
+    const count = Number(document.getElementById('chequeSlider').value);
+    document.getElementById('chequeCountVal').textContent = count;
+    const perCheque = cheques(p.rent, count);
+    document.getElementById('chequeAmt').textContent = '﷼ ' + perCheque.toLocaleString('en-US');
+    document.getElementById('chequeLbl').textContent = count === 1 ? 'Single cheque' : `Per cheque · ${count}× a year`;
+    // real call: frappe.call({method:'re_core.re_core.listing_portal_api.listing_portal.calculate_rent_plan', args:{annual_rent:p.rent, cheques:count}})
+  }
+  document.getElementById('chequeSlider').addEventListener('input', updateChequePlan);
+  updateChequePlan();
+}
+
+function closeDossier(){
+  document.getElementById('overlay').classList.remove('open');
+}
+
+/* ===== Event wiring ===== */
+document.getElementById('grid').addEventListener('click', (e)=>{
+  const wishBtn = e.target.closest('[data-wish]');
+  if(wishBtn){ e.stopPropagation(); toggleWish(wishBtn.dataset.wish, wishBtn); return; }
+  const card = e.target.closest('.card');
+  if(card) openDossier(card.dataset.id);
+});
+document.getElementById('overlay').addEventListener('click', (e)=>{ if(e.target.id==='overlay') closeDossier(); });
+document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDossier(); });
+
+document.getElementById('applyFilters').onclick = ()=>{
+  activeFilters = {
+    location: document.getElementById('fLocation').value,
+    type: document.getElementById('fType').value,
+    beds: document.getElementById('fBeds').value,
+    min: document.getElementById('fMin').value,
+    max: document.getElementById('fMax').value,
+  };
+  // Sent straight to the backend, which does the real filtering server-side
+  // (get_live_properties already accepts location/property_type/min_budget/max_budget/bedrooms).
+  loadProperties({
+    location: activeFilters.location || undefined,
+    property_type: activeFilters.type || undefined,
+    bedrooms: activeFilters.beds || undefined,
+    min_budget: activeFilters.min || undefined,
+    max_budget: activeFilters.max || undefined,
+  });
+};
+document.getElementById('clearFilters').onclick = ()=>{
+  ['fLocation','fType','fBeds','fMin','fMax'].forEach(id=>document.getElementById(id).value='');
+  activeFilters = {};
+  loadProperties();
+};
+document.getElementById('sortSelect').onchange = renderGrid;
+document.getElementById('wishlistChip').onclick = ()=>{
+  activeFilters = {};
+  const list = PROPERTIES.filter(p=>wishlist.has(p.id));
+  const grid = document.getElementById('grid');
+  document.getElementById('resultCount').textContent = list.length;
+  grid.innerHTML = list.length === 0
+    ? `<div class="empty-state" style="grid-column:1/-1;"><span class="serif">Your wishlist is empty</span>Tap the heart on any listing to save it here.</div>`
+    : list.map(cardTemplate).join('');
+};
+
+/* ===== Init ===== */
+loadCsrfToken().then(loadProperties);
+</script>
+</body>
+</html>
