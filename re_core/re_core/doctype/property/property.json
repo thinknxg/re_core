@@ -75,8 +75,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Owner",
-   "options": "Property Owner",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.ownership_type != \"Company\"",
+   "options": "Property Owner"
   },
   {
    "fetch_from": "owner_ref.company",

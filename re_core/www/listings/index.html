@@ -674,10 +674,10 @@ document.getElementById('applyFilters').onclick = ()=>{
   // (get_live_properties already accepts location/property_type/min_budget/max_budget/bedrooms).
   loadProperties({
     location: activeFilters.location || undefined,
-    property_type: activeFilters.type || undefined,
+    unit_type: activeFilters.type || undefined,
     bedrooms: activeFilters.beds || undefined,
-    min_budget: activeFilters.min || undefined,
-    max_budget: activeFilters.max || undefined,
+    min_rent: activeFilters.min || undefined,
+    max_rent: activeFilters.max || undefined,
   });
 };
 document.getElementById('clearFilters').onclick = ()=>{

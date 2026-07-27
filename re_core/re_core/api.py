@@ -1,5 +1,6 @@
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 import frappe
-from frappe.utils import add_days, today
+from frappe.utils import add_days, today, flt
 
 VAT_RATES = {
     "Oman": 5,
@@ -863,6 +864,14 @@ def delete_property_document(name):
 def set_unit_portal_publish(unit, published):
     published = 1 if int(published) else 0
     frappe.db.set_value("Unit", unit, "published_to_portal", published)
+
+    if published:
+        property_name = frappe.db.get_value("Unit", unit, "property")
+        if property_name and not frappe.db.get_value("Property", property_name, "is_live"):
+            prop = frappe.get_doc("Property", property_name)
+            prop.is_live = 1
+            prop.save(ignore_permissions=True)
+
     return {"unit": unit, "published_to_portal": published}
 
 
@@ -925,7 +934,7 @@ def get_property_financials(property):
 # POST DATED CHEQUES
 # ─────────────────────────────────────────────
 @frappe.whitelist()
-def get_pdc_list(tenant=None, lease_contract=None, status=None):
+def get_pdc_list(tenant=None, lease_contract=None, status=None, from_date=None, to_date=None):
     filters = {}
     if tenant:
         filters["tenant"] = tenant
@@ -933,6 +942,12 @@ def get_pdc_list(tenant=None, lease_contract=None, status=None):
         filters["lease_contract"] = lease_contract
     if status:
         filters["status"] = status
+    if from_date and to_date:
+        filters["cheque_date"] = ["between", [from_date, to_date]]
+    elif from_date:
+        filters["cheque_date"] = [">=", from_date]
+    elif to_date:
+        filters["cheque_date"] = ["<=", to_date]
 
     total_received = frappe.db.count("Post Dated Cheque", {"status": "Received"})
     total_deposited = frappe.db.count("Post Dated Cheque", {"status": "Deposited"})
@@ -1011,10 +1026,11 @@ def get_rent_schedule(lease_contract=None, tenant=None, status=None):
         s["installments"] = frappe.get_all(
             "Rent Installment",
             filters={"parent": s["name"]},
-            fields=["name", "installment_no", "due_date", "amount", "status", "pdc",
-                    "sales_invoice", "remarks"],
+            fields=["name", "installment_no", "due_date", "amount", "paid_amount",
+                    "outstanding_amount", "status", "pdc", "sales_invoice", "remarks"],
             order_by="installment_no asc",
         )
+        s["outstanding_amount"] = sum(flt(i.get("outstanding_amount")) for i in s["installments"])
 
     all_pdc_names = list({
         i["pdc"] for s in schedules for i in s["installments"] if i.get("pdc")
@@ -1037,24 +1053,28 @@ def get_rent_schedule(lease_contract=None, tenant=None, status=None):
 @frappe.whitelist()
 def get_rent_schedule_detail(name):
     doc = frappe.get_doc("Rent Schedule", name)
+    installments = [
+        {
+            "installment_no": row.installment_no,
+            "due_date": row.due_date,
+            "amount": row.amount,
+            "paid_amount": row.paid_amount,
+            "outstanding_amount": row.outstanding_amount,
+            "status": row.status,
+            "pdc": row.pdc,
+            "sales_invoice": row.sales_invoice,
+            "remarks": row.remarks,
+        }
+        for row in doc.installments
+    ]
     return {
         "name": doc.name,
         "lease_contract": doc.lease_contract,
         "tenant": doc.tenant,
         "status": doc.status,
         "total_amount": doc.total_amount,
-        "installments": [
-            {
-                "installment_no": row.installment_no,
-                "due_date": row.due_date,
-                "amount": row.amount,
-                "status": row.status,
-                "pdc": row.pdc,
-                "sales_invoice": row.sales_invoice,
-                "remarks": row.remarks,
-            }
-            for row in doc.installments
-        ],
+        "outstanding_amount": sum(flt(i["outstanding_amount"]) for i in installments),
+        "installments": installments,
     }
 
 
@@ -1810,3 +1830,348 @@ def create_maintenance_request(unit, category, description, property=None, tenan
         "status": status,
     }).insert()
     return {"name": doc.name}
+
+
+
+@frappe.whitelist()
+def record_partial_payment(installment_name, amount, mode_of_payment="Cash", payment_date=None, remarks=None):
+	amount = flt(amount)
+	if amount <= 0:
+		frappe.throw("Payment amount must be greater than zero.")
+
+	schedule_name = frappe.db.get_value("Rent Installment", installment_name, "parent")
+	if not schedule_name:
+		frappe.throw(f"Rent Installment {installment_name} not found.")
+
+	schedule_doc = frappe.get_doc("Rent Schedule", schedule_name)
+
+	installments = sorted(
+		schedule_doc.installments,
+		key=lambda r: (r.due_date or frappe.utils.getdate("9999-12-31"), flt(r.installment_no)),
+	)
+
+	start_idx = None
+	for idx, r in enumerate(installments):
+		if r.name == installment_name:
+			start_idx = idx
+			break
+	if start_idx is None:
+		frappe.throw(f"Rent Installment {installment_name} not found in Rent Schedule {schedule_name}.")
+
+	if not installments[start_idx].sales_invoice:
+		frappe.throw("This installment has no linked Sales Invoice yet. Generate the invoice before recording a payment.")
+
+	remaining = amount
+	applied = []
+
+	for r in installments[start_idx:]:
+		if remaining <= 0:
+			break
+		outstanding = flt(r.amount) - flt(r.paid_amount)
+		if outstanding <= 0:
+			continue
+		if not r.sales_invoice:
+			break
+
+		pay_amt = min(remaining, outstanding)
+
+		si = frappe.get_doc("Sales Invoice", r.sales_invoice)
+		pe = get_payment_entry("Sales Invoice", si.name, party_amount=pay_amt)
+		pe.mode_of_payment = mode_of_payment
+		mop_account = frappe.db.get_value(
+			"Mode of Payment Account",
+			{"parent": mode_of_payment, "company": si.company},
+			"default_account",
+		)
+		if mop_account:
+			if pe.payment_type == "Receive":
+				pe.paid_to = mop_account
+			else:
+				pe.paid_from = mop_account
+		if payment_date:
+			pe.posting_date = payment_date
+		if remarks:
+			pe.remarks = remarks
+		pe.insert()
+		pe.submit()
+
+		payment_doc = frappe.get_doc({
+			"doctype": "Rent Installment Payment",
+			"parent": r.name,
+			"parenttype": "Rent Installment",
+			"parentfield": "payments",
+			"payment_date": payment_date or frappe.utils.today(),
+			"amount": pay_amt,
+			"mode_of_payment": mode_of_payment,
+			"payment_entry": pe.name,
+			"remarks": remarks,
+		})
+		payment_doc.insert(ignore_permissions=True)
+
+		new_paid = flt(r.paid_amount) + pay_amt
+		new_outstanding = flt(r.amount) - new_paid
+		new_status = "Paid" if new_outstanding <= 0 else "Partially Paid"
+		frappe.db.set_value("Rent Installment", r.name, {
+			"paid_amount": new_paid,
+			"outstanding_amount": new_outstanding,
+			"status": new_status,
+		})
+
+		applied.append({
+			"installment": r.name,
+			"payment_entry": pe.name,
+			"amount_applied": pay_amt,
+			"status": new_status,
+		})
+
+		remaining = flt(remaining - pay_amt)
+
+	credit_balance = None
+	if remaining > 0:
+		credit_customer = frappe.db.get_value("Tenant", schedule_doc.tenant, "customer")
+		if not credit_customer:
+			frappe.throw(f"Tenant {schedule_doc.tenant} has no linked Customer.")
+		credit_doc = frappe.get_doc({
+			"doctype": "Rent Credit Balance",
+			"lease_contract": schedule_doc.lease_contract,
+			"tenant": credit_customer,
+			"rent_schedule": schedule_doc.name,
+			"source_installment": installment_name,
+			"amount": remaining,
+			"status": "Available",
+			"remarks": remarks,
+		})
+		credit_doc.insert(ignore_permissions=True)
+		credit_balance = {
+			"credit_balance_name": credit_doc.name,
+			"amount": remaining,
+		}
+
+	return {
+		"installments_paid": applied,
+		"credit_created": credit_balance,
+	}
+
+
+# ─────────────────────────────────────────────
+# BULK PDC PAYMENT ENTRY
+# ─────────────────────────────────────────────
+@frappe.whitelist()
+def get_bulk_pdc_due_installments(property, from_date, to_date):
+    return frappe.db.sql("""
+        select
+            ri.name as rent_installment,
+            ri.due_date,
+            ri.amount,
+            ri.outstanding_amount,
+            rs.lease_contract,
+            rs.tenant,
+            t.tenant_name
+        from `tabRent Installment` ri
+        inner join `tabRent Schedule` rs on rs.name = ri.parent
+        inner join `tabLease Contract` lc on lc.name = rs.lease_contract
+        left join `tabTenant` t on t.name = rs.tenant
+        where lc.property = %(property)s
+            and ri.due_date between %(from_date)s and %(to_date)s
+            and ri.status in ('Pending', 'Partially Paid', 'Overdue')
+            and ifnull(ri.sales_invoice, '') != ''
+        order by ri.due_date
+    """, {"property": property, "from_date": from_date, "to_date": to_date}, as_dict=True)
+
+
+@frappe.whitelist()
+def submit_bulk_pdc_payments(property, rows, mode_of_payment="Cash", company=None):
+    if isinstance(rows, str):
+        rows = frappe.parse_json(rows)
+    if not rows:
+        frappe.throw("No rows to process.")
+    if not company:
+        company = frappe.db.get_value("Property", property, "company")
+
+    results = []
+    for row in rows:
+        installment_name = row.get("rent_installment")
+        pay_amount = flt(row.get("pay_amount"))
+
+        if not installment_name or pay_amount <= 0:
+            results.append({"rent_installment": installment_name, "status": "Failed", "error": "Missing installment or pay amount"})
+            continue
+
+        savepoint = f"bulk_pdc_{frappe.generate_hash(length=8)}"
+        frappe.db.savepoint(savepoint)
+        try:
+            payment_result = record_partial_payment(
+                installment_name=installment_name,
+                amount=pay_amount,
+                mode_of_payment=mode_of_payment,
+                payment_date=row.get("cheque_date") or nowdate(),
+                remarks=f"Bulk PDC entry, cheque {row.get('cheque_no') or ''}".strip(),
+            )
+            payment_entry = None
+            if payment_result.get("installments_paid"):
+                payment_entry = payment_result["installments_paid"][0]["payment_entry"]
+
+            pdc_name = None
+            if row.get("cheque_no"):
+                pdc = create_pdc(
+                    tenant=row.get("tenant"),
+                    cheque_no=row.get("cheque_no"),
+                    bank=row.get("bank"),
+                    cheque_date=row.get("cheque_date") or nowdate(),
+                    amount=pay_amount,
+                    lease_contract=row.get("lease_contract"),
+                    company=company,
+                    status="Cleared",
+                )
+                pdc_name = pdc["name"]
+
+            results.append({
+                "rent_installment": installment_name,
+                "status": "Paid",
+                "payment_entry": payment_entry,
+                "pdc": pdc_name,
+            })
+        except Exception:
+            frappe.db.rollback(save_point=savepoint)
+            frappe.log_error(title=f"Bulk PDC payment failed for {installment_name}", message=frappe.get_traceback())
+            results.append({"rent_installment": installment_name, "status": "Failed", "error": "See Error Log"})
+
+    return results
+
+
+# ─────────────────────────────────────────────
+# PURCHASE INVOICE — LANDLORD/EXPENSE LINKAGE
+# ─────────────────────────────────────────────
+PI_EXPENSE_ACCOUNT_MAP = {
+    "Maintenance": "Repairs and Maintenance",
+    "Utilities": "Utilities",
+    "Municipality Fee": "Rates and Taxes",
+    "Insurance": "Insurance",
+    "Staff": "Staff Welfare",
+}
+
+
+def _resolve_expense_account(expense_type, company):
+    account_name = PI_EXPENSE_ACCOUNT_MAP.get(expense_type)
+    account = None
+    if account_name:
+        account = frappe.db.get_value("Account", {"account_name": account_name, "company": company})
+    if not account:
+        account = frappe.db.get_value("Company", company, "default_expense_account")
+    return account
+
+
+@frappe.whitelist()
+def get_purchase_invoices_list(property=None):
+    filters = {}
+    if property:
+        filters["custom_property"] = property
+    return frappe.get_all(
+        "Purchase Invoice",
+        filters=filters,
+        fields=[
+            "name", "supplier", "posting_date", "grand_total", "status", "docstatus",
+            "custom_property", "custom_tenancy_id", "custom_sales_invoice_id", "custom_loan",
+        ],
+        order_by="posting_date desc",
+        limit_page_length=200,
+    )
+
+
+@frappe.whitelist()
+def get_suppliers_list():
+    return frappe.get_all("Supplier", fields=["name", "supplier_name"], order_by="supplier_name asc", limit_page_length=500)
+
+
+@frappe.whitelist()
+def create_purchase_invoice(supplier, property, amount, expense_type=None, description=None,
+                             posting_date=None, tenancy=None, sales_invoice=None, loan=0, company=None):
+    amount = flt(amount)
+    if amount <= 0:
+        frappe.throw("Amount must be greater than zero.")
+    if not company:
+        company = frappe.db.get_value("Property", property, "company")
+    if not company:
+        frappe.throw("Could not resolve Company from Property.")
+
+    expense_account = _resolve_expense_account(expense_type, company)
+    if not expense_account:
+        frappe.throw(f"No expense account resolved for company {company}. Set a Default Expense Account.")
+
+    doc = frappe.new_doc("Purchase Invoice")
+    doc.supplier = supplier
+    doc.company = company
+    doc.posting_date = posting_date or nowdate()
+    doc.custom_property = property
+    doc.custom_tenancy_id = tenancy
+    doc.custom_sales_invoice_id = sales_invoice
+    doc.custom_loan = flt(loan)
+    doc.append("items", {
+        "item_name": description or expense_type or "Expense",
+        "description": description or expense_type or "Expense",
+        "qty": 1,
+        "uom": "Nos",
+        "rate": amount,
+        "amount": amount,
+        "expense_account": expense_account,
+    })
+    doc.insert(ignore_permissions=True)
+    return {"name": doc.name}
+
+
+# ─────────────────────────────────────────────
+# EXPENSE PROPERTY
+# ─────────────────────────────────────────────
+@frappe.whitelist()
+def get_expense_properties_list(property=None):
+    filters = {}
+    if property:
+        filters["property"] = property
+    return frappe.get_all(
+        "Expense Property",
+        filters=filters,
+        fields=[
+            "name", "property", "expense_date", "expense_type", "amount",
+            "paid_amount", "outstanding_amount", "status", "docstatus", "description",
+        ],
+        order_by="expense_date desc",
+        limit_page_length=200,
+    )
+
+
+@frappe.whitelist()
+def create_expense_property(property, expense_type, amount, supplier, description=None, expense_date=None, company=None):
+    amount = flt(amount)
+    if amount <= 0:
+        frappe.throw("Amount must be greater than zero.")
+    if not company:
+        company = frappe.db.get_value("Property", property, "company")
+
+    doc = frappe.new_doc("Expense Property")
+    doc.property = property
+    doc.supplier = supplier
+    doc.company = company
+    doc.expense_type = expense_type
+    doc.amount = amount
+    doc.description = description
+    doc.expense_date = expense_date or nowdate()
+    doc.insert(ignore_permissions=True)
+    return {"name": doc.name}
+
+
+@frappe.whitelist()
+def submit_expense_property(name):
+    doc = frappe.get_doc("Expense Property", name)
+    doc.submit()
+    return {"name": doc.name, "status": doc.status}
+
+
+@frappe.whitelist()
+def record_expense_partial_payment(expense_property, paid_amount, payment_date=None, remarks=None):
+    from re_core.re_core.doctype.expense_property.expense_property import record_partial_payment as _record_expense_payment
+    return _record_expense_payment(
+        expense_property=expense_property,
+        paid_amount=paid_amount,
+        payment_date=payment_date,
+        remarks=remarks,
+    )

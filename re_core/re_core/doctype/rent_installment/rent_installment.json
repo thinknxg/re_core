@@ -10,6 +10,9 @@
   "installment_no",
   "due_date",
   "amount",
+  "payments",
+  "paid_amount",
+  "outstanding_amount",
   "status",
   "pdc",
   "sales_invoice",
@@ -38,12 +41,30 @@
    "reqd": 1
   },
   {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "label": "Payments",
+   "options": "Rent Installment Payment"
+  },
+  {
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
    "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Pending\nInvoiced\nPaid\nOverdue\nBounced\nCancelled"
+   "options": "Pending\nInvoiced\nPartially Paid\nPaid\nOverdue\nBounced\nCancelled"
   },
   {
    "fieldname": "pdc",

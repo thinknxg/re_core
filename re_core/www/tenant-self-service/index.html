@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Home · Tenant Portal</title>
+<meta name="csrf-token" content="{{ csrf_token }}">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root {
+  --slate:      #0F2027;
+  --slate-mid:  #1C3340;
+  --teal:       #2D7D6F;
+  --teal-lt:    #3DA090;
+  --mint:       #4CC9A0;
+  --mint-dim:   rgba(76,201,160,0.12);
+  --amber:      #F0A500;
+  --amber-dim:  rgba(240,165,0,0.12);
+  --red:        #E05252;
+  --red-dim:    rgba(224,82,82,0.1);
+  --white:      #FFFFFF;
+  --off:        #F4F7F6;
+  --border:     rgba(255,255,255,0.08);
+  --border-lt:  rgba(0,0,0,0.07);
+  --text-primary:   #0F2027;
+  --text-secondary: #5A7080;
+  --text-muted:     #94AABB;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--off); color: var(--text-primary); min-height: 100vh; font-size: 14px; line-height: 1.5; }
+
+.login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--slate); padding: 20px; }
+.login-card { background: var(--white); border-radius: 14px; width: 380px; max-width: 100%; padding: 32px 28px; box-shadow: 0 24px 60px rgba(15,32,39,0.35); }
+.login-logo { font-weight: 700; font-size: 20px; color: var(--text-primary); margin-bottom: 4px; }
+.login-logo span { color: var(--teal); }
+.login-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 24px; }
+.login-error { display: none; background: var(--red-dim); border: 1px solid rgba(224,82,82,0.25); color: var(--red); font-size: 12px; padding: 10px 12px; border-radius: 7px; margin-bottom: 16px; }
+.login-error.show { display: block; }
+
+.shell { display: none; grid-template-columns: 220px 1fr; grid-template-rows: auto 1fr; min-height: 100vh; }
+.shell.active { display: grid; }
+
+.health-bar { grid-column: 1 / -1; background: var(--slate); padding: 0 24px; height: 52px; display: flex; align-items: center; position: sticky; top: 0; z-index: 200; }
+.hb-logo { font-weight: 700; font-size: 15px; color: var(--white); margin-right: 28px; white-space: nowrap; flex-shrink: 0; }
+.hb-logo span { color: var(--mint); }
+.lease-timeline { flex: 1; display: flex; align-items: center; height: 52px; overflow: hidden; position: relative; }
+.lt-segment { display: flex; flex-direction: column; justify-content: center; padding: 0 16px; height: 100%; border-right: 1px solid var(--border); flex-shrink: 0; }
+.lt-label { font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.lt-value { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--white); margin-top: 1px; }
+.lt-value.good { color: var(--mint); }
+.lt-value.warn { color: var(--amber); }
+.lt-value.bad  { color: var(--red); }
+.lt-track-wrap { flex: 1; padding: 0 20px; display: flex; flex-direction: column; gap: 5px; }
+.lt-track-label { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; color: var(--text-muted); }
+.lt-track { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; position: relative; }
+.lt-fill { height: 100%; background: linear-gradient(90deg, var(--teal-lt), var(--mint)); border-radius: 2px; width: 0%; transition: width 0.4s ease; }
+.hb-user { flex-shrink: 0; margin-left: 16px; display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 16px; }
+.hb-avatar { width: 30px; height: 30px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
+.hb-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.75); }
+.hb-logout { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,0.4); background: none; border: none; cursor: pointer; text-decoration: underline; margin-left: 10px; }
+.hb-logout:hover { color: rgba(255,255,255,0.7); }
+
+.sidebar { background: var(--slate-mid); padding: 20px 0; display: flex; flex-direction: column; gap: 4px; position: sticky; top: 52px; height: calc(100vh - 52px); overflow-y: auto; }
+.nav-section-label { font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.28); padding: 16px 20px 6px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 20px; cursor: pointer; border: none; background: transparent; width: 100%; text-align: left; position: relative; }
+.nav-item:hover { background: rgba(255,255,255,0.05); }
+.nav-item.active { background: rgba(76,201,160,0.12); }
+.nav-item.active::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--mint); border-radius: 0 2px 2px 0; }
+.nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+.nav-label { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.55); }
+.nav-item.active .nav-label { color: var(--mint); }
+.nav-badge { margin-left: auto; font-family: var(--mono); font-size: 10px; font-weight: 600; background: var(--amber); color: var(--slate); padding: 1px 6px; border-radius: 10px; min-width: 18px; text-align: center; }
+.nav-badge.red { background: var(--red); color: #fff; }
+.sidebar-footer { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--border); }
+.sidebar-footer-text { font-family: var(--mono); font-size: 9px; color: rgba(255,255,255,0.2); line-height: 1.6; }
+
+.main { padding: 28px 32px; max-width: 960px; overflow-y: auto; }
+.panel { display: none; }
+.panel.active { display: block; }
+.page-header { margin-bottom: 24px; display: flex; align-items: flex-start; justify-content: space-between; }
+.page-title { font-size: 22px; font-weight: 700; color: var(--text-primary); }
+.page-sub { font-size: 13px; color: var(--text-secondary); margin-top: 3px; }
+
+.alert { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; border: 1px solid; }
+.alert.warn { background: var(--amber-dim); border-color: rgba(240,165,0,0.3); }
+.alert.ok { background: var(--mint-dim); border-color: rgba(76,201,160,0.25); }
+.alert.danger { background: var(--red-dim); border-color: rgba(224,82,82,0.25); }
+.alert-icon { font-size: 18px; flex-shrink: 0; }
+.alert-body { flex: 1; }
+.alert-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.alert-desc  { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.alert-cta { font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 6px; border: none; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+.alert-cta.amber { background: var(--amber); color: var(--slate); }
+
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card { background: var(--white); border: 1px solid var(--border-lt); border-radius: 10px; padding: 16px 18px; }
+.stat-label { font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.stat-value { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.stat-value.mint { color: var(--teal); }
+.stat-value.amber { color: var(--amber); }
+.stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
+
+.sec-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; margin-top: 24px; display: flex; align-items: center; gap: 10px; }
+.sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border-lt); }
+.sec-label:first-child { margin-top: 0; }
+
+.card { background: var(--white); border: 1px solid var(--border-lt); border-radius: 10px; overflow: hidden; margin-bottom: 14px; }
+.card-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-lt); }
+.card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.card-sub { font-size: 12px; color: var(--text-secondary); margin-top: 1px; }
+.card-body { padding: 18px 20px; }
+
+.lease-card { background: var(--slate); border-radius: 12px; padding: 24px; color: #fff; margin-bottom: 20px; position: relative; overflow: hidden; }
+.lc-unit { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.lc-address { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 20px; }
+.lc-meta-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.lc-meta-item .lm-label { font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.35); margin-bottom: 4px; }
+.lc-meta-item .lm-value { font-family: var(--mono); font-size: 14px; font-weight: 600; color: #fff; }
+.lc-meta-item .lm-value.good { color: var(--mint); }
+.contract-badge { position: absolute; top: 20px; right: 20px; font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; border: 1px solid; }
+.contract-badge.active { border-color: var(--mint); color: var(--mint); background: rgba(76,201,160,0.1); }
+.contract-badge.draft { border-color: var(--text-muted); color: rgba(255,255,255,0.6); background: rgba(255,255,255,0.06); }
+
+.pay-table { width: 100%; border-collapse: collapse; }
+.pay-table th { font-family: var(--mono); font-size: 9px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); padding: 0 14px 10px; text-align: left; border-bottom: 1px solid var(--border-lt); }
+.pay-table td { padding: 13px 14px; font-size: 13px; border-bottom: 1px solid var(--border-lt); vertical-align: middle; }
+.pay-table tr:last-child td { border-bottom: none; }
+.pay-table tr:hover td { background: var(--off); }
+.pay-ref { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+.pay-amount { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+.pill { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 20px; }
+.pill::before { content: ''; width: 5px; height: 5px; border-radius: 50%; }
+.pill.paid { background: var(--mint-dim); color: var(--teal); }
+.pill.paid::before { background: var(--mint); }
+.pill.pending { background: var(--amber-dim); color: #9A6A00; }
+.pill.pending::before { background: var(--amber); }
+.pill.overdue { background: var(--red-dim); color: var(--red); }
+.pill.overdue::before { background: var(--red); }
+.pill.upcoming { background: rgba(148,170,187,0.12); color: var(--text-muted); }
+.pill.upcoming::before { background: var(--text-muted); }
+.pill.open { background: var(--amber-dim); color: #9A6A00; }
+.pill.open::before { background: var(--amber); }
+.pill.progress { background: rgba(45,125,111,0.12); color: var(--teal); }
+.pill.progress::before { background: var(--teal-lt); }
+.pill.resolved { background: var(--mint-dim); color: var(--teal); }
+.pill.resolved::before { background: var(--mint); }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; }
+.btn:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--teal); color: #fff; }
+.btn-mint    { background: var(--mint); color: var(--slate); }
+.btn-ghost   { background: transparent; color: var(--teal); border: 1px solid rgba(45,125,111,0.3); }
+.btn-amber   { background: var(--amber); color: var(--slate); }
+.btn-sm { font-size: 11px; padding: 5px 10px; }
+.btn-block { width: 100%; justify-content: center; padding: 11px; }
+
+.maint-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; padding: 14px 20px; border-bottom: 1px solid var(--border-lt); }
+.maint-item:last-child { border-bottom: none; }
+.maint-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; background: rgba(45,125,111,0.1); }
+.maint-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.maint-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-family: var(--mono); }
+
+.form-group { margin-bottom: 16px; }
+.form-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 6px; }
+.form-control { width: 100%; padding: 9px 13px; border: 1px solid var(--border-lt); border-radius: 7px; font-family: var(--sans); font-size: 13px; color: var(--text-primary); background: var(--white); outline: none; }
+.form-control:focus { border-color: var(--teal-lt); box-shadow: 0 0 0 3px rgba(45,125,111,0.12); }
+select.form-control { appearance: none; cursor: pointer; }
+textarea.form-control { resize: vertical; min-height: 90px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+.doc-item { display: flex; align-items: center; gap: 14px; padding: 13px 20px; border-bottom: 1px solid var(--border-lt); }
+.doc-item:last-child { border-bottom: none; }
+.doc-icon { width: 34px; height: 34px; border-radius: 7px; background: rgba(45,125,111,0.08); display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+.doc-name { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+.doc-meta { font-family: var(--mono); font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.doc-dl { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--teal); padding: 4px 10px; border-radius: 5px; border: 1px solid rgba(45,125,111,0.25); background: transparent; cursor: pointer; margin-left: auto; white-space: nowrap; text-decoration: none; }
+.doc-dl:hover { background: var(--mint-dim); }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,32,39,0.65); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--white); border-radius: 14px; width: 440px; max-width: 94vw; overflow: hidden; box-shadow: 0 24px 60px rgba(15,32,39,0.35); }
+.modal-header { background: var(--slate); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; }
+.modal-title { font-size: 16px; font-weight: 700; color: #fff; }
+.modal-close { font-size: 18px; color: rgba(255,255,255,0.5); cursor: pointer; background: none; border: none; }
+.modal-body { padding: 24px; }
+.modal-amount-display { text-align: center; padding: 20px 0; margin-bottom: 20px; border-bottom: 1px solid var(--border-lt); }
+.modal-amount { font-family: var(--mono); font-size: 36px; font-weight: 600; color: var(--text-primary); }
+.modal-amount-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.modal-footer { padding: 0 24px 24px; }
+
+.empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+.empty-icon { font-size: 40px; margin-bottom: 12px; }
+.empty-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+.empty-sub { font-size: 12px; line-height: 1.6; }
+
+.priority-row { display: flex; gap: 8px; }
+.priority-btn { flex: 1; padding: 7px 10px; border: 1px solid var(--border-lt); border-radius: 6px; font-size: 11px; font-family: var(--mono); font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); text-align: center; }
+.priority-btn.sel-low    { background: var(--mint-dim); border-color: var(--mint); color: var(--teal); }
+.priority-btn.sel-medium { background: var(--amber-dim); border-color: var(--amber); color: #9A6A00; }
+.priority-btn.sel-high   { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+.priority-btn.sel-emergency { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+
+.notice-bar { position: fixed; bottom: 20px; right: 24px; background: var(--slate); color: #fff; padding: 12px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(15,32,39,0.4); z-index: 2000; transform: translateY(80px); opacity: 0; transition: transform 0.3s, opacity 0.3s; max-width: 340px; }
+.notice-bar.show { transform: translateY(0); opacity: 1; }
+.notice-bar.error { background: var(--red); }
+.notice-bar .mint { color: var(--mint); }
+
+.cheque-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.cheque-item { flex-shrink: 0; width: 84px; border: 1px solid var(--border-lt); border-radius: 8px; padding: 10px 8px; text-align: center; background: var(--white); }
+.cheque-item.presented { border-color: var(--mint); background: var(--mint-dim); }
+.cheque-item.upcoming  { border-color: var(--border-lt); }
+.cheque-item.due-soon  { border-color: var(--amber); background: var(--amber-dim); }
+.cheque-item.bounced   { border-color: var(--red); background: var(--red-dim); }
+.ch-num  { font-family: var(--mono); font-size: 9px; color: var(--text-muted); margin-bottom: 4px; }
+.ch-date { font-family: var(--mono); font-size: 10px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+.ch-amt  { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--text-primary); }
+.ch-status { font-family: var(--mono); font-size: 8px; font-weight: 600; margin-top: 5px; color: var(--text-muted); }
+.cheque-item.presented .ch-status { color: var(--teal); }
+.cheque-item.due-soon  .ch-status { color: #9A6A00; }
+.cheque-item.bounced   .ch-status { color: var(--red); }
+
+@media (max-width: 720px) {
+  .shell.active { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .stat-row { grid-template-columns: 1fr 1fr; }
+  .lc-meta-row { grid-template-columns: 1fr 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .health-bar { overflow-x: auto; }
+  .lt-track-wrap { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">my<span>home</span></div>
+    <div class="login-sub">Sign in with your registered mobile number and access code.</div>
+    <div class="login-error" id="login-error"></div>
+    <form id="login-form">
+      <div class="form-group">
+        <label class="form-label">Mobile Number</label>
+        <input class="form-control" type="text" id="login-mobile" placeholder="e.g. 9856241563" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Access Code</label>
+        <input class="form-control" type="password" id="login-code" placeholder="Access code" required>
+      </div>
+      <button class="btn btn-mint btn-block" type="submit" id="login-submit">Sign In</button>
+    </form>
+  </div>
+</div>
+
+<div class="shell" id="shell">
+  <div class="health-bar">
+    <div class="hb-logo">my<span>home</span></div>
+    <div class="lease-timeline">
+      <div class="lt-segment">
+        <div class="lt-label">Unit</div>
+        <div class="lt-value" id="hb-unit">—</div>
+      </div>
+      <div class="lt-segment">
+        <div class="lt-label">Next Payment</div>
+        <div class="lt-value" id="hb-next-payment">—</div>
+      </div>
+      <div class="lt-segment">
+        <div class="lt-label">Amount Due</div>
+        <div class="lt-value" id="hb-amount-due">—</div>
+      </div>
+      <div class="lt-segment" style="border-right:none">
+        <div class="lt-label">Lease Ends</div>
+        <div class="lt-value" id="hb-lease-ends">—</div>
+      </div>
+      <div class="lt-track-wrap">
+        <div class="lt-track-label">
+          <span id="hb-track-start">—</span>
+          <span id="hb-track-end">—</span>
+        </div>
+        <div class="lt-track"><div class="lt-fill" id="hb-track-fill"></div></div>
+      </div>
+    </div>
+    <div class="hb-user">
+      <div class="hb-avatar" id="hb-avatar">–</div>
+      <div class="hb-name" id="hb-name">—</div>
+      <button class="hb-logout" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="nav-section-label">Home</div>
+    <button class="nav-item active" onclick="showPanel('dashboard', this)"><span class="nav-icon">🏠</span><span class="nav-label">Dashboard</span></button>
+    <div class="nav-section-label">Tenancy</div>
+    <button class="nav-item" onclick="showPanel('lease', this)"><span class="nav-icon">📄</span><span class="nav-label">My Lease</span></button>
+    <button class="nav-item" onclick="showPanel('payments', this)"><span class="nav-icon">💳</span><span class="nav-label">Payments</span></button>
+    <button class="nav-item" onclick="showPanel('pdc', this)"><span class="nav-icon">🏦</span><span class="nav-label">Cheque Schedule</span></button>
+    <div class="nav-section-label">Property</div>
+    <button class="nav-item" onclick="showPanel('maintenance', this)"><span class="nav-icon">🔧</span><span class="nav-label">Maintenance</span><span class="nav-badge red" id="nav-maintenance-badge" style="display:none">0</span></button>
+    <button class="nav-item" onclick="showPanel('new-request', this)"><span class="nav-icon">➕</span><span class="nav-label">New Request</span></button>
+    <div class="nav-section-label">Documents</div>
+    <button class="nav-item" onclick="showPanel('documents', this)"><span class="nav-icon">📁</span><span class="nav-label">My Documents</span></button>
+    <div class="sidebar-footer"><div class="sidebar-footer-text">Powered by Frappe V16</div></div>
+  </div>
+
+  <div class="main">
+    <div class="panel active" id="panel-dashboard">
+      <div class="page-header">
+        <div>
+          <div class="page-title" id="dash-greeting">Welcome</div>
+          <div class="page-sub" id="dash-subtitle">—</div>
+        </div>
+        <button class="btn btn-mint" id="dash-pay-btn" onclick="openPayModalForNextDue()" style="display:none">Pay Rent</button>
+      </div>
+      <div id="dash-alert-container"></div>
+      <div class="stat-row" id="dash-stats"></div>
+      <div class="sec-label">Recent Installments</div>
+      <div class="card">
+        <table class="pay-table">
+          <thead><tr><th>Installment</th><th>Due Date</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody id="dash-payments-tbody"><tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <div class="sec-label">Open Maintenance</div>
+      <div class="card" id="dash-maintenance-card"><div class="empty-state"><div class="empty-sub">Loading…</div></div></div>
+    </div>
+
+    <div class="panel" id="panel-lease">
+      <div class="page-header"><div><div class="page-title">My Lease</div><div class="page-sub">All lease contracts on your account</div></div></div>
+      <div id="lease-container"><div class="empty-state"><div class="empty-sub">Loading…</div></div></div>
+    </div>
+
+    <div class="panel" id="panel-payments">
+      <div class="page-header"><div><div class="page-title">Payments</div><div class="page-sub">Full installment history for this tenancy</div></div></div>
+      <div id="payments-alert-container"></div>
+      <div class="sec-label">Installment History</div>
+      <div class="card">
+        <table class="pay-table">
+          <thead><tr><th>#</th><th>Due Date</th><th>Amount</th><th>Paid</th><th>Outstanding</th><th>Status</th><th></th></tr></thead>
+          <tbody id="payments-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px">Loading…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-pdc">
+      <div class="page-header"><div><div class="page-title">Cheque Schedule</div><div class="page-sub">Post-dated cheques for this tenancy</div></div></div>
+      <div class="sec-label">Cheque Timeline</div>
+      <div class="card"><div class="card-body"><div class="cheque-strip" id="cheque-strip"><div class="empty-state" style="width:100%"><div class="empty-sub">Loading…</div></div></div></div></div>
+    </div>
+
+    <div class="panel" id="panel-maintenance">
+      <div class="page-header">
+        <div><div class="page-title">Maintenance</div><div class="page-sub">Your maintenance requests</div></div>
+        <button class="btn btn-primary" onclick="showPanel('new-request', document.querySelector('[onclick*=new-request]'))">New Request</button>
+      </div>
+      <div class="sec-label">Active Requests</div>
+      <div class="card" id="maint-active-card"><div class="empty-state"><div class="empty-sub">Loading…</div></div></div>
+      <div class="sec-label">Closed</div>
+      <div class="card" id="maint-closed-card"><div class="empty-state"><div class="empty-sub">Loading…</div></div></div>
+    </div>
+
+    <div class="panel" id="panel-new-request">
+      <div class="page-header"><div><div class="page-title">New Maintenance Request</div><div class="page-sub">We'll route this to the property manager</div></div></div>
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Describe the issue</div><div class="card-sub" id="new-request-unit-sub">—</div></div></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select class="form-control" id="req-category">
+                <option value="Plumbing">Plumbing</option>
+                <option value="Electrical">Electrical</option>
+                <option value="AC">Air Conditioning</option>
+                <option value="Civil">Civil / Structural</option>
+                <option value="Appliances">Appliances</option>
+                <option value="Pest Control">Pest Control</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group" id="req-unit-group" style="display:none">
+              <label class="form-label">Unit</label>
+              <select class="form-control" id="req-unit"></select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <div class="priority-row">
+              <button type="button" class="priority-btn sel-medium" data-priority="Low" onclick="selectPriority(this)">Low</button>
+              <button type="button" class="priority-btn" data-priority="Medium" onclick="selectPriority(this)">Medium</button>
+              <button type="button" class="priority-btn" data-priority="High" onclick="selectPriority(this)">High</button>
+              <button type="button" class="priority-btn" data-priority="Emergency" onclick="selectPriority(this)">Emergency</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" id="req-description" placeholder="Describe the issue clearly — what is happening, when it started, how it affects you…"></textarea>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+            <button class="btn btn-ghost" onclick="showPanel('maintenance', document.querySelector('[onclick*=maintenance]'))">Cancel</button>
+            <button class="btn btn-primary" id="req-submit-btn" onclick="submitRequest()">Submit Request</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-documents">
+      <div class="page-header"><div><div class="page-title">My Documents</div><div class="page-sub">Files attached to your lease</div></div></div>
+      <div class="card" id="documents-card"><div class="empty-state"><div class="empty-sub">Loading…</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="pay-modal" onclick="if(event.target===this)closePayModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Pay Rent</div>
+      <button class="modal-close" onclick="closePayModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-amount-display">
+        <div class="modal-amount" id="modal-amount">0.00</div>
+        <div class="modal-amount-sub" id="modal-sub">—</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mode of Payment</label>
+        <select class="form-control" id="modal-mode">
+          <option value="Cash">Cash</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Cheque">Cheque</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-mint btn-block" id="modal-confirm-btn" onclick="confirmPayment()">Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<div class="notice-bar" id="notice-bar">
+  <span class="mint">✓</span>
+  <span id="notice-text">Done</span>
+</div>
+
+<script>
+const API_BASE = "";
+const CURRENCY = "";
+
+function getToken() { return localStorage.getItem("tenant_portal_token"); }
+function setToken(t) { localStorage.setItem("tenant_portal_token", t); }
+function clearToken() { localStorage.removeItem("tenant_portal_token"); }
+
+function getCsrfToken() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  return meta ? meta.getAttribute("content") : "";
+}
+
+async function apiCall(method, params) {
+  params = params || {};
+  const token = getToken();
+  const body = Object.assign({}, params);
+  if (token && method !== "tenant_portal_login") body.token = token;
+
+  const res = await fetch(API_BASE + "/api/method/re_core.re_core.tenant_portal_api." + method, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Frappe-CSRF-Token": getCsrfToken(),
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      clearToken();
+      showLogin();
+      throw new Error("Session expired — please sign in again.");
+    }
+    throw new Error((data && (data.exception || data.message)) || "Something went wrong");
+  }
+  return data.message;
+}
+
+function fmtAmount(n) {
+  const num = Number(n || 0);
+  return CURRENCY + num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function fmtDate(d) {
+  if (!d) return "—";
+  const dt = new Date(d);
+  if (isNaN(dt)) return d;
+  return dt.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+}
+function daysBetween(a, b) { return Math.round((new Date(b) - new Date(a)) / 86400000); }
+
+function showLogin() {
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("shell").classList.remove("active");
+}
+function showApp() {
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("shell").classList.add("active");
+}
+
+document.getElementById("login-form").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const mobile = document.getElementById("login-mobile").value.trim();
+  const code = document.getElementById("login-code").value.trim();
+  const errBox = document.getElementById("login-error");
+  const submitBtn = document.getElementById("login-submit");
+  errBox.classList.remove("show");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Signing in…";
+  try {
+    const result = await apiCall("tenant_portal_login", { mobile: mobile, access_code: code });
+    setToken(result.token);
+    if (result.tenant_name) localStorage.setItem("tenant_portal_name", result.tenant_name);
+    showApp();
+    await loadAll();
+  } catch (err) {
+    errBox.textContent = err.message;
+    errBox.classList.add("show");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Sign In";
+  }
+});
+
+async function logout() {
+  try { await apiCall("tenant_portal_logout"); } catch (e) {}
+  clearToken();
+  localStorage.removeItem("tenant_portal_name");
+  showLogin();
+}
+
+function showPanel(id, triggerBtn) {
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+  const panel = document.getElementById('panel-' + id);
+  if (panel) panel.classList.add('active');
+  if (triggerBtn) triggerBtn.classList.add('active');
+}
+
+let noticeTimer;
+function showNotice(msg, type) {
+  const bar = document.getElementById('notice-bar');
+  document.getElementById('notice-text').textContent = msg;
+  bar.classList.toggle('error', type === "error");
+  bar.classList.add('show');
+  clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(function(){ bar.classList.remove('show'); }, 4000);
+}
+
+let STATE = { dashboard: null, lease: [], installments: [], pdcs: [], maintenance: [], documents: [], units: [] };
+
+async function loadAll() {
+  try {
+    const results = await Promise.all([
+      apiCall("tenant_portal_dashboard"),
+      apiCall("tenant_portal_lease"),
+      apiCall("tenant_portal_installments"),
+      apiCall("tenant_portal_pdcs"),
+      apiCall("tenant_portal_maintenance_list"),
+      apiCall("tenant_portal_documents"),
+      apiCall("tenant_portal_units"),
+    ]);
+    STATE.dashboard = results[0];
+    STATE.lease = results[1].leases || [];
+    STATE.installments = results[2].installments || [];
+    STATE.pdcs = results[3].cheques || [];
+    STATE.maintenance = results[4].requests || [];
+    STATE.documents = results[5].documents || [];
+    STATE.units = results[6].units || [];
+
+    renderHealthBar();
+    renderDashboard();
+    renderLease();
+    renderPayments();
+    renderPdcs();
+    renderMaintenance();
+    renderNewRequestForm();
+    renderDocuments();
+  } catch (err) {
+    showNotice(err.message, "error");
+  }
+}
+
+function renderHealthBar() {
+  const d = STATE.dashboard;
+  const activeLease = (d.leases || [])[0];
+  document.getElementById("hb-unit").textContent = activeLease ? activeLease.unit : "—";
+
+  const nextDue = d.next_due_installment;
+  const nextPaymentEl = document.getElementById("hb-next-payment");
+  const amountDueEl = document.getElementById("hb-amount-due");
+
+  if (nextDue) {
+    const days = daysBetween(new Date(), nextDue.due_date);
+    nextPaymentEl.textContent = days < 0 ? (Math.abs(days) + "d overdue") : (days + " days");
+    nextPaymentEl.className = "lt-value " + (days < 0 ? "bad" : days <= 7 ? "warn" : "good");
+    const due = nextDue.outstanding_amount > 0 ? nextDue.outstanding_amount : nextDue.amount;
+    amountDueEl.textContent = fmtAmount(due);
+  } else {
+    nextPaymentEl.textContent = "All paid";
+    nextPaymentEl.className = "lt-value good";
+    amountDueEl.textContent = fmtAmount(0);
+  }
+
+  const leaseEndsEl = document.getElementById("hb-lease-ends");
+  if (activeLease) {
+    const daysLeft = daysBetween(new Date(), activeLease.end_date);
+    leaseEndsEl.textContent = daysLeft + " days";
+    leaseEndsEl.className = "lt-value " + (daysLeft < 30 ? "warn" : "good");
+    document.getElementById("hb-track-start").textContent = "Start · " + fmtDate(activeLease.start_date);
+    document.getElementById("hb-track-end").textContent = "End · " + fmtDate(activeLease.end_date);
+    const total = daysBetween(activeLease.start_date, activeLease.end_date);
+    const elapsed = daysBetween(activeLease.start_date, new Date());
+    const pct = total > 0 ? Math.min(100, Math.max(0, Math.round((elapsed / total) * 100))) : 0;
+    document.getElementById("hb-track-fill").style.width = pct + "%";
+  } else {
+    leaseEndsEl.textContent = "—";
+  }
+
+  const tenantName = localStorage.getItem("tenant_portal_name") || "Tenant";
+  document.getElementById("hb-name").textContent = tenantName;
+  document.getElementById("hb-avatar").textContent = tenantName.slice(0, 2).toUpperCase();
+}
+
+function installmentStatusPill(inst) {
+  if (inst.status === "Paid") return '<span class="pill paid">Paid</span>';
+  const overdue = daysBetween(new Date(), inst.due_date) < 0;
+  if (overdue) return '<span class="pill overdue">Overdue</span>';
+  return '<span class="pill upcoming">' + (inst.status || "Pending") + '</span>';
+}
+
+function renderDashboard() {
+  const d = STATE.dashboard;
+  const activeLease = (d.leases || [])[0];
+  const tenantName = localStorage.getItem("tenant_portal_name") || "there";
+
+  document.getElementById("dash-greeting").textContent = "Welcome, " + tenantName;
+  document.getElementById("dash-subtitle").textContent = activeLease ? (activeLease.property + " · Unit " + activeLease.unit) : "No active lease found";
+
+  const alertContainer = document.getElementById("dash-alert-container");
+  const payBtn = document.getElementById("dash-pay-btn");
+  alertContainer.innerHTML = "";
+
+  const nextDue = d.next_due_installment;
+  if (nextDue) {
+    const days = daysBetween(new Date(), nextDue.due_date);
+    const due = nextDue.outstanding_amount > 0 ? nextDue.outstanding_amount : nextDue.amount;
+    const overdue = days < 0;
+    alertContainer.innerHTML =
+      '<div class="alert ' + (overdue ? 'danger' : 'warn') + '">' +
+        '<div class="alert-icon">' + (overdue ? '⚠️' : '⏰') + '</div>' +
+        '<div class="alert-body">' +
+          '<div class="alert-title">' + (overdue ? ('Overdue by ' + Math.abs(days) + ' days') : ('Rent due in ' + days + ' days')) + ' — ' + fmtAmount(due) + '</div>' +
+          '<div class="alert-desc">Installment due ' + fmtDate(nextDue.due_date) + '.</div>' +
+        '</div>' +
+        '<button class="alert-cta amber" onclick="openPayModal(\'' + nextDue.name + '\', ' + due + ')">Pay Now</button>' +
+      '</div>';
+    payBtn.style.display = "inline-flex";
+  } else {
+    payBtn.style.display = "none";
+  }
+
+  document.getElementById("dash-stats").innerHTML =
+    '<div class="stat-card"><div class="stat-label">Total Outstanding</div><div class="stat-value ' + (d.total_outstanding > 0 ? 'amber' : 'mint') + '">' + fmtAmount(d.total_outstanding) + '</div><div class="stat-sub">Across all installments</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Lease Remaining</div><div class="stat-value">' + (activeLease ? (daysBetween(new Date(), activeLease.end_date) + ' days') : '—') + '</div><div class="stat-sub">' + (activeLease ? ('Ends ' + fmtDate(activeLease.end_date)) : 'No active lease') + '</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Open Requests</div><div class="stat-value amber">' + d.open_maintenance_requests + '</div><div class="stat-sub">Maintenance requests</div></div>' +
+    '<div class="stat-card"><div class="stat-label">Active Leases</div><div class="stat-value mint">' + (d.leases || []).length + '</div><div class="stat-sub">Currently active</div></div>';
+
+  const recent = STATE.installments.slice(0, 5);
+  const tbody = document.getElementById("dash-payments-tbody");
+  tbody.innerHTML = recent.length ? recent.map(function(i){
+    return '<tr><td><div class="pay-ref">#' + i.installment_no + '</div></td><td>' + fmtDate(i.due_date) + '</td><td><div class="pay-amount">' + fmtAmount(i.amount) + '</div></td><td>' + installmentStatusPill(i) + '</td></tr>';
+  }).join("") : '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:20px">No installments found</td></tr>';
+
+  const maintCard = document.getElementById("dash-maintenance-card");
+  const openReqs = STATE.maintenance.filter(function(m){ return ["Completed", "Rejected", "Cancelled"].indexOf(m.status) === -1; });
+  maintCard.innerHTML = openReqs.length ? openReqs.map(maintItemHtml).join("") :
+    '<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">No open requests</div><div class="empty-sub">Everything is in good shape.</div></div>';
+}
+
+function renderLease() {
+  const container = document.getElementById("lease-container");
+  if (!STATE.lease.length) {
+    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📄</div><div class="empty-title">No lease found</div></div>';
+    return;
+  }
+  container.innerHTML = STATE.lease.map(function(l){
+    const isActive = (l.status || "").toLowerCase() === "active";
+    return '<div class="lease-card">' +
+      '<span class="contract-badge ' + (isActive ? 'active' : 'draft') + '">' + l.status + '</span>' +
+      '<div class="lc-unit">Unit ' + l.unit + ' — ' + l.property + '</div>' +
+      '<div class="lc-address">' + (l.title || '') + '</div>' +
+      '<div class="lc-meta-row">' +
+        '<div class="lc-meta-item"><div class="lm-label">Start Date</div><div class="lm-value">' + fmtDate(l.start_date) + '</div></div>' +
+        '<div class="lc-meta-item"><div class="lm-label">End Date</div><div class="lm-value">' + fmtDate(l.end_date) + '</div></div>' +
+        '<div class="lc-meta-item"><div class="lm-label">Contract Value</div><div class="lm-value">' + fmtAmount(l.total_contract_value) + '</div></div>' +
+        '<div class="lc-meta-item"><div class="lm-label">Payment</div><div class="lm-value good">' + (l.payment_frequency || '—') + '</div></div>' +
+      '</div></div>' +
+      '<div class="card"><div class="card-body"><div class="form-row">' +
+        '<div><div class="form-label">Duration</div><div style="font-size:13px;font-weight:500;padding:9px 0">' + (l.duration_months || '—') + ' months</div></div>' +
+        '<div><div class="form-label">Security Deposit</div><div style="font-family:var(--mono);font-size:13px;padding:9px 0">' + fmtAmount(l.security_deposit_amount) + '</div></div>' +
+        '<div><div class="form-label">Company</div><div style="font-size:13px;font-weight:500;padding:9px 0">' + (l.company || '—') + '</div></div>' +
+        '<div><div class="form-label">Rent Schedule</div><div style="font-size:13px;padding:9px 0">' + (l.rent_schedule || 'Not generated yet') + '</div></div>' +
+      '</div></div></div><div style="height:20px"></div>';
+  }).join("");
+}
+
+function renderPayments() {
+  const alertContainer = document.getElementById("payments-alert-container");
+  const d = STATE.dashboard;
+  alertContainer.innerHTML = d.total_outstanding > 0 ?
+    '<div class="alert warn"><div class="alert-icon">💳</div><div class="alert-body"><div class="alert-title">' + fmtAmount(d.total_outstanding) + ' outstanding across your installments</div><div class="alert-desc">Pay individual installments below.</div></div></div>' :
+    '<div class="alert ok"><div class="alert-icon">✅</div><div class="alert-body"><div class="alert-title">All installments paid</div></div></div>';
+
+  const tbody = document.getElementById("payments-tbody");
+  tbody.innerHTML = STATE.installments.length ? STATE.installments.map(function(i){
+    const canPay = i.status !== "Paid";
+    const due = i.outstanding_amount > 0 ? i.outstanding_amount : (canPay ? i.amount : 0);
+    return '<tr><td><div class="pay-ref">#' + i.installment_no + '</div></td><td>' + fmtDate(i.due_date) + '</td><td><div class="pay-amount">' + fmtAmount(i.amount) + '</div></td><td>' + fmtAmount(i.paid_amount) + '</td><td>' + fmtAmount(i.outstanding_amount) + '</td><td>' + installmentStatusPill(i) + '</td><td>' + (canPay ? ('<button class="btn btn-amber btn-sm" onclick="openPayModal(\'' + i.name + '\', ' + due + ')">Pay</button>') : '<span style="color:var(--text-muted);font-size:11px">—</span>') + '</td></tr>';
+  }).join("") : '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:20px">No installments found</td></tr>';
+}
+
+function pdcClass(status) {
+  if (status === "Cleared") return "presented";
+  if (status === "Bounced" || status === "Returned") return "bounced";
+  if (status === "Deposited") return "due-soon";
+  return "upcoming";
+}
+function renderPdcs() {
+  const strip = document.getElementById("cheque-strip");
+  strip.innerHTML = STATE.pdcs.length ? STATE.pdcs.map(function(c, idx){
+    return '<div class="cheque-item ' + pdcClass(c.status) + '"><div class="ch-num">CHQ ' + (idx + 1) + '</div><div class="ch-date">' + fmtDate(c.cheque_date) + '</div><div class="ch-amt">' + fmtAmount(c.amount) + '</div><div class="ch-status">' + c.status + '</div></div>';
+  }).join("") : '<div class="empty-state" style="width:100%"><div class="empty-sub">No cheques on file</div></div>';
+}
+
+function maintPill(status) {
+  const map = { "Open": "open", "In Progress": "progress", "On Hold": "pending", "Completed": "resolved", "Rejected": "overdue", "Cancelled": "upcoming" };
+  return '<span class="pill ' + (map[status] || 'upcoming') + '">' + status + '</span>';
+}
+function maintItemHtml(m) {
+  return '<div class="maint-item"><div class="maint-icon">🔧</div><div><div class="maint-title">' + (m.description ? m.description.slice(0, 70) : m.category) + '</div><div class="maint-meta">' + m.name + ' · ' + m.category + ' · Priority: ' + m.priority + '</div></div>' + maintPill(m.status) + '</div>';
+}
+function renderMaintenance() {
+  const active = STATE.maintenance.filter(function(m){ return ["Completed", "Rejected", "Cancelled"].indexOf(m.status) === -1; });
+  const closed = STATE.maintenance.filter(function(m){ return ["Completed", "Rejected", "Cancelled"].indexOf(m.status) !== -1; });
+
+  document.getElementById("maint-active-card").innerHTML = active.length ? active.map(maintItemHtml).join("") :
+    '<div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">No active requests</div></div>';
+  document.getElementById("maint-closed-card").innerHTML = closed.length ? closed.map(maintItemHtml).join("") :
+    '<div class="empty-state"><div class="empty-sub">No closed requests yet</div></div>';
+
+  const badge = document.getElementById("nav-maintenance-badge");
+  if (active.length) { badge.style.display = "inline-block"; badge.textContent = active.length; }
+  else { badge.style.display = "none"; }
+}
+
+let selectedPriority = "Medium";
+function selectPriority(el) {
+  document.querySelectorAll('.priority-btn').forEach(function(b){ b.className = 'priority-btn'; });
+  const level = el.dataset.priority.toLowerCase();
+  el.classList.add('sel-' + level);
+  selectedPriority = el.dataset.priority;
+}
+
+function renderNewRequestForm() {
+  const unitGroup = document.getElementById("req-unit-group");
+  const unitSelect = document.getElementById("req-unit");
+  const sub = document.getElementById("new-request-unit-sub");
+
+  if (STATE.units.length > 1) {
+    unitGroup.style.display = "block";
+    unitSelect.innerHTML = STATE.units.map(function(u){ return '<option value="' + u + '">' + u + '</option>'; }).join("");
+    sub.textContent = "Select the unit this request applies to";
+  } else if (STATE.units.length === 1) {
+    unitGroup.style.display = "none";
+    sub.textContent = "Unit " + STATE.units[0];
+  } else {
+    sub.textContent = "No active lease found — you may not be able to submit a request";
+  }
+}
+
+async function submitRequest() {
+  const category = document.getElementById("req-category").value;
+  const description = document.getElementById("req-description").value.trim();
+  const unit = STATE.units.length > 1 ? document.getElementById("req-unit").value : (STATE.units[0] || null);
+  const btn = document.getElementById("req-submit-btn");
+
+  if (!description) { showNotice("Please describe the issue before submitting.", "error"); return; }
+  if (!unit) { showNotice("No active unit found for your account.", "error"); return; }
+
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+  try {
+    await apiCall("tenant_portal_create_maintenance_request", { category: category, description: description, priority: selectedPriority, unit: unit });
+    showNotice("Maintenance request submitted.");
+    document.getElementById("req-description").value = "";
+    const maintenance = await apiCall("tenant_portal_maintenance_list");
+    STATE.maintenance = maintenance.requests || [];
+    renderMaintenance();
+    showPanel('maintenance', document.querySelector('.nav-item[onclick*="maintenance"]'));
+  } catch (err) {
+    showNotice(err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Submit Request";
+  }
+}
+
+function renderDocuments() {
+  const card = document.getElementById("documents-card");
+  card.innerHTML = STATE.documents.length ? STATE.documents.map(function(f){
+    return '<div class="doc-item"><div class="doc-icon">📄</div><div><div class="doc-name">' + f.file_name + '</div><div class="doc-meta">Attached to ' + f.attached_to_name + ' · ' + fmtDate(f.creation) + '</div></div><a class="doc-dl" href="' + f.file_url + '" target="_blank" rel="noopener">⬇ Open</a></div>';
+  }).join("") : '<div class="empty-state"><div class="empty-icon">📁</div><div class="empty-title">No documents on file</div><div class="empty-sub">Files attached to your lease will show up here.</div></div>';
+}
+
+let currentPayInstallment = null;
+function openPayModal(installmentName, amount) {
+  currentPayInstallment = installmentName;
+  document.getElementById("modal-amount").textContent = fmtAmount(amount);
+  document.getElementById("modal-sub").textContent = installmentName;
+  document.getElementById("pay-modal").classList.add("open");
+}
+function openPayModalForNextDue() {
+  const nextDue = STATE.dashboard.next_due_installment;
+  if (!nextDue) return;
+  const due = nextDue.outstanding_amount > 0 ? nextDue.outstanding_amount : nextDue.amount;
+  openPayModal(nextDue.name, due);
+}
+function closePayModal() {
+  document.getElementById("pay-modal").classList.remove("open");
+  currentPayInstallment = null;
+}
+async function confirmPayment() {
+  if (!currentPayInstallment) return;
+  const mode = document.getElementById("modal-mode").value;
+  const amountText = document.getElementById("modal-amount").textContent.replace(CURRENCY, "").replace(/,/g, "");
+  const amount = parseFloat(amountText);
+  const btn = document.getElementById("modal-confirm-btn");
+
+  btn.disabled = true;
+  btn.textContent = "Processing…";
+  try {
+    await apiCall("tenant_portal_pay_installment", { installment_name: currentPayInstallment, amount: amount, mode_of_payment: mode });
+    showNotice("Payment recorded successfully.");
+    closePayModal();
+    const dashboard = await apiCall("tenant_portal_dashboard");
+    const installments = await apiCall("tenant_portal_installments");
+    STATE.dashboard = dashboard;
+    STATE.installments = installments.installments || [];
+    renderHealthBar();
+    renderDashboard();
+    renderPayments();
+  } catch (err) {
+    showNotice(err.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Confirm Payment";
+  }
+}
+
+(async function init() {
+  if (getToken()) {
+    showApp();
+    try { await loadAll(); } catch (err) { showLogin(); }
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>

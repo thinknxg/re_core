@@ -71,7 +71,10 @@ def get_live_properties(location=None, unit_type=None, min_rent=None, max_rent=N
     values = {}
 
     if location:
-        conditions.append("(p.city = %(location)s OR p.area = %(location)s)")
+        conditions.append(
+            "(p.city = %(location)s OR p.area = %(location)s "
+            "OR CONCAT(p.area, ', ', p.city) = %(location)s)"
+        )
         values["location"] = location
     if unit_type:
         conditions.append("u.unit_type = %(unit_type)s")
@@ -95,7 +98,13 @@ def get_live_properties(location=None, unit_type=None, min_rent=None, max_rent=N
             u.usage, u.status, u.furnishing, u.parking_slots, u.area_sqm,
             u.bedrooms, u.bathrooms, u.annual_rent,
             p.name as property, p.property_name, p.city, p.area,
-            p.cover_image, p.latitude, p.longitude
+            COALESCE(p.cover_image, (
+                SELECT pp.image FROM `tabProperty Photo` pp
+                WHERE pp.parent = p.name
+                ORDER BY pp.is_cover DESC, pp.idx ASC
+                LIMIT 1
+            )) as cover_image,
+            p.latitude, p.longitude
         FROM `tabUnit` u
         INNER JOIN `tabProperty` p ON u.property = p.name
         WHERE {" AND ".join(conditions)}
