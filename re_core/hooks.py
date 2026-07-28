@@ -10,11 +10,18 @@ required_apps = ["erpnext"]
 after_install = "re_core.install.after_install"
 
 fixtures = [
-    {"doctype": "Custom Field", "filters": [["dt", "=", "Unit"], ["fieldname", "=", "published_to_portal"]]},
-    {"doctype": "Custom Field", "filters": [["dt", "=", "Purchase Invoice"], ["fieldname", "in", [
-        "re_core_section", "custom_property", "custom_tenancy_id",
-        "cb_re_core", "custom_sales_invoice_id", "custom_loan",
-    ]]]},
+    {"doctype": "Custom Field", "filters": [
+        ["dt", "in", ["Unit", "Tenant", "Property", "Purchase Invoice"]],
+        ["fieldname", "in", [
+            "published_to_portal",
+            "portal_access_code",
+            "ownership_section", "ownership_type", "column_break_ownership",
+            "management_fee_type", "management_fee_value", "onetime_commission", "no_of_floors",
+            "portal_section", "is_live", "published_on", "portal_visibility",
+            "re_core_section", "custom_property", "custom_tenancy_id",
+            "cb_re_core", "custom_sales_invoice_id", "custom_loan",
+        ]],
+    ]},
     {"dt": "Role", "filters": [["name", "in", [
         "RE Manager", "Property Manager", "Leasing Officer",
         "Maintenance Supervisor", "Tenant",
