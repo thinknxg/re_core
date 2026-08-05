@@ -34,7 +34,22 @@
   "photos",
   "amenities",
   "notes_sb",
-  "notes"
+  "notes",
+  "usage_status_sb",
+  "usage",
+  "column_break_usage",
+  "published_to_portal",
+  "specs_sb",
+  "area_sqm",
+  "bedrooms",
+  "bathrooms",
+  "column_break_specs",
+  "furnishing",
+  "parking_slots",
+  "fin_sb",
+  "annual_rent",
+  "column_break_financials",
+  "current_lease"
  ],
  "fields": [
   {
@@ -208,6 +223,87 @@
    "fieldname": "notes",
    "fieldtype": "Text Editor",
    "label": "Notes"
+  },
+  {
+   "fieldname": "usage_status_sb",
+   "fieldtype": "Section Break",
+   "label": "Usage & Availability"
+  },
+  {
+   "default": "Residential",
+   "description": "Drives VAT treatment: Oman residential leases are VAT-exempt",
+   "fieldname": "usage",
+   "fieldtype": "Select",
+   "label": "Usage",
+   "options": "Residential\nCommercial"
+  },
+  {
+   "fieldname": "column_break_usage",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Show this property on the public listings portal",
+   "fieldname": "published_to_portal",
+   "fieldtype": "Check",
+   "label": "Published to Portal"
+  },
+  {
+   "fieldname": "specs_sb",
+   "fieldtype": "Section Break",
+   "label": "Specifications"
+  },
+  {
+   "fieldname": "area_sqm",
+   "fieldtype": "Float",
+   "label": "Area (sqm)"
+  },
+  {
+   "fieldname": "bedrooms",
+   "fieldtype": "Int",
+   "label": "Bedrooms"
+  },
+  {
+   "fieldname": "bathrooms",
+   "fieldtype": "Int",
+   "label": "Bathrooms"
+  },
+  {
+   "fieldname": "column_break_specs",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Unfurnished",
+   "fieldname": "furnishing",
+   "fieldtype": "Select",
+   "label": "Furnishing",
+   "options": "Unfurnished\nSemi Furnished\nFully Furnished"
+  },
+  {
+   "fieldname": "parking_slots",
+   "fieldtype": "Int",
+   "label": "Parking Slots"
+  },
+  {
+   "fieldname": "fin_sb",
+   "fieldtype": "Section Break",
+   "label": "Financials"
+  },
+  {
+   "fieldname": "annual_rent",
+   "fieldtype": "Currency",
+   "label": "Asking Annual Rent"
+  },
+  {
+   "fieldname": "column_break_financials",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "current_lease",
+   "fieldtype": "Link",
+   "label": "Current Lease",
+   "options": "Lease Contract",
+   "read_only": 1
   }
  ],
  "image_field": "cover_image",
@@ -215,7 +311,18 @@
  "is_submittable": 0,
  "issingle": 0,
  "istable": 0,
- "links": [],
+ "links": [
+  {
+   "group": "Leasing",
+   "link_doctype": "Unit",
+   "link_fieldname": "property"
+  },
+  {
+   "group": "Documents",
+   "link_doctype": "Property Document",
+   "link_fieldname": "property"
+  }
+ ],
  "modified": "2026-01-01 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "RE Core",

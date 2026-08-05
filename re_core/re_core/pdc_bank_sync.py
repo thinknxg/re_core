@@ -1,63 +1,84 @@
 import frappe
 from frappe import _
+from frappe.model.mapper import get_payment_entry
 
 
-def sync_bank_to_payment_entry(pdc_doc, method=None):
+def create_or_sync_payment_entry(pdc_doc, method=None):
     """Hook: runs on Post Dated Cheque submit.
 
-    Confirmed against real schema: Post Dated Cheque's field is
-    "payment_entry" (not "linked_payment_entry" as originally guessed).
+    If the PDC already has a linked Payment Entry (e.g. bulk flow, where
+    record_partial_payment() already created and submitted one before this
+    PDC record was even created), just sync the bank/mode onto it.
 
-    Payment Entry's bank-side field is "party_bank_account" (standard
-    Frappe field) - adjust if you're using a custom field instead.
-    Mode of Payment is resolved via Bank Account -> Account -> linked
-    Mode of Payment. Adjust _resolve_mode_of_payment() if your setup
-    maps Mode of Payment differently.
-
-    This allows the bank to be changed right up to the moment of submission
-    and have the accounting Payment Entry submit against the correct
-    bank/mode, rather than whatever bank was set when the PDC was first created.
+    Otherwise, create a new draft Payment Entry - linked to the reserved
+    installment's Sales Invoice if one exists, or a standalone receipt
+    against the tenant's Customer if not.
     """
-    if not pdc_doc.bank_account:
-        frappe.throw(_("Bank Account must be set before submitting this cheque."))
+    if not pdc_doc.deposit_account:
+        frappe.throw(_("Deposit Account must be set before submitting this cheque."))
 
-    linked_pe_name = pdc_doc.payment_entry
-    if not linked_pe_name:
-        # No Payment Entry exists yet for this PDC - nothing to sync.
-        # If your flow creates the Payment Entry as part of this same submit
-        # action rather than beforehand, call that creation function here
-        # instead, passing pdc_doc.bank_account through to it.
-        return
+    if pdc_doc.payment_entry:
+        _sync_existing_payment_entry(pdc_doc)
+    else:
+        _create_payment_entry(pdc_doc)
 
-    pe = frappe.get_doc("Payment Entry", linked_pe_name)
+
+def _sync_existing_payment_entry(pdc_doc):
+    pe = frappe.get_doc("Payment Entry", pdc_doc.payment_entry)
     if pe.docstatus == 1:
         frappe.throw(
             _("Linked Payment Entry {0} is already submitted - cannot change bank now.").format(pe.name)
         )
 
-    pe.party_bank_account = pdc_doc.bank_account
-    mode_of_payment = _resolve_mode_of_payment(pdc_doc.bank_account)
-    if mode_of_payment:
-        pe.mode_of_payment = mode_of_payment
-
+    pe.paid_to = pdc_doc.deposit_account
+    if pdc_doc.mode_of_payment:
+        pe.mode_of_payment = pdc_doc.mode_of_payment
     pe.save(ignore_permissions=True)
 
     frappe.msgprint(
-        _("Payment Entry {0} updated to use bank account {1}").format(pe.name, pdc_doc.bank_account),
+        _("Payment Entry {0} updated to use deposit account {1}").format(pe.name, pdc_doc.deposit_account),
         alert=True,
     )
 
 
-def _resolve_mode_of_payment(bank_account_name):
-    """Best-effort lookup of a Mode of Payment tied to the selected Bank Account.
-    Adjust this if your Mode of Payment <-> Bank Account relationship is modeled
-    differently (e.g. a direct custom field rather than via Mode of Payment Account).
-    """
-    account = frappe.db.get_value("Bank Account", bank_account_name, "account")
-    if not account:
-        return None
-
-    mop_account = frappe.db.get_value(
-        "Mode of Payment Account", {"default_account": account}, "parent"
+def _create_payment_entry(pdc_doc):
+    row = frappe.db.get_value(
+        "Rent Installment",
+        {"pdc": pdc_doc.name, "parenttype": "Rent Schedule"},
+        ["name", "parent", "sales_invoice"],
+        as_dict=True,
     )
-    return mop_account
+
+    if row and row.sales_invoice:
+        pe = get_payment_entry("Sales Invoice", row.sales_invoice, party_amount=pdc_doc.amount)
+    else:
+        customer = frappe.db.get_value("Tenant", pdc_doc.tenant, "customer")
+        if not customer:
+            frappe.throw(_("Tenant {0} has no linked Customer.").format(pdc_doc.tenant))
+
+        receivable_account = frappe.get_cached_value(
+            "Company", pdc_doc.company, "default_receivable_account"
+        )
+        pe = frappe.new_doc("Payment Entry")
+        pe.payment_type = "Receive"
+        pe.party_type = "Customer"
+        pe.party = customer
+        pe.company = pdc_doc.company
+        pe.paid_from = receivable_account
+        pe.paid_amount = pdc_doc.amount
+        pe.received_amount = pdc_doc.amount
+
+    pe.paid_to = pdc_doc.deposit_account
+    if pdc_doc.mode_of_payment:
+        pe.mode_of_payment = pdc_doc.mode_of_payment
+    pe.reference_no = pdc_doc.cheque_no
+    pe.reference_date = pdc_doc.cheque_date
+    pe.posting_date = pdc_doc.cheque_date
+    pe.insert(ignore_permissions=True)
+
+    frappe.db.set_value("Post Dated Cheque", pdc_doc.name, "payment_entry", pe.name)
+
+    frappe.msgprint(
+        _("Payment Entry {0} created for cheque {1}").format(pe.name, pdc_doc.cheque_no),
+        alert=True,
+    )

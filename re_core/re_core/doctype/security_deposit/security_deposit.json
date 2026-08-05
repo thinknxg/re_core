@@ -14,6 +14,8 @@
   "col_break_1",
   "amount",
   "received_date",
+  "deposit_account",
+  "mode_of_payment",
   "status",
   "refund_sb",
   "deduction_amount",
@@ -138,6 +140,19 @@
    "options": "Security Deposit",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "description": "Bank/cash account the deposit is received into, and refunded from",
+   "fieldname": "deposit_account",
+   "fieldtype": "Link",
+   "label": "Deposit Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment"
   }
  ],
  "index_web_pages_for_search": 0,

@@ -60,11 +60,15 @@ has_permission = {
 }
 
 doctype_js = {
-"Property": "public/js/property_live_toggle.js"
+"Property": "public/js/property_live_toggle.js",
+"Unit": "public/js/unit_lease_contract.js"
 }
 
 doc_events = {
 "Post Dated Cheque": {
-"on_submit": "re_core.re_core.pdc_bank_sync.sync_bank_to_payment_entry"
+"on_submit": "re_core.re_core.pdc_bank_sync.create_or_sync_payment_entry"
+},
+"Security Deposit": {
+"on_submit": "re_core.re_core.security_deposit_accounting.create_deposit_journal_entry"
 },
 }

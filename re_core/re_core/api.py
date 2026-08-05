@@ -957,7 +957,8 @@ def get_pdc_list(tenant=None, lease_contract=None, status=None, from_date=None, 
         "Post Dated Cheque",
         filters=filters,
         fields=["name", "tenant", "lease_contract", "cheque_no", "bank", "cheque_date",
-                "amount", "status", "deposit_date", "clearance_date", "bounce_reason"],
+                "amount", "status", "deposit_date", "clearance_date", "bounce_reason",
+                "deposit_account", "mode_of_payment", "payment_entry"],
         order_by="cheque_date asc",
         limit_page_length=200,
     )
@@ -973,8 +974,35 @@ def get_pdc_list(tenant=None, lease_contract=None, status=None, from_date=None, 
 
 
 @frappe.whitelist()
-def update_pdc_status(name, status, deposit_date=None, clearance_date=None, bounce_reason=None):
+def get_bank_accounts():
+    return frappe.get_all(
+        "Account",
+        filters={"account_type": "Bank", "is_group": 0},
+        fields=["name", "account_name", "company"],
+        order_by="account_name asc",
+        limit_page_length=200,
+    )
+
+
+@frappe.whitelist()
+def get_modes_of_payment():
+    return frappe.get_all(
+        "Mode of Payment",
+        fields=["name", "type"],
+        order_by="name asc",
+        limit_page_length=100,
+    )
+
+
+@frappe.whitelist()
+def update_pdc_status(name, status, deposit_date=None, clearance_date=None, bounce_reason=None,
+                       deposit_account=None, mode_of_payment=None):
     doc = frappe.get_doc("Post Dated Cheque", name)
+
+    if deposit_account:
+        doc.db_set("deposit_account", deposit_account)
+    if mode_of_payment:
+        doc.db_set("mode_of_payment", mode_of_payment)
 
     if deposit_date:
         doc.deposit_date = deposit_date
@@ -1118,7 +1146,12 @@ def get_security_deposits(tenant=None, lease_contract=None, status=None):
 
 @frappe.whitelist()
 def update_security_deposit(name, status=None, deduction_amount=None, deduction_reason=None, refunded_amount=None):
+    from re_core.re_core.security_deposit_accounting import process_refund_or_forfeit
+
     doc = frappe.get_doc("Security Deposit", name)
+    prev_deduction = flt(doc.deduction_amount)
+    prev_refunded = flt(doc.refunded_amount)
+
     if status:
         doc.status = status
     if deduction_amount is not None:
@@ -1128,6 +1161,13 @@ def update_security_deposit(name, status=None, deduction_amount=None, deduction_
     if refunded_amount is not None:
         doc.refunded_amount = refunded_amount
     doc.save()
+
+    if doc.docstatus == 1 and status in ("Refunded", "Partially Refunded", "Forfeited"):
+        new_deduction = flt(doc.deduction_amount) - prev_deduction
+        new_refund = flt(doc.refunded_amount) - prev_refunded
+        if new_deduction > 0 or new_refund > 0:
+            process_refund_or_forfeit(doc, new_deduction, new_refund)
+
     return {"name": doc.name, "status": doc.status}
 
 
@@ -1521,7 +1561,10 @@ def link_pdc_to_installment(pdc, installment_name):
 
 @frappe.whitelist()
 def create_pdc(tenant, cheque_no, bank, cheque_date, amount, lease_contract=None,
-                company=None, status="Received"):
+                company=None):
+    # New PDCs always start at "Received" - all further transitions must go
+    # through the mark_deposited/mark_cleared/mark_bounced lifecycle methods,
+    # never set directly, so the accounting side-effects always fire.
     doc = frappe.get_doc({
         "doctype": "Post Dated Cheque",
         "tenant": tenant,
@@ -1531,8 +1574,9 @@ def create_pdc(tenant, cheque_no, bank, cheque_date, amount, lease_contract=None
         "bank": bank,
         "cheque_date": cheque_date,
         "amount": amount,
-        "status": status,
+        "status": "Received",
     }).insert()
+    doc.submit()
 
     # Link this PDC to the lease's next unassigned installment, if one exists.
     if lease_contract:
@@ -2022,6 +2066,7 @@ def submit_bulk_pdc_payments(property, rows, mode_of_payment="Cash", company=Non
                     lease_contract=row.get("lease_contract"),
                     company=company,
                     status="Cleared",
+                    payment_entry=payment_entry,
                 )
                 pdc_name = pdc["name"]
 
