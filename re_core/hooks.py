@@ -20,6 +20,7 @@ fixtures = [
             "portal_section", "is_live", "published_on", "portal_visibility",
             "re_core_section", "custom_property", "custom_tenancy_id",
             "cb_re_core", "custom_sales_invoice_id", "custom_loan",
+            "owner_ref", "custom_source_sales_invoice", "custom_lease_contract",
         ]],
     ]},
     {"dt": "Role", "filters": [["name", "in", [
