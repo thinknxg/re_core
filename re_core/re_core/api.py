@@ -360,7 +360,9 @@ def get_units_for_property(property):
 @frappe.whitelist()
 def create_lease_contract(tenant, unit, property, start_date, end_date,
                            annual_rent, payment_frequency=None, security_deposit=None,
-                           agent=None):
+                           agent=None, owner_ref=None, notice_period_days=None, auto_renew=None,
+                           custom_installments=None, broker_commission=None,
+                           ejari_contract_no=None, terms=None):
     from frappe.utils import month_diff, getdate, flt
 
     duration_months = month_diff(end_date, start_date)
@@ -372,10 +374,17 @@ def create_lease_contract(tenant, unit, property, start_date, end_date,
         "tenant": tenant,
         "unit": unit,
         "property": property,
+        "owner_ref": owner_ref,
         "start_date": start_date,
         "end_date": end_date,
         "payment_frequency": payment_frequency or "Monthly",
         "security_deposit_amount": security_deposit or 0,
+        "notice_period_days": notice_period_days,
+        "auto_renew": auto_renew,
+        "custom_installments": custom_installments,
+        "broker_commission": broker_commission,
+        "ejari_contract_no": ejari_contract_no,
+        "terms": terms,
         "status": "Draft",
         "charges": [{
             "charge_type": "Rent",
@@ -391,6 +400,15 @@ def create_lease_contract(tenant, unit, property, start_date, end_date,
         if commission_name:
             result["commission_entry"] = commission_name
     return result
+
+
+@frappe.whitelist()
+def submit_lease_contract(name):
+    doc = frappe.get_doc("Lease Contract", name)
+    if doc.docstatus != 0:
+        frappe.throw(_("Only Draft contracts can be submitted."))
+    doc.submit()
+    return {"name": doc.name, "status": doc.status, "docstatus": doc.docstatus}
 
 
 def _draft_portal_commission(lease_contract_doc, agent):
@@ -803,15 +821,36 @@ def get_property_detail(property):
 
     return {
         "property_name": p.property_name,
+        "property_type": p.property_type,
         "status": p.status,
+        "owner_ref": p.owner_ref,
         "country": p.country,
         "city": p.city,
         "area": p.area,
         "address_line": p.address_line,
+        "latitude": p.latitude,
+        "longitude": p.longitude,
         "municipality_ref": p.municipality_ref,
         "ejari_number": p.ejari_number,
         "tawtheeq_ref": p.tawtheeq_ref,
         "rera_permit": p.rera_permit,
+        "notes": p.notes,
+        "usage": p.usage,
+        "published_to_portal": p.published_to_portal,
+        "area_sqm": p.area_sqm,
+        "bedrooms": p.bedrooms,
+        "bathrooms": p.bathrooms,
+        "furnishing": p.furnishing,
+        "parking_slots": p.parking_slots,
+        "annual_rent": p.annual_rent,
+        "current_lease": p.current_lease,
+        "ownership_type": p.ownership_type,
+        "management_fee_type": p.management_fee_type,
+        "management_fee_value": p.management_fee_value,
+        "onetime_commission": p.onetime_commission,
+        "no_of_floors": p.no_of_floors,
+        "is_live": p.is_live,
+        "portal_visibility": p.portal_visibility,
         "vat_rate": VAT_RATES.get(p.country, 5),
         "total_units": total_units,
         "occupied": occupied,
@@ -1473,7 +1512,8 @@ def update_inspection(name, estimated_damage_cost=None, summary=None, tenant_sig
 def get_lease_contracts_list():
     rows = frappe.get_all(
         "Lease Contract",
-        fields=["name", "tenant", "unit", "property", "status"],
+        fields=["name", "tenant", "unit", "property", "status", "docstatus",
+                "start_date", "end_date", "total_contract_value", "payment_frequency"],
         order_by="modified desc",
         limit_page_length=200,
     )
@@ -1729,13 +1769,27 @@ def update_inspection_items(name, items):
 # PROPERTY — CREATE
 # ─────────────────────────────────────────────
 @frappe.whitelist()
+def get_companies():
+    return frappe.get_all("Company", fields=["name"], order_by="name")
+
+
+@frappe.whitelist()
 def get_property_owners_list():
     return frappe.get_all("Property Owner", fields=["name", "owner_name"], order_by="owner_name asc")
 
 
 @frappe.whitelist()
 def create_property(property_name, property_type, owner_ref, country, company=None,
-                     status="Active", city=None, area=None, address_line=None, total_units=None):
+                     status="Active", city=None, area=None, address_line=None,
+                     latitude=None, longitude=None,
+                     municipality_ref=None, ejari_number=None, rera_permit=None, tawtheeq_ref=None,
+                     notes=None,
+                     usage=None, published_to_portal=None,
+                     area_sqm=None, bedrooms=None, bathrooms=None, furnishing=None, parking_slots=None,
+                     annual_rent=None, current_lease=None,
+                     ownership_type=None, management_fee_type=None, management_fee_value=None,
+                     onetime_commission=None, no_of_floors=None,
+                     is_live=None, portal_visibility=None):
     doc = frappe.get_doc({
         "doctype": "Property",
         "property_name": property_name,
@@ -1747,8 +1801,64 @@ def create_property(property_name, property_type, owner_ref, country, company=No
         "city": city,
         "area": area,
         "address_line": address_line,
-        "total_units": total_units,
+        "latitude": latitude,
+        "longitude": longitude,
+        "municipality_ref": municipality_ref,
+        "ejari_number": ejari_number,
+        "rera_permit": rera_permit,
+        "tawtheeq_ref": tawtheeq_ref,
+        "notes": notes,
+        "usage": usage,
+        "published_to_portal": published_to_portal,
+        "area_sqm": area_sqm,
+        "bedrooms": bedrooms,
+        "bathrooms": bathrooms,
+        "furnishing": furnishing,
+        "parking_slots": parking_slots,
+        "annual_rent": annual_rent,
+        "current_lease": current_lease,
+        "ownership_type": ownership_type,
+        "management_fee_type": management_fee_type,
+        "management_fee_value": management_fee_value,
+        "onetime_commission": onetime_commission,
+        "no_of_floors": no_of_floors,
+        "is_live": is_live,
+        "portal_visibility": portal_visibility,
     }).insert()
+    return {"name": doc.name}
+
+
+@frappe.whitelist()
+def update_property(name, property_name=None, property_type=None, owner_ref=None, country=None,
+                     company=None, status=None, city=None, area=None, address_line=None,
+                     latitude=None, longitude=None,
+                     municipality_ref=None, ejari_number=None, rera_permit=None, tawtheeq_ref=None,
+                     notes=None,
+                     usage=None, published_to_portal=None,
+                     area_sqm=None, bedrooms=None, bathrooms=None, furnishing=None, parking_slots=None,
+                     annual_rent=None, current_lease=None,
+                     ownership_type=None, management_fee_type=None, management_fee_value=None,
+                     onetime_commission=None, no_of_floors=None,
+                     is_live=None, portal_visibility=None):
+    doc = frappe.get_doc("Property", name)
+    fields = {
+        "property_name": property_name, "property_type": property_type, "owner_ref": owner_ref,
+        "country": country, "company": company, "status": status, "city": city, "area": area,
+        "address_line": address_line, "latitude": latitude, "longitude": longitude,
+        "municipality_ref": municipality_ref, "ejari_number": ejari_number,
+        "rera_permit": rera_permit, "tawtheeq_ref": tawtheeq_ref, "notes": notes,
+        "usage": usage, "published_to_portal": published_to_portal,
+        "area_sqm": area_sqm, "bedrooms": bedrooms, "bathrooms": bathrooms,
+        "furnishing": furnishing, "parking_slots": parking_slots,
+        "annual_rent": annual_rent, "current_lease": current_lease,
+        "ownership_type": ownership_type, "management_fee_type": management_fee_type,
+        "management_fee_value": management_fee_value, "onetime_commission": onetime_commission,
+        "no_of_floors": no_of_floors, "is_live": is_live, "portal_visibility": portal_visibility,
+    }
+    for key, value in fields.items():
+        if value is not None:
+            doc.set(key, value)
+    doc.save()
     return {"name": doc.name}
 
 
@@ -1758,7 +1868,10 @@ def create_property(property_name, property_type, owner_ref, country, company=No
 @frappe.whitelist()
 def create_unit(property, unit_no, unit_type, unit_title=None, floor=None, usage=None,
                  status="Vacant", area_sqm=None, bedrooms=None, bathrooms=None,
-                 furnishing=None, parking_slots=None, annual_rent=None):
+                 furnishing=None, parking_slots=None, annual_rent=None,
+                 current_lease=None, company=None,
+                 ownership_type=None, owner_ref=None, management_fee_type=None,
+                 management_fee_value=None, onetime_commission=None, published_to_portal=None):
     doc = frappe.get_doc({
         "doctype": "Unit",
         "property": property,
@@ -1774,26 +1887,37 @@ def create_unit(property, unit_no, unit_type, unit_title=None, floor=None, usage
         "furnishing": furnishing,
         "parking_slots": parking_slots,
         "annual_rent": annual_rent,
+        "current_lease": current_lease,
+        "company": company,
+        "ownership_type": ownership_type,
+        "owner_ref": owner_ref,
+        "management_fee_type": management_fee_type,
+        "management_fee_value": management_fee_value,
+        "onetime_commission": onetime_commission,
+        "published_to_portal": published_to_portal,
     }).insert()
     return {"name": doc.name}
 
 
 @frappe.whitelist()
-def update_unit(name, unit_type=None, floor=None, area_sqm=None,
-                 bedrooms=None, annual_rent=None, status=None):
+def update_unit(name, unit_type=None, unit_title=None, floor=None, usage=None, status=None,
+                 area_sqm=None, bedrooms=None, bathrooms=None, furnishing=None, parking_slots=None,
+                 annual_rent=None, current_lease=None, company=None,
+                 ownership_type=None, owner_ref=None, management_fee_type=None,
+                 management_fee_value=None, onetime_commission=None, published_to_portal=None):
     doc = frappe.get_doc("Unit", name)
-    if unit_type is not None:
-        doc.unit_type = unit_type
-    if floor is not None:
-        doc.floor = floor
-    if area_sqm is not None:
-        doc.area_sqm = area_sqm
-    if bedrooms is not None:
-        doc.bedrooms = bedrooms
-    if annual_rent is not None:
-        doc.annual_rent = annual_rent
-    if status is not None:
-        doc.status = status
+    fields = {
+        "unit_type": unit_type, "unit_title": unit_title, "floor": floor, "usage": usage,
+        "status": status, "area_sqm": area_sqm, "bedrooms": bedrooms, "bathrooms": bathrooms,
+        "furnishing": furnishing, "parking_slots": parking_slots, "annual_rent": annual_rent,
+        "current_lease": current_lease, "company": company,
+        "ownership_type": ownership_type, "owner_ref": owner_ref,
+        "management_fee_type": management_fee_type, "management_fee_value": management_fee_value,
+        "onetime_commission": onetime_commission, "published_to_portal": published_to_portal,
+    }
+    for key, value in fields.items():
+        if value is not None:
+            doc.set(key, value)
     doc.save()
     return {"name": doc.name}
 

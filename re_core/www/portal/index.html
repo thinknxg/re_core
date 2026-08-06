@@ -535,6 +535,9 @@
 
     <div class="sidebar-section">
       <div class="sidebar-section-label">Lease Records</div>
+      <div class="nav-item" onclick="showScreen('lease_contracts')">
+        <span class="nav-icon">📋</span> Lease Contracts
+      </div>
       <div class="nav-item" onclick="showScreen('pdc')">
         <span class="nav-icon">🏦</span> Post Dated Cheques
       </div>
@@ -725,25 +728,103 @@
           <div class="filter-chip" onclick="setPropertyFilter('type', 'Commercial', this)">Commercial</div>
           <div class="filter-chip" onclick="setPropertyFilter('vacant', '', this)">Vacant</div>
         </div>
-        <div id="prop-add-form" style="display:none; margin-bottom:16px; padding:14px; background:var(--sand); border-radius:var(--radius); flex-direction:column; gap:8px;">
+        <div id="prop-add-form" style="display:none; margin-bottom:16px; padding:14px; background:var(--sand); border-radius:var(--radius); flex-direction:column; gap:14px;">
+          <div style="font-weight:600; font-size:15px;" id="prop-form-title">New Property</div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Basic</div>
           <div class="form-grid">
-            <input class="form-input" id="prop-new-name" placeholder="Property Name">
-            <select class="form-input" id="prop-new-type">
+            <input class="form-input" id="prop-f-property_name" placeholder="Property Name">
+            <select class="form-input" id="prop-f-property_type">
               <option value="">Property Type…</option>
               <option>Apartment Building</option><option>Villa</option><option>Villa Compound</option>
               <option>Commercial Tower</option><option>Mixed Use</option><option>Land</option>
             </select>
-            <select class="form-input" id="prop-new-owner"><option value="">Owner…</option></select>
-            <select class="form-input" id="prop-new-country">
+            <select class="form-input" id="prop-f-status">
+              <option value="Active">Active</option><option>Under Development</option>
+              <option>Sold</option><option>Archived</option>
+            </select>
+            <select class="form-input" id="prop-f-owner_ref"><option value="">Owner…</option></select>
+            <select class="form-input" id="prop-f-company"><option value="">Company…</option></select>
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Location</div>
+          <div class="form-grid">
+            <select class="form-input" id="prop-f-country">
               <option value="">Country…</option>
               <option>Oman</option><option>United Arab Emirates</option><option>Saudi Arabia</option>
               <option>Bahrain</option><option>Qatar</option><option>Kuwait</option>
             </select>
-            <input class="form-input" id="prop-new-city" placeholder="City">
-            <input class="form-input" id="prop-new-area" placeholder="Area / Wilaya">
+            <input class="form-input" id="prop-f-city" placeholder="City">
+            <input class="form-input" id="prop-f-area" placeholder="Area / Wilaya">
+            <input class="form-input" id="prop-f-address_line" placeholder="Address">
+            <input class="form-input" type="number" step="0.000001" id="prop-f-latitude" placeholder="Latitude">
+            <input class="form-input" type="number" step="0.000001" id="prop-f-longitude" placeholder="Longitude">
           </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Compliance</div>
+          <div class="form-grid">
+            <input class="form-input" id="prop-f-municipality_ref" placeholder="Municipality Reference">
+            <input class="form-input" id="prop-f-ejari_number" placeholder="Ejari Number">
+            <input class="form-input" id="prop-f-rera_permit" placeholder="RERA Permit">
+            <input class="form-input" id="prop-f-tawtheeq_ref" placeholder="Tawtheeq Reference">
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Ownership & Billing</div>
+          <div class="form-grid">
+            <select class="form-input" id="prop-f-ownership_type">
+              <option value="">Ownership Type…</option>
+              <option>Company</option><option>Landlord</option>
+            </select>
+            <select class="form-input" id="prop-f-management_fee_type">
+              <option value="">Management Fee Type…</option>
+              <option>Percentage</option><option>Fixed Amount</option>
+            </select>
+            <input class="form-input" type="number" step="0.01" id="prop-f-management_fee_value" placeholder="Management Fee Value">
+            <input class="form-input" type="number" step="0.01" id="prop-f-onetime_commission" placeholder="Onetime Commission">
+            <input class="form-input" type="number" id="prop-f-no_of_floors" placeholder="No. of Floors">
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Usage & Availability</div>
+          <div class="form-grid">
+            <select class="form-input" id="prop-f-usage">
+              <option value="">Usage…</option>
+              <option>Residential</option><option>Commercial</option>
+            </select>
+            <label style="display:flex; align-items:center; gap:6px; font-size:14px;">
+              <input type="checkbox" id="prop-f-published_to_portal"> Published to Portal
+            </label>
+            <label style="display:flex; align-items:center; gap:6px; font-size:14px;">
+              <input type="checkbox" id="prop-f-is_live"> Live on Portal
+            </label>
+            <select class="form-input" id="prop-f-portal_visibility">
+              <option value="">Portal Visibility…</option>
+              <option>Draft</option><option>Live</option><option>Under Offer</option><option>Sold - Hidden</option>
+            </select>
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Specifications</div>
+          <div class="form-grid">
+            <input class="form-input" type="number" step="0.01" id="prop-f-area_sqm" placeholder="Area (sqm)">
+            <input class="form-input" type="number" id="prop-f-bedrooms" placeholder="Bedrooms">
+            <input class="form-input" type="number" id="prop-f-bathrooms" placeholder="Bathrooms">
+            <select class="form-input" id="prop-f-furnishing">
+              <option value="">Furnishing…</option>
+              <option>Unfurnished</option><option>Semi Furnished</option><option>Fully Furnished</option>
+            </select>
+            <input class="form-input" type="number" id="prop-f-parking_slots" placeholder="Parking Slots">
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Financials</div>
+          <div class="form-grid">
+            <input class="form-input" type="number" step="0.01" id="prop-f-annual_rent" placeholder="Asking Annual Rent">
+            <input class="form-input" id="prop-f-current_lease" placeholder="Current Lease (e.g. LEASE-2026-0001)">
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Notes</div>
+          <textarea class="form-input" id="prop-f-notes" placeholder="Notes" rows="3" style="resize:vertical;"></textarea>
+
           <div class="action-row">
-            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('prop-add-form').style.display='none'">Cancel</button>
+            <button class="btn btn-ghost btn-sm" onclick="hidePropertyForm()">Cancel</button>
             <button class="btn btn-primary btn-sm" onclick="submitProperty()">Save Property</button>
           </div>
         </div>
@@ -809,14 +890,46 @@
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                   <select class="form-input" id="unit-new-property" style="flex:1; min-width:160px;"><option value="">Property…</option></select>
                   <input class="form-input" id="unit-new-unitno" placeholder="Unit No" style="min-width:100px;">
+                  <input class="form-input" id="unit-new-title" placeholder="Unit Title" style="min-width:120px;">
+                  <input class="form-input" id="unit-new-floor" placeholder="Floor" style="min-width:80px;">
                   <select class="form-input" id="unit-new-type" style="min-width:120px;">
                     <option value="">Unit Type…</option>
                     <option>Studio</option><option>1BR</option><option>2BR</option><option>3BR</option>
                     <option>4BR+</option><option>Penthouse</option><option>Shop</option><option>Office</option><option>Warehouse</option>
                   </select>
+                  <select class="form-input" id="unit-new-usage" style="min-width:120px;">
+                    <option value="">Usage…</option><option>Residential</option><option>Commercial</option>
+                  </select>
+                  <select class="form-input" id="unit-new-status" style="min-width:130px;">
+                    <option value="Vacant">Vacant</option><option>Reserved</option><option>Occupied</option>
+                    <option>Under Maintenance</option><option>Blocked</option>
+                  </select>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
                   <input class="form-input" type="number" id="unit-new-area" placeholder="Area (sqm)" style="min-width:100px;">
                   <input class="form-input" type="number" id="unit-new-bedrooms" placeholder="Bedrooms" style="min-width:90px;">
+                  <input class="form-input" type="number" id="unit-new-bathrooms" placeholder="Bathrooms" style="min-width:90px;">
+                  <select class="form-input" id="unit-new-furnishing" style="min-width:140px;">
+                    <option value="">Furnishing…</option><option>Unfurnished</option><option>Semi Furnished</option><option>Fully Furnished</option>
+                  </select>
+                  <input class="form-input" type="number" id="unit-new-parking" placeholder="Parking Slots" style="min-width:100px;">
                   <input class="form-input" type="number" step="0.01" id="unit-new-rent" placeholder="Annual Rent" style="min-width:110px;">
+                  <input class="form-input" id="unit-new-lease" placeholder="Current Lease (e.g. LEASE-2026-0001)" style="min-width:180px;">
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                  <select class="form-input" id="unit-new-company" style="min-width:140px;"><option value="">Company…</option></select>
+                  <select class="form-input" id="unit-new-ownership_type" style="min-width:140px;">
+                    <option value="">Ownership Type…</option><option>Company</option><option>Landlord</option>
+                  </select>
+                  <select class="form-input" id="unit-new-owner" style="min-width:160px;"><option value="">Owner…</option></select>
+                  <select class="form-input" id="unit-new-mgmt_fee_type" style="min-width:150px;">
+                    <option value="">Management Fee Type…</option><option>Percentage</option><option>Fixed Amount</option>
+                  </select>
+                  <input class="form-input" type="number" step="0.01" id="unit-new-mgmt_fee_value" placeholder="Management Fee Value" style="min-width:150px;">
+                  <input class="form-input" type="number" step="0.01" id="unit-new-onetime_commission" placeholder="Onetime Commission" style="min-width:150px;">
+                  <label style="display:flex; align-items:center; gap:6px; font-size:14px;">
+                    <input type="checkbox" id="unit-new-published"> Published to Portal
+                  </label>
                 </div>
                 <div class="action-row">
                   <button class="btn btn-ghost btn-sm" onclick="document.getElementById('unit-add-form').style.display='none'">Cancel</button>
@@ -977,6 +1090,36 @@
       </div>
 
       <!-- ════════════════════════════════════════════
+           SCREEN: LEASE CONTRACTS (list)
+      ════════════════════════════════════════════ -->
+      <div class="screen" id="screen-lease_contracts">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Lease Contracts</div>
+            <button class="btn btn-primary btn-sm" onclick="showScreen('contracts')">+ New Contract</button>
+          </div>
+          <div class="filter-row">
+            <div class="filter-chip active" onclick="setLeaseContractStatusFilter('', this)">All</div>
+            <div class="filter-chip" onclick="setLeaseContractStatusFilter('Draft', this)">Draft</div>
+            <div class="filter-chip" onclick="setLeaseContractStatusFilter('Active', this)">Active</div>
+            <div class="filter-chip" onclick="setLeaseContractStatusFilter('Expiring', this)">Expiring</div>
+            <div class="filter-chip" onclick="setLeaseContractStatusFilter('Expired', this)">Expired</div>
+            <div class="filter-chip" onclick="setLeaseContractStatusFilter('Terminated', this)">Terminated</div>
+          </div>
+          <div class="scroll-x">
+            <table>
+              <thead>
+                <tr><th>Contract</th><th>Tenant</th><th>Unit</th><th>Property</th><th>Start</th><th>End</th><th>Value</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody id="lease-contracts-rows">
+                <tr><td colspan="9" style="text-align:center;color:var(--ink-muted);padding:24px;">Loading contracts…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
            SCREEN: CONTRACTS
       ════════════════════════════════════════════ -->
       <div class="screen" id="screen-contracts">
@@ -1062,6 +1205,31 @@
                 <label class="form-label">VAT Rate</label>
                 <input class="form-input" id="contract-vat-display" readonly placeholder="Determined by property country">
               </div>
+              <div class="form-group">
+                <label class="form-label">Owner</label>
+                <select class="form-input form-select" id="contract-owner">
+                  <option value="">Owner…</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Notice Period (Days)</label>
+                <input class="form-input" type="number" id="contract-notice-period" placeholder="60">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Broker Commission (OMR)</label>
+                <input class="form-input" type="number" step="0.01" id="contract-broker-commission" placeholder="0.00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Ejari Contract No</label>
+                <input class="form-input" id="contract-ejari-no" placeholder="Optional">
+              </div>
+              <div class="form-group" style="display:flex; align-items:center; gap:8px; padding-top:22px;">
+                <input type="checkbox" id="contract-auto-renew"> <label class="form-label" style="margin:0;">Auto-Renew Offer</label>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:14px;">
+              <label class="form-label">Terms &amp; Conditions</label>
+              <textarea class="form-input" id="contract-terms" rows="3" placeholder="Optional" style="resize:vertical;"></textarea>
             </div>
 
             <div style="background:var(--amber-pale);border:1px solid #C99A5B;border-radius:var(--radius);padding:12px 14px;font-size: 15.0px;display:flex;gap:8px;align-items:flex-start;">
@@ -1394,15 +1562,46 @@
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <select class="form-input" id="unit-new-property-2" style="flex:1; min-width:160px;"><option value="">Property…</option></select>
               <input class="form-input" id="unit-new-unitno-2" placeholder="Unit No" style="min-width:100px;">
+              <input class="form-input" id="unit-new-title-2" placeholder="Unit Title" style="min-width:120px;">
               <input class="form-input" id="unit-new-floor-2" placeholder="Floor" style="min-width:80px;">
               <select class="form-input" id="unit-new-type-2" style="min-width:120px;">
                 <option value="">Unit Type…</option>
                 <option>Studio</option><option>1BR</option><option>2BR</option><option>3BR</option>
                 <option>4BR+</option><option>Penthouse</option><option>Shop</option><option>Office</option><option>Warehouse</option>
               </select>
+              <select class="form-input" id="unit-new-usage-2" style="min-width:120px;">
+                <option value="">Usage…</option><option>Residential</option><option>Commercial</option>
+              </select>
+              <select class="form-input" id="unit-new-status-2" style="min-width:130px;">
+                <option value="Vacant">Vacant</option><option>Reserved</option><option>Occupied</option>
+                <option>Under Maintenance</option><option>Blocked</option>
+              </select>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <input class="form-input" type="number" id="unit-new-area-2" placeholder="Area (sqm)" style="min-width:100px;">
               <input class="form-input" type="number" id="unit-new-bedrooms-2" placeholder="Bedrooms" style="min-width:90px;">
+              <input class="form-input" type="number" id="unit-new-bathrooms-2" placeholder="Bathrooms" style="min-width:90px;">
+              <select class="form-input" id="unit-new-furnishing-2" style="min-width:140px;">
+                <option value="">Furnishing…</option><option>Unfurnished</option><option>Semi Furnished</option><option>Fully Furnished</option>
+              </select>
+              <input class="form-input" type="number" id="unit-new-parking-2" placeholder="Parking Slots" style="min-width:100px;">
               <input class="form-input" type="number" step="0.01" id="unit-new-rent-2" placeholder="Annual Rent" style="min-width:110px;">
+              <input class="form-input" id="unit-new-lease-2" placeholder="Current Lease (e.g. LEASE-2026-0001)" style="min-width:180px;">
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <select class="form-input" id="unit-new-company-2" style="min-width:140px;"><option value="">Company…</option></select>
+              <select class="form-input" id="unit-new-ownership_type-2" style="min-width:140px;">
+                <option value="">Ownership Type…</option><option>Company</option><option>Landlord</option>
+              </select>
+              <select class="form-input" id="unit-new-owner-2" style="min-width:160px;"><option value="">Owner…</option></select>
+              <select class="form-input" id="unit-new-mgmt_fee_type-2" style="min-width:150px;">
+                <option value="">Management Fee Type…</option><option>Percentage</option><option>Fixed Amount</option>
+              </select>
+              <input class="form-input" type="number" step="0.01" id="unit-new-mgmt_fee_value-2" placeholder="Management Fee Value" style="min-width:150px;">
+              <input class="form-input" type="number" step="0.01" id="unit-new-onetime_commission-2" placeholder="Onetime Commission" style="min-width:150px;">
+              <label style="display:flex; align-items:center; gap:6px; font-size:14px;">
+                <input type="checkbox" id="unit-new-published-2"> Published to Portal
+              </label>
             </div>
             <div class="action-row">
               <button class="btn btn-ghost btn-sm" onclick="document.getElementById('unit-add-form-2').style.display='none'">Cancel</button>
@@ -2066,6 +2265,7 @@
     viewings: { title: 'Property Viewings', bread: 'CRM → Viewings Calendar', btn: '+ Schedule Viewing', btnAction: null },
     portal: { title: 'Listings Portal', bread: 'Portal → Public View', btn: 'Manage Listings', btnAction: null },
     maintenance: { title: 'Maintenance', bread: 'Maintenance → Work Orders', btn: '+ Work Order', btnAction: null },
+    lease_contracts: { title: 'Lease Contracts', bread: 'Lease Records → Contracts', btn: 'Refresh', btnAction: null },
     pdc: { title: 'Post Dated Cheques', bread: 'Lease Records → PDC', btn: 'Refresh', btnAction: null },
     rent_schedule: { title: 'Rent Schedule', bread: 'Lease Records → Rent Schedule', btn: 'Refresh', btnAction: null },
     security_deposits: { title: 'Security Deposits', bread: 'Lease Records → Security Deposits', btn: 'Refresh', btnAction: null },
@@ -2284,6 +2484,7 @@
     if (id === 'units') loadUnits();
     if (id === 'tenants') loadTenants();
     if (id === 'contracts') loadContractFormOptions();
+    if (id === 'lease_contracts') loadLeaseContractsList();
     if (id === 'invoices') loadInvoices();
     if (id === 'compliance') loadCompliance();
     if (id === 'crm') loadCRM();
@@ -2856,9 +3057,74 @@
   // ─────────────────────────────────────────────
   // CONTRACTS (create form)
   // ─────────────────────────────────────────────
+  let _leaseContractStatusFilter = '';
+
+  function setLeaseContractStatusFilter(status, el) {
+    _leaseContractStatusFilter = status;
+    document.querySelectorAll('#screen-lease_contracts .filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    renderLeaseContractsTable();
+  }
+
+  function renderLeaseContractRow(r) {
+    const canSubmit = r.docstatus === 0;
+    return `
+        <tr>
+          <td class="mono">${r.name}</td>
+          <td>${r.tenant_name || r.tenant || '—'}</td>
+          <td class="mono">${r.unit_no || r.unit || '—'}</td>
+          <td>${r.property || '—'}</td>
+          <td>${r.start_date || '—'}</td>
+          <td>${r.end_date || '—'}</td>
+          <td class="mono">${fmtMoney(r.total_contract_value)}</td>
+          <td><span class="badge ${statusBadgeClass(r.status)}">${r.docstatus === 0 ? 'Draft' : r.status}</span></td>
+          <td>
+            ${canSubmit ? `<button class="btn btn-primary btn-sm" onclick="submitLeaseContractFromList('${r.name}')">Submit</button>` : ''}
+          </td>
+        </tr>
+      `;
+  }
+
+  function renderLeaseContractsTable() {
+    const tbody = document.getElementById('lease-contracts-rows');
+    let rows = window.__leaseContractRows || [];
+    if (_leaseContractStatusFilter === 'Draft') {
+      rows = rows.filter(r => r.docstatus === 0);
+    } else if (_leaseContractStatusFilter) {
+      rows = rows.filter(r => r.docstatus !== 0 && r.status === _leaseContractStatusFilter);
+    }
+    tbody.innerHTML = rows.length
+      ? rows.map(renderLeaseContractRow).join('')
+      : '<tr><td colspan="9" style="text-align:center;color:var(--ink-muted);padding:24px;">No contracts match this filter.</td></tr>';
+  }
+
+  async function loadLeaseContractsList() {
+    const tbody = document.getElementById('lease-contracts-rows');
+    try {
+      const rows = await callApi('get_lease_contracts_list');
+      window.__leaseContractRows = rows || [];
+      renderLeaseContractsTable();
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--red);padding:24px;">Failed to load lease contracts.</td></tr>';
+    }
+  }
+
+  async function submitLeaseContractFromList(name) {
+    if (!confirm('Submit ' + name + ' for signature? This will activate the lease, lock the unit, and generate the Rent Schedule, Security Deposit and PDCs.')) return;
+    try {
+      await postApi('re_core', 'submit_lease_contract', { name });
+      loadLeaseContractsList();
+      loadSidebarCounts();
+    } catch (err) {
+      alert('Failed to submit contract: ' + err.message);
+    }
+  }
+
   let contractVatRates = {};
 
   async function loadContractFormOptions() {
+    resetContractForm();
     try {
       const d = await callApi('get_lease_form_options');
       contractVatRates = d.vat_rates || {};
@@ -2879,6 +3145,7 @@
       document.getElementById('contract-jurisdiction-tag').textContent = 'Select a property';
       document.getElementById('contract-jurisdiction-display').value = '';
       document.getElementById('contract-vat-display').value = '';
+      await populateContractOwnerDropdown();
     } catch (err) {
       console.error(err);
     }
@@ -2936,7 +3203,31 @@
     el.textContent = text;
   }
 
-  async function submitLeaseContract() {
+  let _draftedLeaseContract = null;
+
+  async function populateContractOwnerDropdown() {
+    try {
+      const owners = await getPropertyOwnersCached();
+      populateSelect(document.getElementById('contract-owner'), owners, 'name', 'owner_name');
+    } catch (err) { console.error(err); }
+  }
+
+  function resetContractForm() {
+    _draftedLeaseContract = null;
+    const btn = document.getElementById('contract-submit-btn');
+    btn.textContent = 'Save Draft';
+    btn.disabled = false;
+    btn.onclick = saveLeaseContractDraft;
+    ['contract-tenant','contract-property','contract-unit','contract-start-date','contract-end-date',
+     'contract-rent','contract-deposit','contract-agent','contract-owner','contract-notice-period',
+     'contract-broker-commission','contract-ejari-no','contract-terms'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    document.getElementById('contract-auto-renew').checked = false;
+  }
+
+  async function saveLeaseContractDraft() {
     const tenant = document.getElementById('contract-tenant').value;
     const unit = document.getElementById('contract-unit').value;
     const property = document.getElementById('contract-property').value;
@@ -2948,18 +3239,24 @@
     const agent = document.getElementById('contract-agent').value;
 
     if (!tenant || !unit || !property || !startDate || !endDate || !rent) {
-      showContractMsg('Please fill in tenant, property, unit, dates, and rent before submitting.', true);
+      showContractMsg('Please fill in tenant, property, unit, dates, and rent before saving.', true);
       return;
     }
 
     const btn = document.getElementById('contract-submit-btn');
     btn.disabled = true;
-    btn.textContent = 'Submitting…';
+    btn.textContent = 'Saving…';
 
     try {
       const params = new URLSearchParams({
         tenant, unit, property, start_date: startDate, end_date: endDate,
-        annual_rent: rent, payment_frequency: paymentFrequency, security_deposit: deposit || 0
+        annual_rent: rent, payment_frequency: paymentFrequency, security_deposit: deposit || 0,
+        owner_ref: document.getElementById('contract-owner').value || '',
+        notice_period_days: document.getElementById('contract-notice-period').value || '',
+        auto_renew: document.getElementById('contract-auto-renew').checked ? 1 : 0,
+        broker_commission: document.getElementById('contract-broker-commission').value || '',
+        ejari_contract_no: document.getElementById('contract-ejari-no').value || '',
+        terms: document.getElementById('contract-terms').value || '',
       });
       if (agent) params.append('agent', agent);
       const csrfToken = await getCsrfToken();
@@ -2974,14 +3271,39 @@
       });
       const data = await response.json();
       if (!response.ok || !data.message) throw new Error(data.exc || 'Failed to create contract');
-      showContractMsg('Draft Lease Contract ' + data.message.name + ' created successfully.', false);
+      _draftedLeaseContract = data.message.name;
+      showContractMsg('Draft Lease Contract ' + data.message.name + ' saved. Review, then submit for signature.', false);
       loadSidebarCounts();
+      btn.textContent = 'Submit for Signature';
+      btn.disabled = false;
+      btn.onclick = submitLeaseContract;
     } catch (err) {
       console.error(err);
-      showContractMsg('Failed to create contract. Check console for details.', true);
-    } finally {
+      showContractMsg('Failed to save contract: ' + err.message, true);
+      btn.textContent = 'Save Draft';
       btn.disabled = false;
+    }
+  }
+
+  async function submitLeaseContract() {
+    if (!_draftedLeaseContract) {
+      showContractMsg('Save the draft first.', true);
+      return;
+    }
+    const btn = document.getElementById('contract-submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+    try {
+      await postApi('re_core', 'submit_lease_contract', { name: _draftedLeaseContract });
+      showContractMsg('Lease Contract ' + _draftedLeaseContract + ' submitted and is now Active.', false);
+      loadSidebarCounts();
+      btn.textContent = 'Submitted ✓';
+      btn.disabled = true;
+    } catch (err) {
+      console.error(err);
+      showContractMsg('Failed to submit contract: ' + err.message, true);
       btn.textContent = 'Submit for Signature';
+      btn.disabled = false;
     }
   }
 
@@ -5328,32 +5650,109 @@
     return _propertyOwnersCache;
   }
 
+  let _companiesCache = null;
+  async function getCompaniesCached() {
+    if (!_companiesCache) _companiesCache = await callApi('get_companies');
+    return _companiesCache;
+  }
+
+  const PROPERTY_FORM_FIELDS = [
+    'property_name', 'property_type', 'status', 'owner_ref', 'company',
+    'country', 'city', 'area', 'address_line', 'latitude', 'longitude',
+    'municipality_ref', 'ejari_number', 'rera_permit', 'tawtheeq_ref',
+    'ownership_type', 'management_fee_type', 'management_fee_value', 'onetime_commission', 'no_of_floors',
+    'usage', 'published_to_portal', 'is_live', 'portal_visibility',
+    'area_sqm', 'bedrooms', 'bathrooms', 'furnishing', 'parking_slots',
+    'annual_rent', 'current_lease', 'notes',
+  ];
+  const PROPERTY_CHECKBOX_FIELDS = ['published_to_portal', 'is_live'];
+  let _propertyFormMode = 'create';
+  let _propertyFormEditingName = null;
+
+  function clearPropertyForm() {
+    PROPERTY_FORM_FIELDS.forEach(f => {
+      const el = document.getElementById('prop-f-' + f);
+      if (!el) return;
+      if (PROPERTY_CHECKBOX_FIELDS.includes(f)) el.checked = false;
+      else el.value = '';
+    });
+  }
+
+  function fillPropertyForm(data) {
+    PROPERTY_FORM_FIELDS.forEach(f => {
+      const el = document.getElementById('prop-f-' + f);
+      if (!el || data[f] === undefined || data[f] === null) return;
+      if (PROPERTY_CHECKBOX_FIELDS.includes(f)) el.checked = !!data[f];
+      else el.value = data[f];
+    });
+  }
+
+  function readPropertyForm() {
+    const out = {};
+    PROPERTY_FORM_FIELDS.forEach(f => {
+      const el = document.getElementById('prop-f-' + f);
+      if (!el) return;
+      if (PROPERTY_CHECKBOX_FIELDS.includes(f)) out[f] = el.checked ? 1 : 0;
+      else out[f] = el.value || null;
+    });
+    return out;
+  }
+
+  function hidePropertyForm() {
+    document.getElementById('prop-add-form').style.display = 'none';
+    clearPropertyForm();
+    _propertyFormMode = 'create';
+    _propertyFormEditingName = null;
+  }
+
   async function showAddPropertyForm() {
+    _propertyFormMode = 'create';
+    _propertyFormEditingName = null;
+    clearPropertyForm();
+    document.getElementById('prop-form-title').textContent = 'New Property';
     document.getElementById('prop-add-form').style.display = 'flex';
     try {
-      const owners = await getPropertyOwnersCached();
-      populateSelect(document.getElementById('prop-new-owner'), owners, 'name', 'owner_name');
+      const [owners, companies] = await Promise.all([getPropertyOwnersCached(), getCompaniesCached()]);
+      populateSelect(document.getElementById('prop-f-owner_ref'), owners, 'name', 'owner_name');
+      populateSelect(document.getElementById('prop-f-company'), companies, 'name', 'name');
     } catch (err) { console.error(err); }
   }
 
+  async function editCurrentProperty() {
+    if (!currentPropertyName) return;
+    _propertyFormMode = 'edit';
+    _propertyFormEditingName = currentPropertyName;
+    clearPropertyForm();
+    document.getElementById('prop-form-title').textContent = 'Edit Property';
+    document.getElementById('prop-add-form').style.display = 'flex';
+    try {
+      const [owners, companies] = await Promise.all([getPropertyOwnersCached(), getCompaniesCached()]);
+      populateSelect(document.getElementById('prop-f-owner_ref'), owners, 'name', 'owner_name');
+      populateSelect(document.getElementById('prop-f-company'), companies, 'name', 'name');
+      const detail = window.__currentPropertyDetail && window.__currentPropertyDetail.name === currentPropertyName
+        ? window.__currentPropertyDetail
+        : await callApi('get_property_detail', { property: currentPropertyName });
+      fillPropertyForm(detail);
+    } catch (err) {
+      alert('Failed to load property for editing: ' + err.message);
+    }
+  }
+
   async function submitProperty() {
-    const name = document.getElementById('prop-new-name').value;
-    const type = document.getElementById('prop-new-type').value;
-    const owner = document.getElementById('prop-new-owner').value;
-    const country = document.getElementById('prop-new-country').value;
-    if (!name || !type || !owner || !country) {
-      alert('Property Name, Property Type, Owner and Country are required.');
+    const values = readPropertyForm();
+    if (!values.property_name || !values.property_type || !values.country) {
+      alert('Property Name, Property Type and Country are required.');
       return;
     }
     try {
-      await postApi('re_core', 'create_property', {
-        property_name: name, property_type: type, owner_ref: owner, country,
-        city: document.getElementById('prop-new-city').value || null,
-        area: document.getElementById('prop-new-area').value || null,
-      });
-      document.getElementById('prop-add-form').style.display = 'none';
-      ['prop-new-name','prop-new-city','prop-new-area'].forEach(id => document.getElementById(id).value = '');
+      if (_propertyFormMode === 'edit' && _propertyFormEditingName) {
+        await postApi('re_core', 'update_property', { name: _propertyFormEditingName, ...values });
+      } else {
+        await postApi('re_core', 'create_property', values);
+      }
+      hidePropertyForm();
       loadProperties();
+      if (_propertyFormEditingName) loadPropertyDetail(_propertyFormEditingName);
     } catch (err) {
       alert('Failed to save property: ' + err.message);
     }
