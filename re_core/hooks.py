@@ -27,7 +27,7 @@ fixtures = [
         "RE Manager", "Property Manager", "Leasing Officer",
         "Maintenance Supervisor", "Tenant",
     ]]]},
-    {"dt": "Workspace", "filters": [["name", "in", ["Property Ops"]]]},
+    {"dt": "Workspace", "filters": [["name", "in", ["RE Core"]]]},
     {"dt": "Print Format", "filters": [["name", "in", [
         "Lease Contract Standard", "Tenant Rent Invoice",
     ]]]},
