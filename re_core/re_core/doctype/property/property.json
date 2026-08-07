@@ -321,6 +321,46 @@
    "group": "Documents",
    "link_doctype": "Property Document",
    "link_fieldname": "property"
+  },
+  {
+   "group": "Leasing",
+   "link_doctype": "Lease Contract",
+   "link_fieldname": "property"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "property"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Job",
+   "link_fieldname": "property"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Move In Out Inspection",
+   "link_fieldname": "property"
+  },
+  {
+   "group": "Utilities",
+   "link_doctype": "Utility Account",
+   "link_fieldname": "property"
+  },
+  {
+   "group": "Interest",
+   "link_doctype": "Property Enquiry",
+   "link_fieldname": "property"
+  },
+  {
+   "group": "Interest",
+   "link_doctype": "Property Wishlist",
+   "link_fieldname": "property"
+  },
+  {
+   "group": "Interest",
+   "link_doctype": "Site Visit Booking",
+   "link_fieldname": "property"
   }
  ],
  "modified": "2026-01-01 00:00:00.000000",

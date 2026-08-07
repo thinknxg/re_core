@@ -1,7 +1,7 @@
 {
  "app": "re_core",
  "charts": [],
- "content": "[]",
+ "content": "[{\"id\": \"blk1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>RE Core</b></span>\", \"col\": 12}}, {\"id\": \"blk2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Admin Dashboard\", \"col\": 3}}, {\"id\": \"blk3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Properties\", \"col\": 3}}, {\"id\": \"blk4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Units\", \"col\": 3}}, {\"id\": \"blk5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Lease Contracts\", \"col\": 3}}, {\"id\": \"blk6\", \"type\": \"card\", \"data\": {\"card_name\": \"Properties\", \"col\": 4}}, {\"id\": \"blk7\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing\", \"col\": 4}}, {\"id\": \"blk8\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance\", \"col\": 4}}, {\"id\": \"blk9\", \"type\": \"card\", \"data\": {\"card_name\": \"Owner Finance\", \"col\": 4}}, {\"id\": \"blk10\", \"type\": \"card\", \"data\": {\"card_name\": \"Pre-Tenancy\", \"col\": 4}}]",
  "creation": "2026-08-06 10:20:50.701940",
  "custom_blocks": [],
  "docstatus": 0,
@@ -260,7 +260,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-06 10:33:27.497894",
+ "modified": "2026-08-06 11:15:00.632695",
  "modified_by": "Administrator",
  "module": "RE Core",
  "name": "RE Core",

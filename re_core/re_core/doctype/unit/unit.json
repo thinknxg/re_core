@@ -166,7 +166,48 @@
  "is_submittable": 0,
  "issingle": 0,
  "istable": 0,
- "links": [],
+ "links": [
+  {
+   "group": "Leasing",
+   "link_doctype": "Lease Contract",
+   "link_fieldname": "unit"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Request",
+   "link_fieldname": "unit"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Maintenance Job",
+   "link_fieldname": "unit"
+  },
+  {
+   "group": "Maintenance",
+   "link_doctype": "Move In Out Inspection",
+   "link_fieldname": "unit"
+  },
+  {
+   "group": "Utilities",
+   "link_doctype": "Utility Account",
+   "link_fieldname": "unit"
+  },
+  {
+   "group": "Interest",
+   "link_doctype": "Property Enquiry",
+   "link_fieldname": "unit"
+  },
+  {
+   "group": "Interest",
+   "link_doctype": "Property Wishlist",
+   "link_fieldname": "unit"
+  },
+  {
+   "group": "Interest",
+   "link_doctype": "Site Visit Booking",
+   "link_fieldname": "unit"
+  }
+ ],
  "modified": "2026-01-01 00:00:00.000000",
  "modified_by": "Administrator",
  "module": "RE Core",
