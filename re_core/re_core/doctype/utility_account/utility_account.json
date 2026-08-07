@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "unit",
+  "property",
   "utility_type",
   "provider",
   "account_number",
@@ -22,6 +23,14 @@
    "label": "Unit",
    "options": "Unit",
    "reqd": 1
+  },
+  {
+   "fetch_from": "unit.property",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "label": "Property",
+   "options": "Property",
+   "read_only": 1
   },
   {
    "fieldname": "utility_type",

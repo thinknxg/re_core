@@ -11,6 +11,7 @@
   "inspection_type",
   "lease_contract",
   "unit",
+  "property",
   "col_break_1",
   "inspection_date",
   "inspected_by",
@@ -52,6 +53,14 @@
    "fieldtype": "Link",
    "label": "Unit",
    "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "unit.property",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "label": "Property",
+   "options": "Property",
    "read_only": 1
   },
   {

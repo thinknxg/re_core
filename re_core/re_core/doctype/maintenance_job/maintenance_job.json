@@ -10,6 +10,7 @@
   "job_sb",
   "maintenance_request",
   "unit",
+  "property",
   "company",
   "col_break_1",
   "assigned_type",
@@ -50,6 +51,14 @@
    "in_list_view": 1,
    "label": "Unit",
    "options": "Unit",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "unit.property",
+   "fieldname": "property",
+   "fieldtype": "Link",
+   "label": "Property",
+   "options": "Property",
    "read_only": 1
   },
   {
