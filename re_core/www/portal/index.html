@@ -538,6 +538,9 @@
       <div class="nav-item" onclick="showScreen('lease_contracts')">
         <span class="nav-icon">📋</span> Lease Contracts
       </div>
+      <div class="nav-item" onclick="showScreen('terminate_lease')">
+        <span class="nav-icon">⛔</span> Terminate Lease
+      </div>
       <div class="nav-item" onclick="showScreen('pdc')">
         <span class="nav-icon">🏦</span> Post Dated Cheques
       </div>
@@ -1115,6 +1118,37 @@
                 <tr><td colspan="9" style="text-align:center;color:var(--ink-muted);padding:24px;">Loading contracts…</td></tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           SCREEN: TERMINATE LEASE
+      ════════════════════════════════════════════ -->
+      <div class="screen" id="screen-terminate_lease">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Terminate Lease</div>
+          </div>
+          <div class="card-body" style="padding:18px; display:flex; flex-direction:column; gap:14px; max-width:520px;">
+            <div id="terminate-form-msg" style="display:none;margin-bottom:4px;padding:10px 14px;border-radius:var(--radius);font-size: 15.0px;"></div>
+            <div class="form-group">
+              <label class="form-label">Lease Contract</label>
+              <select class="form-input form-select" id="terminate-lease-select">
+                <option value="">Select an Active or Expiring lease…</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Termination Date</label>
+              <input class="form-input" type="date" id="terminate-date">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Reason</label>
+              <textarea class="form-input" id="terminate-reason" rows="3" placeholder="Optional" style="resize:vertical;"></textarea>
+            </div>
+            <div class="action-row">
+              <button class="btn btn-primary btn-sm" id="terminate-submit-btn" onclick="submitTerminateLease()" style="background:var(--red);border-color:var(--red);">Terminate Lease</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2266,6 +2300,7 @@
     portal: { title: 'Listings Portal', bread: 'Portal → Public View', btn: 'Manage Listings', btnAction: null },
     maintenance: { title: 'Maintenance', bread: 'Maintenance → Work Orders', btn: '+ Work Order', btnAction: null },
     lease_contracts: { title: 'Lease Contracts', bread: 'Lease Records → Contracts', btn: 'Refresh', btnAction: null },
+    terminate_lease: { title: 'Terminate Lease', bread: 'Lease Records → Terminate Lease', btn: 'Refresh', btnAction: null },
     pdc: { title: 'Post Dated Cheques', bread: 'Lease Records → PDC', btn: 'Refresh', btnAction: null },
     rent_schedule: { title: 'Rent Schedule', bread: 'Lease Records → Rent Schedule', btn: 'Refresh', btnAction: null },
     security_deposits: { title: 'Security Deposits', bread: 'Lease Records → Security Deposits', btn: 'Refresh', btnAction: null },
@@ -2485,6 +2520,7 @@
     if (id === 'tenants') loadTenants();
     if (id === 'contracts') loadContractFormOptions();
     if (id === 'lease_contracts') loadLeaseContractsList();
+    if (id === 'terminate_lease') loadTerminateLeaseOptions();
     if (id === 'invoices') loadInvoices();
     if (id === 'compliance') loadCompliance();
     if (id === 'crm') loadCRM();
@@ -3057,6 +3093,69 @@
   // ─────────────────────────────────────────────
   // CONTRACTS (create form)
   // ─────────────────────────────────────────────
+  async function loadTerminateLeaseOptions() {
+    const sel = document.getElementById('terminate-lease-select');
+    sel.innerHTML = '<option value="">Loading…</option>';
+    document.getElementById('terminate-date').value = '';
+    document.getElementById('terminate-reason').value = '';
+    document.getElementById('terminate-form-msg').style.display = 'none';
+    try {
+      const rows = await callApi('get_lease_contracts_list');
+      const eligible = (rows || []).filter(r => r.docstatus === 1 && ['Active', 'Expiring'].includes(r.status));
+      sel.innerHTML = eligible.length
+        ? '<option value="">Select an Active or Expiring lease…</option>' +
+          eligible.map(r => `<option value="${r.name}">${r.name} — ${r.tenant_name || r.tenant} @ ${r.unit_no || r.unit}</option>`).join('')
+        : '<option value="">No Active or Expiring leases found</option>';
+      const today = new Date().toISOString().slice(0, 10);
+      document.getElementById('terminate-date').value = today;
+    } catch (err) {
+      console.error(err);
+      sel.innerHTML = '<option value="">Failed to load leases</option>';
+    }
+  }
+
+  function showTerminateMsg(text, isError) {
+    const el = document.getElementById('terminate-form-msg');
+    el.style.display = 'block';
+    el.style.background = isError ? 'var(--amber-pale)' : '#E8F5EE';
+    el.style.color = isError ? 'var(--red)' : 'var(--green)';
+    el.style.border = '1px solid ' + (isError ? '#C99A5B' : 'var(--green)');
+    el.textContent = text;
+  }
+
+  async function submitTerminateLease() {
+    const name = document.getElementById('terminate-lease-select').value;
+    const terminationDate = document.getElementById('terminate-date').value;
+    const reason = document.getElementById('terminate-reason').value;
+
+    if (!name) {
+      showTerminateMsg('Select a lease contract to terminate.', true);
+      return;
+    }
+    if (!confirm('Terminate ' + name + '? This will vacate the unit and cannot be undone.')) return;
+
+    const btn = document.getElementById('terminate-submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Terminating…';
+
+    try {
+      await postApi('re_core', 'terminate_lease_contract', {
+        name,
+        termination_date: terminationDate || null,
+        reason: reason || null,
+      });
+      showTerminateMsg('Lease ' + name + ' terminated successfully.', false);
+      loadSidebarCounts();
+      loadTerminateLeaseOptions();
+    } catch (err) {
+      console.error(err);
+      showTerminateMsg('Failed to terminate lease: ' + err.message, true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Terminate Lease';
+    }
+  }
+
   let _leaseContractStatusFilter = '';
 
   function setLeaseContractStatusFilter(status, el) {
@@ -3066,8 +3165,33 @@
     renderLeaseContractsTable();
   }
 
+  function viewLeaseRentSchedule(leaseName) {
+    showScreen('rent_schedule');
+    setTimeout(() => {
+      const sel = document.getElementById('rs-filter-lease');
+      if (sel) { sel.value = leaseName; loadRentScheduleList(); }
+    }, 300);
+  }
+
+  function viewLeaseSecurityDeposit(leaseName) {
+    showScreen('security_deposits');
+    setTimeout(() => {
+      const sel = document.getElementById('sd-filter-lease');
+      if (sel) { sel.value = leaseName; loadSecurityDepositsList(); }
+    }, 300);
+  }
+
+  function goToTerminateLease(leaseName) {
+    showScreen('terminate_lease');
+    setTimeout(() => {
+      const sel = document.getElementById('terminate-lease-select');
+      if (sel) sel.value = leaseName;
+    }, 300);
+  }
+
   function renderLeaseContractRow(r) {
     const canSubmit = r.docstatus === 0;
+    const canTerminate = r.docstatus === 1 && ['Active', 'Expiring'].includes(r.status);
     return `
         <tr>
           <td class="mono">${r.name}</td>
@@ -3080,6 +3204,9 @@
           <td><span class="badge ${statusBadgeClass(r.status)}">${r.docstatus === 0 ? 'Draft' : r.status}</span></td>
           <td>
             ${canSubmit ? `<button class="btn btn-primary btn-sm" onclick="submitLeaseContractFromList('${r.name}')">Submit</button>` : ''}
+            ${r.rent_schedule ? `<button class="btn btn-ghost btn-sm" onclick="viewLeaseRentSchedule('${r.name}')">Rent Schedule</button>` : ''}
+            ${r.security_deposit ? `<button class="btn btn-ghost btn-sm" onclick="viewLeaseSecurityDeposit('${r.name}')">Security Deposit</button>` : ''}
+            ${canTerminate ? `<button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="goToTerminateLease('${r.name}')">Terminate</button>` : ''}
           </td>
         </tr>
       `;
@@ -3682,23 +3809,44 @@
       document.getElementById('pd-address').textContent = '📍 ' + (d.address_line || '—');
 
       const unitsBody = document.getElementById('pd-units-rows');
-      unitsBody.innerHTML = (d.units || []).length ? d.units.map(u => `
-        <tr>
-          <td class="mono">${u.unit_no}</td>
-          <td>${u.unit_type || ''}</td>
-          <td>${u.area_sqm ?? ''} m²</td>
-          <td>${u.tenant_name || '—'}</td>
-          <td>${u.lease_end || '—'}</td>
-          <td class="mono">${fmtMoney(u.rent)}</td>
-          <td><span class="badge ${statusBadgeClass(u.status)}">${u.status}</span></td>
-          <td>
-            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size: 14.0px;">
-              <input type="checkbox" ${u.published_to_portal ? 'checked' : ''} onchange="toggleUnitPublish('${u.name}', this.checked)">
-              Live
-            </label>
-          </td>
-        </tr>
-      `).join('') : '<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">No units yet.</td></tr>';
+      if ((d.units || []).length) {
+        unitsBody.innerHTML = d.units.map(u => `
+          <tr>
+            <td class="mono">${u.unit_no}</td>
+            <td>${u.unit_type || ''}</td>
+            <td>${u.area_sqm ?? ''} m²</td>
+            <td>${u.tenant_name || '—'}</td>
+            <td>${u.lease_end || '—'}</td>
+            <td class="mono">${fmtMoney(u.rent)}</td>
+            <td><span class="badge ${statusBadgeClass(u.status)}">${u.status}</span></td>
+            <td>
+              <label style="display:flex;align-items:center;gap:4px;cursor:pointer;font-size: 14.0px;">
+                <input type="checkbox" ${u.published_to_portal ? 'checked' : ''} onchange="toggleUnitPublish('${u.name}', this.checked)">
+                Live
+              </label>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        // No Units under this property at all — it's a standalone listing
+        // (whole villa/shop rented as one entity), so publish the Property
+        // itself instead of a per-unit row.
+        unitsBody.innerHTML = `
+          <tr>
+            <td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">
+              This property has no units — it's listed as a standalone property.
+              ${!d.annual_rent ? '<div style="margin-top:6px;color:var(--gold);">Set an Asking Annual Rent on the property before publishing.</div>' : ''}
+              <div style="margin-top:10px;">
+                <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:var(--ink);">
+                  <input type="checkbox" ${d.published_to_portal ? 'checked' : ''} ${!d.annual_rent ? 'disabled' : ''}
+                    onchange="togglePropertyPublish('${propertyName}', this.checked)">
+                  Live on Portal
+                </label>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
 
       document.getElementById('pd-ownership').innerHTML = `
         <div class="comp-row"><span class="comp-row-label">Landlord</span><span class="comp-row-value">${d.owner_name || '—'}</span></div>
@@ -3748,6 +3896,34 @@
     } catch (err) {
       console.error('set_unit_portal_publish threw:', err);
       alert('Failed to update portal status. Check console for details.');
+    }
+  }
+
+  async function togglePropertyPublish(propertyName, checked) {
+    try {
+      const params = new URLSearchParams({ property: propertyName, published: checked ? 1 : 0 });
+      const csrfToken = await getCsrfToken();
+      const response = await fetch('/api/method/re_core.re_core.api.set_property_portal_publish', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Frappe-CSRF-Token': csrfToken
+        },
+        body: params.toString()
+      });
+      const text = await response.text();
+      if (!response.ok) {
+        console.error('set_property_portal_publish failed:', response.status, text);
+        alert('Failed to update portal status (HTTP ' + response.status + '). Check console for details.');
+        loadPropertyDetail(propertyName); // revert checkbox to server truth
+      } else {
+        console.log('set_property_portal_publish OK:', text);
+      }
+    } catch (err) {
+      console.error('set_property_portal_publish threw:', err);
+      alert('Failed to update portal status. Check console for details.');
+      loadPropertyDetail(propertyName);
     }
   }
 
@@ -5720,6 +5896,12 @@
 
   async function editCurrentProperty() {
     if (!currentPropertyName) return;
+    // prop-add-form only exists inside #screen-properties (unlike the Unit
+    // form, it was never given a property_detail-native copy) — switch there
+    // first or the form stays invisible even though its own display:flex
+    // gets set below. currentPropertyName survives this since showScreen()
+    // only touches it for the 'property_detail' id.
+    showScreen('properties');
     _propertyFormMode = 'edit';
     _propertyFormEditingName = currentPropertyName;
     clearPropertyForm();
@@ -5731,7 +5913,7 @@
       populateSelect(document.getElementById('prop-f-company'), companies, 'name', 'name');
       const detail = window.__currentPropertyDetail && window.__currentPropertyDetail.name === currentPropertyName
         ? window.__currentPropertyDetail
-        : await callApi('get_property_detail', { property: currentPropertyName });
+        : await callApiWithParams('re_core', 'get_property_detail', { property: currentPropertyName });
       fillPropertyForm(detail);
     } catch (err) {
       alert('Failed to load property for editing: ' + err.message);

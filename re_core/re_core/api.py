@@ -1,5 +1,6 @@
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 import frappe
+from frappe import _
 from frappe.utils import add_days, today, flt
 
 VAT_RATES = {
@@ -915,6 +916,32 @@ def set_unit_portal_publish(unit, published):
 
 
 # ─────────────────────────────────────────────
+# STANDALONE PROPERTY PORTAL PUBLISH TOGGLE
+# (properties with zero Units — e.g. a whole villa/shop rented as one entity.
+#  Properties that DO have Units go through set_unit_portal_publish per-unit
+#  instead; this endpoint refuses to touch those to avoid confusion.)
+# ─────────────────────────────────────────────
+@frappe.whitelist()
+def set_property_portal_publish(property, published):
+    published = 1 if int(published) else 0
+
+    unit_count = frappe.db.count("Unit", {"property": property})
+    if unit_count:
+        frappe.throw(
+            _("{0} has {1} unit(s) — publish/unpublish those individually instead.")
+            .format(property, unit_count)
+        )
+
+    prop = frappe.get_doc("Property", property)
+    prop.published_to_portal = published
+    if published:
+        prop.is_live = 1
+    prop.save(ignore_permissions=True)
+
+    return {"property": property, "published_to_portal": prop.published_to_portal, "is_live": prop.is_live}
+
+
+# ─────────────────────────────────────────────
 # PROPERTY FINANCIALS (scoped Rent Installment view)
 # ─────────────────────────────────────────────
 @frappe.whitelist()
@@ -1509,11 +1536,19 @@ def update_inspection(name, estimated_damage_cost=None, summary=None, tenant_sig
 # LEASE CONTRACTS LIST (for pickers)
 # ─────────────────────────────────────────────
 @frappe.whitelist()
+def terminate_lease_contract(name, termination_date=None, reason=None):
+    doc = frappe.get_doc("Lease Contract", name)
+    status = doc.terminate(termination_date=termination_date, reason=reason)
+    return {"name": doc.name, "status": status}
+
+
+@frappe.whitelist()
 def get_lease_contracts_list():
     rows = frappe.get_all(
         "Lease Contract",
         fields=["name", "tenant", "unit", "property", "status", "docstatus",
-                "start_date", "end_date", "total_contract_value", "payment_frequency"],
+                "start_date", "end_date", "total_contract_value", "payment_frequency",
+                "rent_schedule", "security_deposit"],
         order_by="modified desc",
         limit_page_length=200,
     )

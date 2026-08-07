@@ -291,7 +291,7 @@
   </div>
 
   <div class="result-meta">
-    <div class="count"><b id="resultCount">0</b> properties found</div>
+    <div class="count"><b id="resultCount">0</b> units found</div>
     <select class="sort-select" id="sortSelect">
       <option value="newest">Sort — Newest</option>
       <option value="price_asc">Sort — Rent ↑</option>
@@ -358,6 +358,7 @@ function normalizeProperty(raw){
   p.sqm = Number(p.sqm) || 0;
   p.parking = Number(p.parking) || 0;
   if(!p.img) p.img = 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80';
+  p.isStandalone = !!raw.is_standalone_property;
   return p;
 }
 
@@ -447,7 +448,7 @@ function cardTemplate(p){
     <div class="card" data-id="${p.id}">
       <div class="card-media">
         <img src="${p.img}" alt="${p.title || p.building}" loading="lazy">
-        <div class="status-tag ${STATUS_CLASS[p.status] || ''}">${p.status}</div>
+        <div class="status-tag ${STATUS_CLASS[p.status] || ''}">${p.isStandalone ? 'Whole Property' : p.status}</div>
         <button class="wish-btn ${wishlist.has(p.id)?'active':''}" data-wish="${p.id}" aria-label="Save unit">
           <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.5-8.5C.9 9.2 2.4 5.5 6 5.5c2 0 3.3 1 4 2 0 0-.5 0 0 0s2-2 4-2c3.6 0 5.1 3.7 3.5 7C19 16.65 12 21 12 21z"/></svg>
         </button>
@@ -486,6 +487,11 @@ function renderGrid(){
 }
 
 async function toggleWish(id, btn){
+  const target = PROPERTIES.find(x=>x.id===id);
+  if(target && target.isStandalone){
+    showToast("Saving whole properties isn't supported yet — contact your agent to shortlist this one.");
+    return;
+  }
   const wasSaved = wishlist.has(id);
   // optimistic UI update
   if(wasSaved){ wishlist.delete(id); btn?.classList.remove('active'); }
@@ -552,28 +558,36 @@ function openDossier(id){
 
         <div class="side-panel">
           <div class="panel-card">
-            <button class="btn-primary" id="btnEnquire">Send enquiry</button>
-            <button class="btn-secondary" id="btnVisit">Book a site visit</button>
-            <button class="btn-secondary ${wishlist.has(p.id)?'active':''}" id="btnWish" data-wish="${p.id}">
-              ${wishlist.has(p.id)?'Saved to wishlist':'Save to wishlist'}
-            </button>
+            ${p.isStandalone ? `
+              <p style="font-size:13px; color:var(--ink-soft); line-height:1.5; margin:0 0 4px;">
+                This is a whole-property listing. Online enquiries, visit booking, and
+                wishlist saves for whole properties aren't available yet — please contact
+                your agent directly to move forward on this one.
+              </p>
+            ` : `
+              <button class="btn-primary" id="btnEnquire">Send enquiry</button>
+              <button class="btn-secondary" id="btnVisit">Book a site visit</button>
+              <button class="btn-secondary ${wishlist.has(p.id)?'active':''}" id="btnWish" data-wish="${p.id}">
+                ${wishlist.has(p.id)?'Saved to wishlist':'Save to wishlist'}
+              </button>
 
-            <div class="form-panel" id="enquireForm">
-              <input type="text" placeholder="Your name" id="enqName">
-              <input type="text" placeholder="Phone number" id="enqPhone">
-              <textarea placeholder="Message (optional)" id="enqMsg"></textarea>
-              <button class="submit-mini" id="submitEnquiry">Submit enquiry</button>
-            </div>
-            <div class="form-panel" id="visitForm">
-              <input type="date" id="visitDate">
-              <select id="visitSlot">
-                <option>10:00 - 12:00</option>
-                <option>12:00 - 14:00</option>
-                <option>14:00 - 16:00</option>
-                <option>16:00 - 18:00</option>
-              </select>
-              <button class="submit-mini" id="submitVisit">Confirm visit</button>
-            </div>
+              <div class="form-panel" id="enquireForm">
+                <input type="text" placeholder="Your name" id="enqName">
+                <input type="text" placeholder="Phone number" id="enqPhone">
+                <textarea placeholder="Message (optional)" id="enqMsg"></textarea>
+                <button class="submit-mini" id="submitEnquiry">Submit enquiry</button>
+              </div>
+              <div class="form-panel" id="visitForm">
+                <input type="date" id="visitDate">
+                <select id="visitSlot">
+                  <option>10:00 - 12:00</option>
+                  <option>12:00 - 14:00</option>
+                  <option>14:00 - 16:00</option>
+                  <option>16:00 - 18:00</option>
+                </select>
+                <button class="submit-mini" id="submitVisit">Confirm visit</button>
+              </div>
+            `}
           </div>
 
           <div class="panel-card">
@@ -593,48 +607,50 @@ function openDossier(id){
 
   document.getElementById('overlay').classList.add('open');
   document.getElementById('closeDossier').onclick = closeDossier;
-  document.getElementById('btnWish').onclick = (e)=>{ toggleWish(p.id, null); e.target.textContent = wishlist.has(p.id)?'Saved to wishlist':'Save to wishlist'; e.target.classList.toggle('active'); };
-  document.getElementById('btnEnquire').onclick = ()=>{ document.getElementById('enquireForm').classList.toggle('open'); document.getElementById('visitForm').classList.remove('open'); };
-  document.getElementById('btnVisit').onclick = ()=>{ document.getElementById('visitForm').classList.toggle('open'); document.getElementById('enquireForm').classList.remove('open'); };
-  document.getElementById('submitEnquiry').onclick = async (e)=>{
-    const btn = e.target;
-    const name = document.getElementById('enqName').value.trim();
-    const phone = document.getElementById('enqPhone').value.trim();
-    const message = document.getElementById('enqMsg').value.trim();
-    if(!name || !phone){ showToast('Name and phone are required'); return; }
-    btn.disabled = true; btn.textContent = 'Sending…';
-    try{
-      await frappeCall('re_core.re_core.listing_portal_api.listing_portal.submit_enquiry', {
-        unit: p.id, name, phone, message
-      });
-      showToast('Enquiry sent — an agent will follow up shortly');
-      document.getElementById('enquireForm').classList.remove('open');
-    }catch(err){
-      console.error(err);
-      showToast("Couldn't send enquiry — try again");
-    }finally{
-      btn.disabled = false; btn.textContent = 'Submit enquiry';
-    }
-  };
-  document.getElementById('submitVisit').onclick = async (e)=>{
-    const btn = e.target;
-    const date = document.getElementById('visitDate').value;
-    const slot = document.getElementById('visitSlot').value;
-    if(!date){ showToast('Pick a date first'); return; }
-    btn.disabled = true; btn.textContent = 'Booking…';
-    try{
-      await frappeCall('re_core.re_core.listing_portal_api.listing_portal.book_site_visit', {
-        unit: p.id, visit_date: date, visit_time_slot: slot
-      });
-      showToast('Site visit requested — you\'ll get a confirmation shortly');
-      document.getElementById('visitForm').classList.remove('open');
-    }catch(err){
-      console.error(err);
-      showToast("Couldn't book visit — try again");
-    }finally{
-      btn.disabled = false; btn.textContent = 'Confirm visit';
-    }
-  };
+  if(!p.isStandalone){
+    document.getElementById('btnWish').onclick = (e)=>{ toggleWish(p.id, null); e.target.textContent = wishlist.has(p.id)?'Saved to wishlist':'Save to wishlist'; e.target.classList.toggle('active'); };
+    document.getElementById('btnEnquire').onclick = ()=>{ document.getElementById('enquireForm').classList.toggle('open'); document.getElementById('visitForm').classList.remove('open'); };
+    document.getElementById('btnVisit').onclick = ()=>{ document.getElementById('visitForm').classList.toggle('open'); document.getElementById('enquireForm').classList.remove('open'); };
+    document.getElementById('submitEnquiry').onclick = async (e)=>{
+      const btn = e.target;
+      const name = document.getElementById('enqName').value.trim();
+      const phone = document.getElementById('enqPhone').value.trim();
+      const message = document.getElementById('enqMsg').value.trim();
+      if(!name || !phone){ showToast('Name and phone are required'); return; }
+      btn.disabled = true; btn.textContent = 'Sending…';
+      try{
+        await frappeCall('re_core.re_core.listing_portal_api.listing_portal.submit_enquiry', {
+          unit: p.id, name, phone, message
+        });
+        showToast('Enquiry sent — an agent will follow up shortly');
+        document.getElementById('enquireForm').classList.remove('open');
+      }catch(err){
+        console.error(err);
+        showToast("Couldn't send enquiry — try again");
+      }finally{
+        btn.disabled = false; btn.textContent = 'Submit enquiry';
+      }
+    };
+    document.getElementById('submitVisit').onclick = async (e)=>{
+      const btn = e.target;
+      const date = document.getElementById('visitDate').value;
+      const slot = document.getElementById('visitSlot').value;
+      if(!date){ showToast('Pick a date first'); return; }
+      btn.disabled = true; btn.textContent = 'Booking…';
+      try{
+        await frappeCall('re_core.re_core.listing_portal_api.listing_portal.book_site_visit', {
+          unit: p.id, visit_date: date, visit_time_slot: slot
+        });
+        showToast('Site visit requested — you\'ll get a confirmation shortly');
+        document.getElementById('visitForm').classList.remove('open');
+      }catch(err){
+        console.error(err);
+        showToast("Couldn't book visit — try again");
+      }finally{
+        btn.disabled = false; btn.textContent = 'Confirm visit';
+      }
+    };
+  }
 
   function updateChequePlan(){
     const count = Number(document.getElementById('chequeSlider').value);
