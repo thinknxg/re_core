@@ -750,6 +750,21 @@
             <select class="form-input" id="prop-f-company"><option value="">Company…</option></select>
           </div>
 
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Ownership & Billing</div>
+          <div class="form-grid">
+            <select class="form-input" id="prop-f-ownership_type">
+              <option value="">Ownership Type…</option>
+              <option>Company</option><option>Landlord</option>
+            </select>
+            <select class="form-input" id="prop-f-management_fee_type">
+              <option value="">Management Fee Type…</option>
+              <option>Percentage</option><option>Fixed Amount</option>
+            </select>
+            <input class="form-input" type="number" step="0.01" id="prop-f-management_fee_value" placeholder="Management Fee Value">
+            <input class="form-input" type="number" step="0.01" id="prop-f-onetime_commission" placeholder="Onetime Commission">
+            <input class="form-input" type="number" id="prop-f-no_of_floors" placeholder="No. of Floors">
+          </div>
+
           <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Location</div>
           <div class="form-grid">
             <select class="form-input" id="prop-f-country">
@@ -770,21 +785,6 @@
             <input class="form-input" id="prop-f-ejari_number" placeholder="Ejari Number">
             <input class="form-input" id="prop-f-rera_permit" placeholder="RERA Permit">
             <input class="form-input" id="prop-f-tawtheeq_ref" placeholder="Tawtheeq Reference">
-          </div>
-
-          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Ownership & Billing</div>
-          <div class="form-grid">
-            <select class="form-input" id="prop-f-ownership_type">
-              <option value="">Ownership Type…</option>
-              <option>Company</option><option>Landlord</option>
-            </select>
-            <select class="form-input" id="prop-f-management_fee_type">
-              <option value="">Management Fee Type…</option>
-              <option>Percentage</option><option>Fixed Amount</option>
-            </select>
-            <input class="form-input" type="number" step="0.01" id="prop-f-management_fee_value" placeholder="Management Fee Value">
-            <input class="form-input" type="number" step="0.01" id="prop-f-onetime_commission" placeholder="Onetime Commission">
-            <input class="form-input" type="number" id="prop-f-no_of_floors" placeholder="No. of Floors">
           </div>
 
           <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Usage & Availability</div>
@@ -2497,7 +2497,6 @@
         <div class="prop-footer">
           <div>
             <div class="prop-rent">${rentRange}</div>
-            <div class="prop-rent-label">per month / unit</div>
           </div>
           <span class="vat-chip">${p.vat_rate}% VAT</span>
         </div>
