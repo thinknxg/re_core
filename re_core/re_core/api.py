@@ -284,7 +284,7 @@ def get_tenants_list():
 
     tenants = frappe.get_all(
         "Tenant",
-        filters={"disabled": 0},
+        filters={"disabled": 0, "request_source": ["!=", "Portal"]},
         fields=["name", "tenant_name", "nationality", "tenant_type", "mobile", "email",
                  "whatsapp_number", "enable_portal", "emergency_contact_name",
                  "emergency_contact_mobile", "disabled"],
@@ -336,6 +336,24 @@ def get_tenants_list():
         },
         "rows": rows,
     }
+
+
+@frappe.whitelist()
+def get_portal_tenants_list():
+    """Tenant profiles auto-created from portal signups (via lease requests),
+    kept separate from the main Tenant Register to avoid confusing them with
+    tenants who actually have signed leases.
+    """
+    tenants = frappe.get_all(
+        "Tenant",
+        filters={"request_source": "Portal"},
+        fields=["name", "tenant_name", "mobile", "email", "portal_user", "creation"],
+        order_by="creation desc",
+        limit_page_length=200,
+    )
+    for t in tenants:
+        t["has_lease_request"] = frappe.db.exists("Lease Contract", {"tenant": t["name"]})
+    return tenants
 
 
 # ─────────────────────────────────────────────

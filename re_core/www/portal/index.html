@@ -575,6 +575,9 @@
       <div class="nav-item" onclick="showScreen('site_visit_requests')">
         <span class="nav-icon">📅</span> Site Visit Requests
       </div>
+      <div class="nav-item" onclick="showScreen('portal_tenants')">
+        <span class="nav-icon">👤</span> Portal Tenants
+      </div>
     </div>
 
     <div class="sidebar-section">
@@ -1155,6 +1158,31 @@
               </thead>
               <tbody id="site-visit-requests-rows">
                 <tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">Loading requests…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           SCREEN: PORTAL TENANTS (auto-created from signups)
+      ════════════════════════════════════════════ -->
+      <div class="screen" id="screen-portal_tenants">
+        <div style="margin-bottom:16px; padding:14px 16px; background:var(--teal-pale); border:1px solid var(--teal-light)44; border-radius:var(--radius); font-size: 15.0px; color:var(--teal); display:flex; gap:10px; align-items:flex-start;">
+          <span style="font-size: 20.0px">👤</span>
+          <div><strong>Tenant profiles auto-created from portal signups.</strong> These are kept separate from the main Tenant Register since they don't necessarily have a real lease yet — only visitors who've submitted a lease request.</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Portal Tenants</div>
+          </div>
+          <div class="scroll-x">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Mobile</th><th>Email</th><th>Portal Account</th><th>Has Lease Request</th></tr>
+              </thead>
+              <tbody id="portal-tenants-rows">
+                <tr><td colspan="5" style="text-align:center;color:var(--ink-muted);padding:24px;">Loading…</td></tr>
               </tbody>
             </table>
           </div>
@@ -2397,8 +2425,7 @@
     lease_requests: { title: 'Lease Requests', bread: 'Lease Records → Portal Requests', btn: 'Refresh', btnAction: null },
     property_enquiries: { title: 'Property Enquiries', bread: 'Portal Activity → Enquiries', btn: 'Refresh', btnAction: null },
     site_visit_requests: { title: 'Site Visit Requests', bread: 'Portal Activity → Site Visits', btn: 'Refresh', btnAction: null },
-    property_enquiries: { title: 'Property Enquiries', bread: 'Portal Activity → Enquiries', btn: 'Refresh', btnAction: null },
-    site_visit_requests: { title: 'Site Visit Requests', bread: 'Portal Activity → Site Visits', btn: 'Refresh', btnAction: null },
+    portal_tenants: { title: 'Portal Tenants', bread: 'Portal Activity → Portal Tenants', btn: 'Refresh', btnAction: null },
     terminate_lease: { title: 'Terminate Lease', bread: 'Lease Records → Terminate Lease', btn: 'Refresh', btnAction: null },
     pdc: { title: 'Post Dated Cheques', bread: 'Lease Records → PDC', btn: 'Refresh', btnAction: null },
     rent_schedule: { title: 'Rent Schedule', bread: 'Lease Records → Rent Schedule', btn: 'Refresh', btnAction: null },
@@ -2621,8 +2648,7 @@
     if (id === 'lease_requests') loadLeaseRequestsList();
     if (id === 'property_enquiries') loadPropertyEnquiriesList();
     if (id === 'site_visit_requests') loadSiteVisitRequestsList();
-    if (id === 'property_enquiries') loadPropertyEnquiriesList();
-    if (id === 'site_visit_requests') loadSiteVisitRequestsList();
+    if (id === 'portal_tenants') loadPortalTenantsList();
     if (id === 'terminate_lease') loadTerminateLeaseOptions();
     if (id === 'invoices') loadInvoices();
     if (id === 'compliance') loadCompliance();
@@ -3425,6 +3451,31 @@
       loadSiteVisitRequestsList();
     } catch (err) {
       alert('Failed to update visit request: ' + err.message);
+    }
+  }
+
+  function renderPortalTenantRow(t) {
+    return `
+        <tr>
+          <td>${t.tenant_name || '—'}</td>
+          <td class="mono">${t.mobile || '—'}</td>
+          <td>${t.email || '—'}</td>
+          <td class="mono">${t.portal_user || '—'}</td>
+          <td>${t.has_lease_request ? '<span class="badge badge-green">Yes</span>' : '<span class="badge badge-amber">No</span>'}</td>
+        </tr>
+      `;
+  }
+
+  async function loadPortalTenantsList() {
+    const tbody = document.getElementById('portal-tenants-rows');
+    try {
+      const rows = await callApi('get_portal_tenants_list');
+      tbody.innerHTML = rows.length
+        ? rows.map(renderPortalTenantRow).join('')
+        : '<tr><td colspan="5" style="text-align:center;color:var(--ink-muted);padding:24px;">No portal tenant profiles yet.</td></tr>';
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--red);padding:24px;">Failed to load portal tenants.</td></tr>';
     }
   }
 

@@ -9,6 +9,7 @@
  "field_order": [
   "basic_sb",
   "tenant_name",
+  "request_source",
   "tenant_type",
   "nationality",
   "col_break_1",
@@ -40,6 +41,15 @@
    "in_list_view": 1,
    "label": "Tenant Name",
    "reqd": 1
+  },
+  {
+   "default": "Admin",
+   "fieldname": "request_source",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Request Source",
+   "options": "Admin\nPortal",
+   "read_only": 1
   },
   {
    "default": "Individual",

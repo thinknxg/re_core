@@ -418,6 +418,7 @@ def _get_or_create_tenant_for_current_user():
         "mobile": lead.mobile_no or "N/A",
         "email": lead.email_id,
         "portal_user": user,
+        "request_source": "Portal",
     })
     tenant.insert(ignore_permissions=True)
     return tenant.name
