@@ -387,6 +387,7 @@ def create_lease_contract(tenant, unit, property, start_date, end_date,
         "ejari_contract_no": ejari_contract_no,
         "terms": terms,
         "status": "Draft",
+        "request_source": "Admin",
         "charges": [{
             "charge_type": "Rent",
             "description": "Base Rent",
@@ -1543,12 +1544,105 @@ def terminate_lease_contract(name, termination_date=None, reason=None):
 
 
 @frappe.whitelist()
-def get_lease_contracts_list():
+def reject_lease_contract(name):
+    doc = frappe.get_doc("Lease Contract", name)
+    if doc.docstatus != 0:
+        frappe.throw(_("Only Draft requests can be rejected."))
+    frappe.delete_doc("Lease Contract", name, ignore_permissions=True)
+    return {"deleted": name}
+
+
+@frappe.whitelist()
+def get_property_enquiries_list(status=None):
+    filters = {}
+    if status:
+        filters["status"] = status
+    rows = frappe.get_all(
+        "Property Enquiry",
+        filters=filters,
+        fields=["name", "unit", "property", "customer", "linked_lead", "enquiry_type",
+                "status", "message", "assigned_to_user", "creation"],
+        order_by="creation desc",
+        limit_page_length=200,
+    )
+    unit_names = list({r["unit"] for r in rows if r["unit"]})
+    unit_map = {
+        u["name"]: u["unit_no"]
+        for u in frappe.get_all("Unit", filters={"name": ["in", unit_names]}, fields=["name", "unit_no"])
+    } if unit_names else {}
+    lead_names = list({r["linked_lead"] for r in rows if r["linked_lead"]})
+    lead_map = {
+        l["name"]: l["lead_name"]
+        for l in frappe.get_all("Lead", filters={"name": ["in", lead_names]}, fields=["name", "lead_name"])
+    } if lead_names else {}
+    for r in rows:
+        r["unit_no"] = unit_map.get(r["unit"], r["unit"])
+        r["lead_name"] = lead_map.get(r["linked_lead"])
+    return rows
+
+
+@frappe.whitelist()
+def update_property_enquiry(name, status=None, assigned_to_user=None):
+    doc = frappe.get_doc("Property Enquiry", name)
+    if status is not None:
+        doc.status = status
+    if assigned_to_user is not None:
+        doc.assigned_to_user = assigned_to_user
+    doc.save(ignore_permissions=True)
+    return {"name": doc.name, "status": doc.status}
+
+
+@frappe.whitelist()
+def get_site_visit_bookings_list(status=None):
+    filters = {}
+    if status:
+        filters["status"] = status
+    rows = frappe.get_all(
+        "Site Visit Booking",
+        filters=filters,
+        fields=["name", "unit", "property", "customer", "lead", "visit_date",
+                "visit_time_slot", "status", "assigned_agent", "notes", "creation"],
+        order_by="creation desc",
+        limit_page_length=200,
+    )
+    unit_names = list({r["unit"] for r in rows if r["unit"]})
+    unit_map = {
+        u["name"]: u["unit_no"]
+        for u in frappe.get_all("Unit", filters={"name": ["in", unit_names]}, fields=["name", "unit_no"])
+    } if unit_names else {}
+    lead_names = list({r["lead"] for r in rows if r["lead"]})
+    lead_map = {
+        l["name"]: l["lead_name"]
+        for l in frappe.get_all("Lead", filters={"name": ["in", lead_names]}, fields=["name", "lead_name"])
+    } if lead_names else {}
+    for r in rows:
+        r["unit_no"] = unit_map.get(r["unit"], r["unit"])
+        r["lead_name"] = lead_map.get(r["lead"])
+    return rows
+
+
+@frappe.whitelist()
+def update_site_visit_booking(name, status=None, assigned_agent=None):
+    doc = frappe.get_doc("Site Visit Booking", name)
+    if status is not None:
+        doc.status = status
+    if assigned_agent is not None:
+        doc.assigned_agent = assigned_agent
+    doc.save(ignore_permissions=True)
+    return {"name": doc.name, "status": doc.status}
+
+
+@frappe.whitelist()
+def get_lease_contracts_list(source="Admin"):
+    filters = {}
+    if source and source != "All":
+        filters["request_source"] = source
     rows = frappe.get_all(
         "Lease Contract",
+        filters=filters,
         fields=["name", "tenant", "unit", "property", "status", "docstatus",
                 "start_date", "end_date", "total_contract_value", "payment_frequency",
-                "rent_schedule", "security_deposit"],
+                "rent_schedule", "security_deposit", "request_source"],
         order_by="modified desc",
         limit_page_length=200,
     )

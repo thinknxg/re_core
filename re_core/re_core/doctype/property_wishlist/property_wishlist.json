@@ -8,7 +8,15 @@
    "in_list_view": 1,
    "label": "Customer",
    "options": "Customer",
-   "reqd": 1
+   "reqd": 0
+  },
+  {
+   "description": "Auto-linked when a portal visitor without a Customer profile creates this record",
+   "fieldname": "lead",
+   "fieldtype": "Link",
+   "label": "Lead",
+   "options": "Lead",
+   "read_only": 1
   },
   {
    "fieldname": "unit",

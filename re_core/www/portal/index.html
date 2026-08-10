@@ -538,6 +538,9 @@
       <div class="nav-item" onclick="showScreen('lease_contracts')">
         <span class="nav-icon">📋</span> Lease Contracts
       </div>
+      <div class="nav-item" onclick="showScreen('lease_requests')">
+        <span class="nav-icon">📥</span> Lease Requests
+      </div>
       <div class="nav-item" onclick="showScreen('terminate_lease')">
         <span class="nav-icon">⛔</span> Terminate Lease
       </div>
@@ -561,6 +564,16 @@
       </div>
       <div class="nav-item" onclick="showScreen('expense_property')">
         <span class="nav-icon">🏷️</span> Expense Property
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Portal Activity</div>
+      <div class="nav-item" onclick="showScreen('property_enquiries')">
+        <span class="nav-icon">✉️</span> Property Enquiries
+      </div>
+      <div class="nav-item" onclick="showScreen('site_visit_requests')">
+        <span class="nav-icon">📅</span> Site Visit Requests
       </div>
     </div>
 
@@ -1086,6 +1099,87 @@
               </thead>
               <tbody id="tenants-rows">
                 <tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">No tenants yet.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           SCREEN: PROPERTY ENQUIRIES (portal-originated)
+      ════════════════════════════════════════════ -->
+      <div class="screen" id="screen-property_enquiries">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Property Enquiries</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-chip active" onclick="setEnquiryStatusFilter('', this)">All</div>
+            <div class="filter-chip" onclick="setEnquiryStatusFilter('New', this)">New</div>
+            <div class="filter-chip" onclick="setEnquiryStatusFilter('Assigned', this)">Assigned</div>
+            <div class="filter-chip" onclick="setEnquiryStatusFilter('In Progress', this)">In Progress</div>
+            <div class="filter-chip" onclick="setEnquiryStatusFilter('Closed', this)">Closed</div>
+          </div>
+          <div class="scroll-x">
+            <table>
+              <thead>
+                <tr><th>Unit</th><th>Property</th><th>Contact</th><th>Type</th><th>Message</th><th>Status</th><th>Assigned To</th><th></th></tr>
+              </thead>
+              <tbody id="property-enquiries-rows">
+                <tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">Loading enquiries…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           SCREEN: SITE VISIT REQUESTS (portal-originated)
+      ════════════════════════════════════════════ -->
+      <div class="screen" id="screen-site_visit_requests">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Site Visit Requests</div>
+          </div>
+          <div class="filter-row">
+            <div class="filter-chip active" onclick="setVisitRequestStatusFilter('', this)">All</div>
+            <div class="filter-chip" onclick="setVisitRequestStatusFilter('Requested', this)">Requested</div>
+            <div class="filter-chip" onclick="setVisitRequestStatusFilter('Confirmed', this)">Confirmed</div>
+            <div class="filter-chip" onclick="setVisitRequestStatusFilter('Completed', this)">Completed</div>
+            <div class="filter-chip" onclick="setVisitRequestStatusFilter('Cancelled', this)">Cancelled</div>
+          </div>
+          <div class="scroll-x">
+            <table>
+              <thead>
+                <tr><th>Unit</th><th>Property</th><th>Contact</th><th>Date</th><th>Time Slot</th><th>Status</th><th>Agent</th><th></th></tr>
+              </thead>
+              <tbody id="site-visit-requests-rows">
+                <tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">Loading requests…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════
+           SCREEN: LEASE REQUESTS (portal-originated drafts)
+      ════════════════════════════════════════════ -->
+      <div class="screen" id="screen-lease_requests">
+        <div style="margin-bottom:16px; padding:14px 16px; background:var(--teal-pale); border:1px solid var(--teal-light)44; border-radius:var(--radius); font-size: 15.0px; color:var(--teal); display:flex; gap:10px; align-items:flex-start;">
+          <span style="font-size: 20.0px">📥</span>
+          <div><strong>Lease requests from the public listings portal.</strong> These are draft contracts self-submitted by logged-in visitors. Review each before approving — approving submits the contract, activates the lease, and locks the unit.</div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Lease Requests</div>
+          </div>
+          <div class="scroll-x">
+            <table>
+              <thead>
+                <tr><th>Contract</th><th>Tenant</th><th>Unit</th><th>Property</th><th>Start</th><th>End</th><th>Value</th><th></th></tr>
+              </thead>
+              <tbody id="lease-requests-rows">
+                <tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">Loading requests…</td></tr>
               </tbody>
             </table>
           </div>
@@ -2300,6 +2394,11 @@
     portal: { title: 'Listings Portal', bread: 'Portal → Public View', btn: 'Manage Listings', btnAction: null },
     maintenance: { title: 'Maintenance', bread: 'Maintenance → Work Orders', btn: '+ Work Order', btnAction: null },
     lease_contracts: { title: 'Lease Contracts', bread: 'Lease Records → Contracts', btn: 'Refresh', btnAction: null },
+    lease_requests: { title: 'Lease Requests', bread: 'Lease Records → Portal Requests', btn: 'Refresh', btnAction: null },
+    property_enquiries: { title: 'Property Enquiries', bread: 'Portal Activity → Enquiries', btn: 'Refresh', btnAction: null },
+    site_visit_requests: { title: 'Site Visit Requests', bread: 'Portal Activity → Site Visits', btn: 'Refresh', btnAction: null },
+    property_enquiries: { title: 'Property Enquiries', bread: 'Portal Activity → Enquiries', btn: 'Refresh', btnAction: null },
+    site_visit_requests: { title: 'Site Visit Requests', bread: 'Portal Activity → Site Visits', btn: 'Refresh', btnAction: null },
     terminate_lease: { title: 'Terminate Lease', bread: 'Lease Records → Terminate Lease', btn: 'Refresh', btnAction: null },
     pdc: { title: 'Post Dated Cheques', bread: 'Lease Records → PDC', btn: 'Refresh', btnAction: null },
     rent_schedule: { title: 'Rent Schedule', bread: 'Lease Records → Rent Schedule', btn: 'Refresh', btnAction: null },
@@ -2519,6 +2618,11 @@
     if (id === 'tenants') loadTenants();
     if (id === 'contracts') loadContractFormOptions();
     if (id === 'lease_contracts') loadLeaseContractsList();
+    if (id === 'lease_requests') loadLeaseRequestsList();
+    if (id === 'property_enquiries') loadPropertyEnquiriesList();
+    if (id === 'site_visit_requests') loadSiteVisitRequestsList();
+    if (id === 'property_enquiries') loadPropertyEnquiriesList();
+    if (id === 'site_visit_requests') loadSiteVisitRequestsList();
     if (id === 'terminate_lease') loadTerminateLeaseOptions();
     if (id === 'invoices') loadInvoices();
     if (id === 'compliance') loadCompliance();
@@ -3152,6 +3256,175 @@
     } finally {
       btn.disabled = false;
       btn.textContent = 'Terminate Lease';
+    }
+  }
+
+  function renderLeaseRequestRow(r) {
+    return `
+        <tr>
+          <td class="mono">${r.name}</td>
+          <td>${r.tenant_name || r.tenant || '—'}</td>
+          <td class="mono">${r.unit_no || r.unit || '—'}</td>
+          <td>${r.property || '—'}</td>
+          <td>${r.start_date || '—'}</td>
+          <td>${r.end_date || '—'}</td>
+          <td class="mono">${fmtMoney(r.total_contract_value)}</td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="approveLeaseRequest('${r.name}')">Approve</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="rejectLeaseRequest('${r.name}')">Reject</button>
+          </td>
+        </tr>
+      `;
+  }
+
+  async function loadLeaseRequestsList() {
+    const tbody = document.getElementById('lease-requests-rows');
+    try {
+      const rows = await callApiWithParams('re_core', 'get_lease_contracts_list', { source: 'Portal' });
+      tbody.innerHTML = rows.length
+        ? rows.map(renderLeaseRequestRow).join('')
+        : '<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">No pending lease requests.</td></tr>';
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px;">Failed to load lease requests.</td></tr>';
+    }
+  }
+
+  async function approveLeaseRequest(name) {
+    if (!confirm('Approve ' + name + '? This will activate the lease, lock the unit, and generate the Rent Schedule, Security Deposit and PDCs.')) return;
+    try {
+      await postApi('re_core', 'submit_lease_contract', { name });
+      loadLeaseRequestsList();
+      loadSidebarCounts();
+    } catch (err) {
+      alert('Failed to approve request: ' + err.message);
+    }
+  }
+
+  async function rejectLeaseRequest(name) {
+    if (!confirm('Reject and delete ' + name + '? This cannot be undone.')) return;
+    try {
+      await postApi('re_core', 'reject_lease_contract', { name });
+      loadLeaseRequestsList();
+      loadSidebarCounts();
+    } catch (err) {
+      alert('Failed to reject request: ' + err.message);
+    }
+  }
+
+  let _enquiryStatusFilter = '';
+
+  function setEnquiryStatusFilter(status, el) {
+    _enquiryStatusFilter = status;
+    document.querySelectorAll('#screen-property_enquiries .filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    loadPropertyEnquiriesList();
+  }
+
+  function renderEnquiryRow(r) {
+    return `
+        <tr>
+          <td class="mono">${r.unit_no || r.unit || '—'}</td>
+          <td>${r.property || '—'}</td>
+          <td>${r.lead_name || r.customer || '—'}</td>
+          <td>${r.enquiry_type || '—'}</td>
+          <td style="max-width:220px; white-space:normal;">${r.message || '—'}</td>
+          <td>
+            <select class="form-input" id="enq-status-${r.name}" style="min-width:110px;">
+              ${['New', 'Assigned', 'In Progress', 'Closed'].map(s => `<option ${s === r.status ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </td>
+          <td>
+            <input class="form-input" id="enq-assign-${r.name}" value="${r.assigned_to_user || ''}" placeholder="user email" style="min-width:150px;">
+          </td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="saveEnquiryUpdate('${r.name}')">Save</button>
+          </td>
+        </tr>
+      `;
+  }
+
+  async function loadPropertyEnquiriesList() {
+    const tbody = document.getElementById('property-enquiries-rows');
+    try {
+      const rows = await callApiWithParams('re_core', 'get_property_enquiries_list', _enquiryStatusFilter ? { status: _enquiryStatusFilter } : {});
+      tbody.innerHTML = rows.length
+        ? rows.map(renderEnquiryRow).join('')
+        : '<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">No enquiries match this filter.</td></tr>';
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px;">Failed to load enquiries.</td></tr>';
+    }
+  }
+
+  async function saveEnquiryUpdate(name) {
+    try {
+      await postApi('re_core', 'update_property_enquiry', {
+        name,
+        status: document.getElementById('enq-status-' + name).value,
+        assigned_to_user: document.getElementById('enq-assign-' + name).value || null,
+      });
+      loadPropertyEnquiriesList();
+    } catch (err) {
+      alert('Failed to update enquiry: ' + err.message);
+    }
+  }
+
+  let _visitRequestStatusFilter = '';
+
+  function setVisitRequestStatusFilter(status, el) {
+    _visitRequestStatusFilter = status;
+    document.querySelectorAll('#screen-site_visit_requests .filter-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    loadSiteVisitRequestsList();
+  }
+
+  function renderVisitRequestRow(r) {
+    return `
+        <tr>
+          <td class="mono">${r.unit_no || r.unit || '—'}</td>
+          <td>${r.property || '—'}</td>
+          <td>${r.lead_name || r.customer || '—'}</td>
+          <td>${r.visit_date || '—'}</td>
+          <td>${r.visit_time_slot || '—'}</td>
+          <td>
+            <select class="form-input" id="visit-status-${r.name}" style="min-width:110px;">
+              ${['Requested', 'Confirmed', 'Completed', 'Cancelled'].map(s => `<option ${s === r.status ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </td>
+          <td>
+            <input class="form-input" id="visit-assign-${r.name}" value="${r.assigned_agent || ''}" placeholder="agent email" style="min-width:150px;">
+          </td>
+          <td>
+            <button class="btn btn-primary btn-sm" onclick="saveVisitRequestUpdate('${r.name}')">Save</button>
+          </td>
+        </tr>
+      `;
+  }
+
+  async function loadSiteVisitRequestsList() {
+    const tbody = document.getElementById('site-visit-requests-rows');
+    try {
+      const rows = await callApiWithParams('re_core', 'get_site_visit_bookings_list', _visitRequestStatusFilter ? { status: _visitRequestStatusFilter } : {});
+      tbody.innerHTML = rows.length
+        ? rows.map(renderVisitRequestRow).join('')
+        : '<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">No site visit requests match this filter.</td></tr>';
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px;">Failed to load site visit requests.</td></tr>';
+    }
+  }
+
+  async function saveVisitRequestUpdate(name) {
+    try {
+      await postApi('re_core', 'update_site_visit_booking', {
+        name,
+        status: document.getElementById('visit-status-' + name).value,
+        assigned_agent: document.getElementById('visit-assign-' + name).value || null,
+      });
+      loadSiteVisitRequestsList();
+    } catch (err) {
+      alert('Failed to update visit request: ' + err.message);
     }
   }
 

@@ -11,7 +11,7 @@ after_install = "re_core.install.after_install"
 
 fixtures = [
     {"doctype": "Custom Field", "filters": [
-        ["dt", "in", ["Unit", "Tenant", "Property", "Purchase Invoice"]],
+        ["dt", "in", ["Unit", "Tenant", "Property", "Purchase Invoice", "User"]],
         ["fieldname", "in", [
             "published_to_portal",
             "portal_access_code",
@@ -21,6 +21,7 @@ fixtures = [
             "re_core_section", "custom_property", "custom_tenancy_id",
             "cb_re_core", "custom_sales_invoice_id", "custom_loan",
             "owner_ref", "custom_source_sales_invoice", "custom_lease_contract",
+            "portal_lead",
         ]],
     ]},
     {"dt": "Role", "filters": [["name", "in", [

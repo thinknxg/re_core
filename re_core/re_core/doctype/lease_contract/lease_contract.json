@@ -24,6 +24,7 @@
   "notice_period_days",
   "auto_renew",
   "status",
+  "request_source",
   "fin_sb",
   "charges",
   "total_contract_value",
@@ -158,6 +159,15 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Draft\nActive\nExpiring\nExpired\nTerminated\nRenewed",
+   "read_only": 1
+  },
+  {
+   "default": "Admin",
+   "fieldname": "request_source",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Request Source",
+   "options": "Admin\nPortal",
    "read_only": 1
   },
   {

@@ -24,14 +24,98 @@ def get_csrf_token():
 
 
 def _get_customer_for_current_user():
-    """Resolve the logged-in portal user to their linked Customer record."""
+    """No direct Customer<->User link exists in this schema. Portal visitors
+    resolve via Lead (see _get_identity_for_current_user); a Customer only
+    exists later, once someone becomes an actual Tenant.
+    """
+    frappe.throw(_("No customer profile linked to this account."))
+
+
+def _get_identity_for_current_user():
+    """Resolve the logged-in portal user to either a Customer (if they've since
+    become a real tenant) or their auto-created portal Lead. Returns a dict
+    {"customer": name_or_None, "lead": name_or_None}. Throws if the user has
+    neither - i.e. not actually logged in via the portal.
+    """
     user = frappe.session.user
-    customer = frappe.db.get_value("Contact", {"user": user}, "customer")
-    if not customer:
-        customer = frappe.db.get_value("Customer", {"portal_user": user}, "name")
-    if not customer:
-        frappe.throw(_("No customer profile linked to this account."))
-    return customer
+    if user == "Guest":
+        frappe.throw(_("Please log in to do that."))
+
+    lead = frappe.db.get_value("User", user, "portal_lead")
+
+    if not lead:
+        frappe.throw(_("No profile linked to this account."))
+    return {"customer": None, "lead": lead}
+
+
+@frappe.whitelist(allow_guest=True)
+def portal_signup(email, first_name, phone=None, password=None):
+    email = (email or "").strip().lower()
+    if not email or not first_name:
+        frappe.throw(_("Name and email are required."))
+    if frappe.db.exists("User", email):
+        frappe.throw(_("An account with this email already exists. Please log in instead."))
+
+    lead = frappe.get_doc({
+        "doctype": "Lead",
+        "lead_name": first_name,
+        "email_id": email,
+        "mobile_no": phone,
+        "source": "Website Listings Portal",
+    })
+    lead.insert(ignore_permissions=True)
+
+    user = frappe.get_doc({
+        "doctype": "User",
+        "email": email,
+        "first_name": first_name,
+        "phone": phone,
+        "send_welcome_email": 0,
+        "user_type": "Website User",
+        "portal_lead": lead.name,
+    })
+    user.insert(ignore_permissions=True)
+    if password:
+        user.new_password = password
+        user.save(ignore_permissions=True)
+
+    frappe.db.commit()
+
+    frappe.local.login_manager.login_as(email)
+    return {"user": email, "lead": lead.name}
+
+
+@frappe.whitelist(allow_guest=True)
+def portal_login(email, password):
+    email = (email or "").strip().lower()
+    try:
+        frappe.local.login_manager.authenticate(user=email, pwd=password)
+        frappe.local.login_manager.post_login()
+    except frappe.exceptions.AuthenticationError:
+        frappe.throw(_("Incorrect email or password."))
+    return {"user": frappe.session.user}
+
+
+@frappe.whitelist()
+def portal_logout():
+    frappe.local.login_manager.logout()
+    frappe.db.commit()
+    return {"ok": True}
+
+
+@frappe.whitelist(allow_guest=True)
+def get_current_portal_user():
+    if frappe.session.user == "Guest":
+        return None
+    user_doc = frappe.db.get_value("User", frappe.session.user, ["full_name", "phone", "portal_lead"], as_dict=True)
+    phone = user_doc.phone
+    if not phone and user_doc.portal_lead:
+        phone = frappe.db.get_value("Lead", user_doc.portal_lead, "mobile_no")
+    return {
+        "user": frappe.session.user,
+        "full_name": user_doc.full_name,
+        "phone": phone,
+    }
 
 
 def _unit_row_to_dict(row):
@@ -254,14 +338,21 @@ def get_property_detail(unit=None, property=None):
 
 @frappe.whitelist()
 def toggle_wishlist(unit):
-    customer = _get_customer_for_current_user()
-    existing = frappe.db.exists("Property Wishlist", {"customer": customer, "unit": unit})
+    identity = _get_identity_for_current_user()
+    filters = {"unit": unit}
+    if identity["customer"]:
+        filters["customer"] = identity["customer"]
+    else:
+        filters["lead"] = identity["lead"]
+
+    existing = frappe.db.exists("Property Wishlist", filters)
     if existing:
         frappe.delete_doc("Property Wishlist", existing, ignore_permissions=True)
         return {"saved": False}
     doc = frappe.get_doc({
         "doctype": "Property Wishlist",
-        "customer": customer,
+        "customer": identity["customer"],
+        "lead": identity["lead"],
         "unit": unit,
     })
     doc.insert(ignore_permissions=True)
@@ -270,15 +361,18 @@ def toggle_wishlist(unit):
 
 @frappe.whitelist(allow_guest=True)
 def submit_enquiry(unit, name=None, phone=None, message=None):
-    try:
-        customer = _get_customer_for_current_user()
-    except Exception:
+    customer = None
+    lead = None
+    if frappe.session.user != "Guest":
+        lead = frappe.db.get_value("User", frappe.session.user, "portal_lead")
         customer = None
 
     doc = frappe.get_doc({
         "doctype": "Property Enquiry",
+        "enquiry_id": frappe.model.naming.make_autoname("ENQ-.#####"),
         "unit": unit,
         "customer": customer,
+        "linked_lead": lead,
         "enquiry_type": "General Enquiry",
         "message": message,
     })
@@ -288,13 +382,85 @@ def submit_enquiry(unit, name=None, phone=None, message=None):
 
 @frappe.whitelist()
 def book_site_visit(unit, visit_date, visit_time_slot):
-    customer = _get_customer_for_current_user()
+    identity = _get_identity_for_current_user()
     doc = frappe.get_doc({
         "doctype": "Site Visit Booking",
         "unit": unit,
-        "customer": customer,
+        "customer": identity["customer"],
+        "lead": identity["lead"],
         "visit_date": visit_date,
         "visit_time_slot": visit_time_slot,
+    })
+    doc.insert(ignore_permissions=True)
+    return {"name": doc.name}
+
+
+def _get_or_create_tenant_for_current_user():
+    """Find-or-create a Tenant record for the logged-in portal user, using
+    their Lead info (name/phone/email) the first time they request a lease.
+    """
+    user = frappe.session.user
+    if user == "Guest":
+        frappe.throw(_("Please log in to do that."))
+
+    existing = frappe.db.get_value("Tenant", {"portal_user": user}, "name")
+    if existing:
+        return existing
+
+    lead_name = frappe.db.get_value("User", user, "portal_lead")
+    if not lead_name:
+        frappe.throw(_("No profile linked to this account."))
+    lead = frappe.get_doc("Lead", lead_name)
+
+    tenant = frappe.get_doc({
+        "doctype": "Tenant",
+        "tenant_name": lead.lead_name or lead.email_id,
+        "mobile": lead.mobile_no or "N/A",
+        "email": lead.email_id,
+        "portal_user": user,
+    })
+    tenant.insert(ignore_permissions=True)
+    return tenant.name
+
+
+@frappe.whitelist()
+def request_lease_contract(unit, start_date, duration_months):
+    """Portal-originated lease request. Creates a Draft Lease Contract only -
+    never submitted. Mirrors re_core.api.create_lease_contract but resolves
+    tenant/property/rent from the unit + logged-in visitor automatically.
+    """
+    from frappe.utils import add_months, flt
+
+    tenant = _get_or_create_tenant_for_current_user()
+
+    unit_doc = frappe.db.get_value("Unit", unit, ["property", "annual_rent", "status"], as_dict=True)
+    if not unit_doc:
+        frappe.throw(_("Unit not found."))
+    if unit_doc.status not in ("Vacant", "Reserved"):
+        frappe.throw(_("This unit is no longer available."))
+    if not unit_doc.annual_rent:
+        frappe.throw(_("This unit has no rent set - please contact an agent."))
+
+    duration_months = int(duration_months)
+    end_date = add_months(start_date, duration_months)
+    term_years = flt(duration_months) / 12
+    term_total = flt(unit_doc.annual_rent) * term_years if term_years > 0 else flt(unit_doc.annual_rent)
+
+    doc = frappe.get_doc({
+        "doctype": "Lease Contract",
+        "tenant": tenant,
+        "unit": unit,
+        "property": unit_doc.property,
+        "start_date": start_date,
+        "end_date": end_date,
+        "payment_frequency": "Monthly",
+        "status": "Draft",
+        "request_source": "Portal",
+        "charges": [{
+            "charge_type": "Rent",
+            "description": "Base Rent",
+            "amount": term_total,
+        }],
     })
     doc.insert(ignore_permissions=True)
     return {"name": doc.name}
