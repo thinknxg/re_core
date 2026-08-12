@@ -428,6 +428,10 @@ def submit_lease_contract(name):
     if doc.docstatus != 0:
         frappe.throw(_("Only Draft contracts can be submitted."))
     doc.submit()
+
+    if doc.tenant and frappe.db.get_value("Tenant", doc.tenant, "request_source") == "Portal":
+        frappe.db.set_value("Tenant", doc.tenant, "request_source", "Admin")
+
     return {"name": doc.name, "status": doc.status, "docstatus": doc.docstatus}
 
 
