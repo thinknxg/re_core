@@ -44,7 +44,7 @@ def _get_identity_for_current_user():
     lead = frappe.db.get_value("User", user, "portal_lead")
 
     if not lead:
-        frappe.throw(_("No profile linked to this account."))
+        frappe.throw(_("This account isn't set up as a portal visitor. Please log in with the account you used to sign up on the listings page."))
     return {"customer": None, "lead": lead}
 
 
@@ -80,6 +80,21 @@ def portal_signup(email, first_name, phone=None, password=None):
         user.save(ignore_permissions=True)
 
     frappe.db.commit()
+
+    try:
+        frappe.sendmail(
+            recipients=email,
+            subject=_("Welcome to RE Core Listings"),
+            message=_(
+                "Hi {0},<br><br>"
+                "Your account is ready. You can now save listings to your wishlist, "
+                "book site visits, and submit lease requests directly from the portal.<br><br>"
+                "— RE Core"
+            ).format(first_name),
+            now=True,
+        )
+    except Exception:
+        frappe.log_error(title="Portal signup email failed", message=frappe.get_traceback())
 
     frappe.local.login_manager.login_as(email)
     return {"user": email, "lead": lead.name}
@@ -377,6 +392,25 @@ def submit_enquiry(unit, name=None, phone=None, message=None):
         "message": message,
     })
     doc.insert(ignore_permissions=True)
+
+    recipient_email = frappe.session.user if frappe.session.user != "Guest" else None
+    if not recipient_email and lead:
+        recipient_email = frappe.db.get_value("Lead", lead, "email_id")
+    if recipient_email:
+        try:
+            frappe.sendmail(
+                recipients=recipient_email,
+                subject=_("We received your enquiry"),
+                message=_(
+                    "Hi {0},<br><br>"
+                    "Thanks for your enquiry about unit {1}. An agent will follow up with you shortly.<br><br>"
+                    "— RE Core"
+                ).format(name or "there", unit),
+                now=True,
+            )
+        except Exception:
+            frappe.log_error(title="Enquiry confirmation email failed", message=frappe.get_traceback())
+
     return {"name": doc.name}
 
 
@@ -392,6 +426,22 @@ def book_site_visit(unit, visit_date, visit_time_slot):
         "visit_time_slot": visit_time_slot,
     })
     doc.insert(ignore_permissions=True)
+
+    try:
+        frappe.sendmail(
+            recipients=frappe.session.user,
+            subject=_("Site visit requested"),
+            message=_(
+                "Hi,<br><br>"
+                "Your site visit for unit {0} is requested for {1} ({2}). "
+                "You'll get a confirmation once an agent reviews it.<br><br>"
+                "— RE Core"
+            ).format(unit, visit_date, visit_time_slot),
+            now=True,
+        )
+    except Exception:
+        frappe.log_error(title="Site visit confirmation email failed", message=frappe.get_traceback())
+
     return {"name": doc.name}
 
 
@@ -465,6 +515,56 @@ def request_lease_contract(unit, start_date, duration_months):
     })
     doc.insert(ignore_permissions=True)
     return {"name": doc.name}
+
+
+@frappe.whitelist()
+def get_my_requests():
+    """Everything the logged-in portal visitor has submitted - enquiries,
+    site visit requests, and lease requests - for their own 'My Requests' page.
+    """
+    user = frappe.session.user
+    if user == "Guest":
+        frappe.throw(_("Please log in to view your requests."))
+
+    lead = frappe.db.get_value("User", user, "portal_lead")
+    tenant = frappe.db.get_value("Tenant", {"portal_user": user}, "name")
+
+    enquiries = []
+    visits = []
+    leases = []
+
+    if lead:
+        enquiries = frappe.get_all(
+            "Property Enquiry",
+            filters={"linked_lead": lead},
+            fields=["name", "unit", "property", "enquiry_type", "status", "message", "creation"],
+            order_by="creation desc",
+        )
+        visits = frappe.get_all(
+            "Site Visit Booking",
+            filters={"lead": lead},
+            fields=["name", "unit", "property", "visit_date", "visit_time_slot", "status", "creation"],
+            order_by="creation desc",
+        )
+
+    if tenant:
+        leases = frappe.get_all(
+            "Lease Contract",
+            filters={"tenant": tenant},
+            fields=["name", "unit", "property", "start_date", "end_date", "status",
+                     "docstatus", "total_contract_value", "creation"],
+            order_by="creation desc",
+        )
+
+    all_units = list({r["unit"] for r in (enquiries + visits + leases) if r.get("unit")})
+    unit_map = {
+        u["name"]: u["unit_no"]
+        for u in frappe.get_all("Unit", filters={"name": ["in", all_units]}, fields=["name", "unit_no"])
+    } if all_units else {}
+    for r in enquiries + visits + leases:
+        r["unit_no"] = unit_map.get(r.get("unit"), r.get("unit"))
+
+    return {"enquiries": enquiries, "visits": visits, "leases": leases}
 
 
 @frappe.whitelist(allow_guest=True)

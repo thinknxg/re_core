@@ -267,7 +267,7 @@
     </div>
     <nav class="header-right">
       <a class="nav-link active" href="#">Listings</a>
-      <a class="nav-link" href="#">Visits</a>
+      <a class="nav-link" href="#" id="myRequestsLink" style="display:none;" onclick="event.preventDefault(); openMyRequests();">My Requests</a>
       <button class="wishlist-chip" id="wishlistChip">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-4.35-9.5-8.5C.9 9.2 2.4 5.5 6 5.5c2 0 3.3 1 4 2 0 0-.5 0 0 0s2-2 4-2c3.6 0 5.1 3.7 3.5 7C19 16.65 12 21 12 21z"/></svg>
         Saved <span class="count-badge" id="wishCount">0</span>
@@ -347,6 +347,19 @@
 <!-- ===== Dossier overlay ===== -->
 <div class="dossier-overlay" id="overlay">
   <div class="dossier" id="dossier"></div>
+</div>
+
+<!-- ===== My Requests overlay ===== -->
+<div class="dossier-overlay" id="myRequestsOverlay">
+  <div class="dossier" style="max-width:760px;">
+    <div style="padding:30px 36px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center;">
+      <span class="serif" style="font-size:24px;">My Requests</span>
+      <button onclick="closeMyRequests()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--ink-soft);">&times;</button>
+    </div>
+    <div style="padding:30px 36px;" id="myRequestsBody">
+      <div class="empty-state"><span class="serif">Loading…</span></div>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -818,18 +831,89 @@ async function checkPortalSession(){
 
 function updateAccountChip(){
   const chip = document.getElementById('accountChip');
+  const requestsLink = document.getElementById('myRequestsLink');
   if(CURRENT_PORTAL_USER){
     chip.textContent = CURRENT_PORTAL_USER.full_name || 'Account';
     chip.onclick = () => { if(confirm('Log out?')) doPortalLogout(); };
+    requestsLink.style.display = 'inline';
   } else {
     chip.textContent = 'Log in';
     chip.onclick = onAccountChipClick;
+    requestsLink.style.display = 'none';
   }
+}
+
+function statusBadgeColor(status){
+  const done = ['Closed', 'Completed', 'Cancelled', 'Terminated'];
+  const active = ['Confirmed', 'Active', 'Assigned', 'In Progress'];
+  if(done.includes(status)) return 'background:var(--sage); color:var(--moss-deep);';
+  if(active.includes(status)) return 'background:var(--brass-soft); color:var(--moss-deep);';
+  return 'background:var(--stone-deep); color:var(--ink-soft);';
+}
+
+function myRequestsSection(title, items, renderRow){
+  if(!items || items.length === 0){
+    return `<div style="margin-bottom:28px;"><div class="section-label">${title}</div><p style="font-size:13.5px; color:var(--ink-soft);">Nothing here yet.</p></div>`;
+  }
+  return `<div style="margin-bottom:28px;">
+    <div class="section-label">${title}</div>
+    <div style="display:flex; flex-direction:column; gap:10px;">${items.map(renderRow).join('')}</div>
+  </div>`;
+}
+
+async function openMyRequests(){
+  if(!requirePortalLogin()) return;
+  document.getElementById('myRequestsOverlay').classList.add('open');
+  const body = document.getElementById('myRequestsBody');
+  body.innerHTML = `<div class="empty-state"><span class="serif">Loading…</span></div>`;
+  try{
+    const data = await frappeCall('re_core.re_core.listing_portal_api.listing_portal.get_my_requests', {});
+
+    const enquiryRow = e => `<div class="panel-card" style="padding:14px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><b>${e.unit_no || e.unit || e.property || 'Unit'}</b> — ${e.enquiry_type || 'Enquiry'}</div>
+        <span class="mono" style="font-size:11px; padding:3px 10px; border-radius:20px; ${statusBadgeColor(e.status)}">${e.status}</span>
+      </div>
+      ${e.message ? `<p style="font-size:13px; color:var(--ink-soft); margin:6px 0 0;">${e.message}</p>` : ''}
+    </div>`;
+
+    const visitRow = v => `<div class="panel-card" style="padding:14px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><b>${v.unit_no || v.unit || v.property || 'Unit'}</b> — ${v.visit_date || '—'} · ${v.visit_time_slot || ''}</div>
+        <span class="mono" style="font-size:11px; padding:3px 10px; border-radius:20px; ${statusBadgeColor(v.status)}">${v.status}</span>
+      </div>
+    </div>`;
+
+    const leaseRow = l => `<div class="panel-card" style="padding:14px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div><b>${l.unit_no || l.unit || l.property || 'Unit'}</b> — ${l.start_date || '—'} to ${l.end_date || '—'}</div>
+        <span class="mono" style="font-size:11px; padding:3px 10px; border-radius:20px; ${statusBadgeColor(l.docstatus === 0 ? 'Draft' : l.status)}">${l.docstatus === 0 ? 'Awaiting Review' : l.status}</span>
+      </div>
+      <div style="font-size:12.5px; color:var(--ink-soft); margin-top:4px;">${rent(l.total_contract_value)} total contract value</div>
+    </div>`;
+
+    body.innerHTML =
+      myRequestsSection('Lease Requests', data.leases, leaseRow) +
+      myRequestsSection('Site Visits', data.visits, visitRow) +
+      myRequestsSection('Enquiries', data.enquiries, enquiryRow);
+  }catch(err){
+    console.error(err);
+    body.innerHTML = `<div class="empty-state"><span class="serif">Couldn't load your requests</span>${err.message}</div>`;
+  }
+}
+
+function closeMyRequests(){
+  document.getElementById('myRequestsOverlay').classList.remove('open');
 }
 
 function onAccountChipClick(){
   authMode = 'login';
   openAuthModal();
+}
+
+function resetAuthModalToLogin(){
+  authMode = 'login';
+  applyAuthMode();
 }
 
 function openAuthModal(){
@@ -854,11 +938,52 @@ function toggleAuthMode(e){
 
 function applyAuthMode(){
   const isSignup = authMode === 'signup';
-  document.getElementById('authModalTitle').textContent = isSignup ? 'Sign up' : 'Log in';
+  const isForgot = authMode === 'forgot';
+
+  document.getElementById('authModalTitle').textContent = isForgot ? 'Reset password' : (isSignup ? 'Sign up' : 'Log in');
   document.getElementById('authFieldsSignup').style.display = isSignup ? 'block' : 'none';
-  document.getElementById('authSubmitBtn').textContent = isSignup ? 'Sign up' : 'Log in';
-  document.getElementById('authSwitchPrompt').textContent = isSignup ? 'Already have an account?' : "Don't have an account?";
-  document.getElementById('authSwitchLink').textContent = isSignup ? 'Log in' : 'Sign up';
+  document.getElementById('authPassword').style.display = isForgot ? 'none' : 'block';
+  document.getElementById('authForgotWrap').style.display = isForgot ? 'none' : (isSignup ? 'none' : 'block');
+  document.getElementById('authSwitchRow').style.display = isForgot ? 'none' : 'block';
+  document.getElementById('authSubmitBtn').textContent = isForgot ? 'Send reset link' : (isSignup ? 'Sign up' : 'Log in');
+  document.getElementById('authSubmitBtn').onclick = isForgot ? submitForgotPassword : submitAuthForm;
+  if(!isForgot){
+    document.getElementById('authSwitchPrompt').textContent = isSignup ? 'Already have an account?' : "Don't have an account?";
+    document.getElementById('authSwitchLink').textContent = isSignup ? 'Log in' : 'Sign up';
+  }
+}
+
+function showForgotPassword(){
+  authMode = 'forgot';
+  document.getElementById('authModalMsg').style.display = 'none';
+  applyAuthMode();
+}
+
+async function submitForgotPassword(){
+  const email = document.getElementById('authEmail').value.trim();
+  if(!email){ showAuthError('Enter your email first.'); return; }
+  const btn = document.getElementById('authSubmitBtn');
+  btn.disabled = true;
+  try{
+    const res = await frappeCall('frappe.core.doctype.user.user.reset_password', { user: email });
+    if(res === 'not found'){
+      showAuthError('No account found with that email.');
+    } else if(res === 'disabled'){
+      showAuthError('This account has been disabled.');
+    } else if(res === 'not allowed'){
+      showAuthError("This account can't be reset here.");
+    } else {
+      const msgEl = document.getElementById('authModalMsg');
+      msgEl.style.background = '#E8F5EE';
+      msgEl.style.color = 'var(--moss-deep)';
+      msgEl.textContent = 'If that email is registered, a reset link has been sent.';
+      msgEl.style.display = 'block';
+    }
+  }catch(err){
+    showAuthError('Something went wrong. Try again.');
+  }finally{
+    btn.disabled = false;
+  }
 }
 
 function showAuthError(msg){
@@ -929,9 +1054,12 @@ loadCsrfToken().then(loadProperties).then(checkPortalSession);
       <input class="form-input" id="authPhone" placeholder="Phone (optional)" style="width:100%; margin-bottom:8px;">
     </div>
     <input class="form-input" id="authEmail" type="email" placeholder="Email" style="width:100%; margin-bottom:8px;">
-    <input class="form-input" id="authPassword" type="password" placeholder="Password" style="width:100%; margin-bottom:14px;">
+    <input class="form-input" id="authPassword" type="password" placeholder="Password" style="width:100%; margin-bottom:6px;">
+    <div id="authForgotWrap" style="text-align:right; margin-bottom:8px;">
+      <a href="#" onclick="event.preventDefault(); showForgotPassword();" style="font-size:12px; color:var(--ink-soft);">Forgot password?</a>
+    </div>
     <button class="submit-mini" id="authSubmitBtn" onclick="submitAuthForm()">Log in</button>
-    <div style="text-align:center; margin-top:14px; font-size:13px; color:var(--ink-soft);">
+    <div style="text-align:center; margin-top:14px; font-size:13px; color:var(--ink-soft);" id="authSwitchRow">
       <span id="authSwitchPrompt">Don't have an account?</span>
       <a href="#" id="authSwitchLink" onclick="toggleAuthMode(event)" style="color:var(--brass); font-weight:600;">Sign up</a>
     </div>
