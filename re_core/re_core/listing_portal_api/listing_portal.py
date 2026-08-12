@@ -392,6 +392,11 @@ def submit_enquiry(unit, name=None, phone=None, message=None):
         "message": message,
     })
     doc.insert(ignore_permissions=True)
+    _notify_re_managers(
+        document_type="Property Enquiry",
+        document_name=doc.name,
+        subject=_("New enquiry received for unit {0}").format(unit),
+    )
 
     recipient_email = frappe.session.user if frappe.session.user != "Guest" else None
     if not recipient_email and lead:
@@ -426,6 +431,11 @@ def book_site_visit(unit, visit_date, visit_time_slot):
         "visit_time_slot": visit_time_slot,
     })
     doc.insert(ignore_permissions=True)
+    _notify_re_managers(
+        document_type="Site Visit Booking",
+        document_name=doc.name,
+        subject=_("New site visit requested for unit {0}").format(unit),
+    )
 
     try:
         frappe.sendmail(
@@ -443,6 +453,22 @@ def book_site_visit(unit, visit_date, visit_time_slot):
         frappe.log_error(title="Site visit confirmation email failed", message=frappe.get_traceback())
 
     return {"name": doc.name}
+
+
+def _notify_re_managers(document_type, document_name, subject):
+    """Alert every enabled RE Manager about a new portal-originated record,
+    matching the notification pattern used in Lease Contract._flag_security_deposit.
+    """
+    for user in frappe.get_all("Has Role", filters={"role": "RE Manager", "parenttype": "User"}, pluck="parent"):
+        if frappe.db.get_value("User", user, "enabled"):
+            frappe.get_doc({
+                "doctype": "Notification Log",
+                "for_user": user,
+                "type": "Alert",
+                "document_type": document_type,
+                "document_name": document_name,
+                "subject": subject,
+            }).insert(ignore_permissions=True)
 
 
 def _get_or_create_tenant_for_current_user():
@@ -514,6 +540,12 @@ def request_lease_contract(unit, start_date, duration_months):
         }],
     })
     doc.insert(ignore_permissions=True)
+
+    _notify_re_managers(
+        "Lease Contract", doc.name,
+        _("New lease request for unit {0}").format(unit)
+    )
+
     return {"name": doc.name}
 
 
