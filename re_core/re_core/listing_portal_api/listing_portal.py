@@ -397,6 +397,8 @@ def submit_enquiry(unit, name=None, phone=None, message=None):
         document_name=doc.name,
         subject=_("New enquiry received for unit {0}").format(unit),
     )
+    if lead:
+        _get_or_create_re_lead(lead)
 
     recipient_email = frappe.session.user if frappe.session.user != "Guest" else None
     if not recipient_email and lead:
@@ -436,6 +438,8 @@ def book_site_visit(unit, visit_date, visit_time_slot):
         document_name=doc.name,
         subject=_("New site visit requested for unit {0}").format(unit),
     )
+    if identity.get("lead"):
+        _get_or_create_re_lead(identity["lead"])
 
     try:
         frappe.sendmail(
@@ -453,6 +457,37 @@ def book_site_visit(unit, visit_date, visit_time_slot):
         frappe.log_error(title="Site visit confirmation email failed", message=frappe.get_traceback())
 
     return {"name": doc.name}
+
+
+def _get_or_create_re_lead(core_lead):
+    """Find-or-create the RE Lead bridged from a portal-originated core Lead,
+    so portal activity surfaces in the agent-facing CRM pipeline (re_crm).
+    Reuses the same RE Lead across repeat submissions from the same visitor.
+    Never throws - portal flows must not break if the CRM bridge has an issue.
+    """
+    if not core_lead:
+        return None
+    try:
+        existing = frappe.db.get_value("RE Lead", {"portal_lead": core_lead}, "name")
+        if existing:
+            return existing
+
+        lead_doc = frappe.get_doc("Lead", core_lead)
+        re_lead = frappe.get_doc({
+            "doctype": "RE Lead",
+            "full_name": lead_doc.lead_name or "Portal Visitor",
+            "mobile": lead_doc.mobile_no or "N/A",
+            "email": lead_doc.email_id,
+            "status": "New",
+            "source": "Website",
+            "request_source": "Portal",
+            "portal_lead": core_lead,
+        })
+        re_lead.insert(ignore_permissions=True)
+        return re_lead.name
+    except Exception:
+        frappe.log_error(title="RE Lead bridge failed", message=frappe.get_traceback())
+        return None
 
 
 def _notify_re_managers(document_type, document_name, subject):
@@ -545,6 +580,9 @@ def request_lease_contract(unit, start_date, duration_months):
         "Lease Contract", doc.name,
         _("New lease request for unit {0}").format(unit)
     )
+    core_lead = frappe.db.get_value("User", frappe.session.user, "portal_lead")
+    if core_lead:
+        _get_or_create_re_lead(core_lead)
 
     return {"name": doc.name}
 

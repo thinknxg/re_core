@@ -67,6 +67,25 @@ def get_sidebar_counts():
     }
 
 
+@frappe.whitelist(methods=["POST"])
+def mark_notifications_read(document_type):
+    frappe.db.set_value(
+        "Notification Log",
+        {"for_user": frappe.session.user, "read": 0, "document_type": document_type},
+        "read",
+        1,
+    )
+    frappe.db.commit()
+    verify = frappe.db.get_all(
+        "Notification Log",
+        filters={"for_user": frappe.session.user, "document_type": document_type},
+        fields=["name", "read"],
+    )
+    with open("/tmp/mark_read_debug2.log", "a") as f:
+        f.write(f"document_type={document_type!r} user={frappe.session.user!r} state_after_commit={verify}\n")
+    return {"ok": True}
+
+
 @frappe.whitelist()
 def get_notifications():
     items = []
@@ -113,6 +132,42 @@ def get_notifications():
             "label": f"{sla_breached_count} lead{'s' if sla_breached_count != 1 else ''} past SLA, not yet contacted",
             "count": sla_breached_count,
             "screen": "crm",
+        })
+
+    new_enquiries_count = frappe.db.count(
+        "Notification Log",
+        {"for_user": frappe.session.user, "read": 0, "document_type": "Property Enquiry"},
+    )
+    if new_enquiries_count:
+        items.append({
+            "type": "new_enquiries",
+            "label": f"{new_enquiries_count} new propert{'ies' if new_enquiries_count != 1 else 'y'} enquir{'ies' if new_enquiries_count != 1 else 'y'}",
+            "count": new_enquiries_count,
+            "screen": "property_enquiries",
+        })
+
+    new_site_visits_count = frappe.db.count(
+        "Notification Log",
+        {"for_user": frappe.session.user, "read": 0, "document_type": "Site Visit Booking"},
+    )
+    if new_site_visits_count:
+        items.append({
+            "type": "new_site_visits",
+            "label": f"{new_site_visits_count} new site visit request{'s' if new_site_visits_count != 1 else ''}",
+            "count": new_site_visits_count,
+            "screen": "site_visit_requests",
+        })
+
+    new_lease_requests_count = frappe.db.count(
+        "Notification Log",
+        {"for_user": frappe.session.user, "read": 0, "document_type": "Lease Contract"},
+    )
+    if new_lease_requests_count:
+        items.append({
+            "type": "new_lease_requests",
+            "label": f"{new_lease_requests_count} new lease request{'s' if new_lease_requests_count != 1 else ''}",
+            "count": new_lease_requests_count,
+            "screen": "lease_requests",
         })
 
     return {
@@ -1301,24 +1356,29 @@ def add_lease_charge(lease_contract, charge_type, description, amount, item_tax_
 # PROPERTY PHOTOS (child table on Property via 'photos')
 # ─────────────────────────────────────────────
 @frappe.whitelist()
-def get_property_photos(property):
+def get_property_photos(property, unit=None):
     doc = frappe.get_doc("Property", property)
+    rows = doc.photos
+    if unit:
+        rows = [row for row in rows if row.unit == unit]
     return [
         {
             "name": row.name,
             "image": row.image,
+            "unit": row.unit,
             "caption": row.caption,
             "is_cover": row.is_cover,
         }
-        for row in doc.photos
+        for row in rows
     ]
 
 
 @frappe.whitelist()
-def add_property_photo(property, image, caption=None, is_cover=0):
+def add_property_photo(property, image, unit=None, caption=None, is_cover=0):
     doc = frappe.get_doc("Property", property)
     doc.append("photos", {
         "image": image,
+        "unit": unit,
         "caption": caption,
         "is_cover": int(is_cover),
     })

@@ -5,13 +5,13 @@ app_description = "GCC Real Estate Platform — Property, Tenant & Lease Managem
 app_email = "dev@kreatao.com"
 app_license = "MIT"
 
-required_apps = ["erpnext"]
+required_apps = ["erpnext", "re_crm"]
 
 after_install = "re_core.install.after_install"
 
 fixtures = [
     {"doctype": "Custom Field", "filters": [
-        ["dt", "in", ["Unit", "Tenant", "Property", "Purchase Invoice", "User"]],
+        ["dt", "in", ["Unit", "Tenant", "Property", "Purchase Invoice", "User", "RE Lead"]],
         ["fieldname", "in", [
             "published_to_portal",
             "portal_access_code",
@@ -21,7 +21,7 @@ fixtures = [
             "re_core_section", "custom_property", "custom_tenancy_id",
             "cb_re_core", "custom_sales_invoice_id", "custom_loan",
             "owner_ref", "custom_source_sales_invoice", "custom_lease_contract",
-            "portal_lead",
+            "portal_lead", "request_source",
         ]],
     ]},
     {"dt": "Role", "filters": [["name", "in", [

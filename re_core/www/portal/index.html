@@ -2121,9 +2121,12 @@
       <div class="screen" id="screen-property_photos">
         <div class="card" style="margin-bottom:16px;">
           <div class="card-header"><div class="card-title">Select Property</div></div>
-          <div style="padding:14px 18px;">
-            <select id="pp-filter-property" class="filter-select" onchange="loadPropertyPhotosList()">
+          <div style="padding:14px 18px; display:flex; gap:10px; flex-wrap:wrap;">
+            <select id="pp-filter-property" class="filter-select" onchange="loadPropertyPhotosScreenUnits(); loadPropertyPhotosList();" style="flex:1; min-width:180px;">
               <option value="">— Select a property —</option>
+            </select>
+            <select id="pp-filter-unit" class="filter-select" onchange="loadPropertyPhotosList()" style="flex:1; min-width:180px;">
+              <option value="">— All units —</option>
             </select>
           </div>
         </div>
@@ -2134,6 +2137,9 @@
           </div>
           <div id="pp-add-form" style="display:none; margin:0 18px 14px; padding:14px; background:var(--sand); border-radius:var(--radius); flex-direction:column; gap:8px;">
             <input class="form-input" type="file" id="pp-new-file" accept="image/*">
+            <select id="pp-new-unit" class="form-input">
+              <option value="">— Not unit-specific (whole property) —</option>
+            </select>
             <input class="form-input" id="pp-new-caption" placeholder="Caption (optional)">
             <label style="display:flex;align-items:center;gap:6px;font-size: 15.0px;color:var(--ink-mid);">
               <input type="checkbox" id="pp-new-cover"> Set as cover photo
@@ -5344,16 +5350,37 @@
     } catch (err) { console.error(err); }
   }
 
+  async function loadPropertyPhotosScreenUnits() {
+    const property = document.getElementById('pp-filter-property')?.value || '';
+    const filterSel = document.getElementById('pp-filter-unit');
+    const formSel = document.getElementById('pp-new-unit');
+    filterSel.innerHTML = '<option value="">— All units —</option>';
+    formSel.innerHTML = '<option value="">— Not unit-specific (whole property) —</option>';
+    if (!property) return;
+    try {
+      const allUnits = await getUnitsCached();
+      const units = allUnits.filter(u => u.property === property);
+      units.forEach(u => {
+        const label = u.unit_no || u.name;
+        filterSel.insertAdjacentHTML('beforeend', `<option value="${u.name}">${label}</option>`);
+        formSel.insertAdjacentHTML('beforeend', `<option value="${u.name}">${label}</option>`);
+      });
+    } catch (err) { console.error(err); }
+  }
+
   async function loadPropertyPhotosList() {
     const grid = document.getElementById('property-photos-grid');
     const property = document.getElementById('pp-filter-property')?.value || '';
+    const unit = document.getElementById('pp-filter-unit')?.value || '';
     if (!property) {
       grid.innerHTML = '<div style="color:var(--ink-muted);font-size: 15.0px;">Select a property above.</div>';
       return;
     }
     grid.innerHTML = '<div style="color:var(--ink-muted);font-size: 15.0px;">Loading…</div>';
     try {
-      const photos = await callApiWithParams('re_core', 'get_property_photos', { property });
+      const params = { property };
+      if (unit) params.unit = unit;
+      const photos = await callApiWithParams('re_core', 'get_property_photos', params);
       grid.innerHTML = (photos || []).length ? photos.map(p => `
         <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--white);">
           <div style="height:110px;background:var(--sand-dark);display:flex;align-items:center;justify-content:center;overflow:hidden;">
@@ -5361,7 +5388,10 @@
           </div>
           <div style="padding:8px 10px;font-size: 14.0px;">
             <div>${p.caption || '—'}</div>
-            ${p.is_cover ? '<span class="badge badge-gold" style="margin-top:4px;display:inline-block;">Cover</span>' : ''}
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px;">
+              ${p.unit ? `<span class="badge" style="display:inline-block;">${p.unit}</span>` : ''}
+              ${p.is_cover ? '<span class="badge badge-gold" style="display:inline-block;">Cover</span>' : ''}
+            </div>
             <div style="display:flex;gap:6px;margin-top:6px;">
               ${!p.is_cover ? `<button class="btn btn-ghost btn-sm" onclick="setPropertyCoverPhoto('${p.name}')">Set Cover</button>` : ''}
               <button class="btn btn-ghost btn-sm" onclick="deletePropertyPhoto('${p.name}')">Delete</button>
@@ -5408,12 +5438,14 @@
       await postApi('re_core', 'add_property_photo', {
         property,
         image: fileUrl,
+        unit: document.getElementById('pp-new-unit').value || null,
         caption: document.getElementById('pp-new-caption').value || null,
         is_cover: document.getElementById('pp-new-cover').checked ? 1 : 0,
       });
       document.getElementById('pp-add-form').style.display = 'none';
       document.getElementById('pp-new-caption').value = '';
       document.getElementById('pp-new-cover').checked = false;
+      document.getElementById('pp-new-unit').value = '';
       fileInput.value = '';
       loadPropertyPhotosList();
     } catch (err) {
@@ -6123,11 +6155,26 @@
     panel.style.display = isOpen ? 'none' : 'block';
   }
 
-  function handleNotificationItemClick(index) {
+  const NOTIF_TYPE_TO_DOCTYPE = {
+    'new_enquiries': 'Property Enquiry',
+    'new_site_visits': 'Site Visit Booking',
+    'new_lease_requests': 'Lease Contract',
+  };
+
+  async function handleNotificationItemClick(index) {
     const item = (window.__notificationItems || [])[index];
     if (!item) return;
     document.getElementById('notif-panel').style.display = 'none';
     showScreen(item.screen);
+    const docType = NOTIF_TYPE_TO_DOCTYPE[item.type];
+    if (docType) {
+      try {
+        await postApi('re_core', 'mark_notifications_read', { document_type: docType });
+        loadNotifications();
+      } catch (err) {
+        console.error('mark_notifications_read failed:', err);
+      }
+    }
   }
 
   // Load live data for whichever screen is active on first paint

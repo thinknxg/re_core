@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "image",
+  "unit",
   "caption",
   "is_cover"
  ],
@@ -18,6 +19,14 @@
    "in_list_view": 1,
    "label": "Image",
    "reqd": 1
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "options": "Unit",
+   "label": "Unit",
+   "in_list_view": 1,
+   "description": "Optional \u2014 tag this photo to a specific unit within the property."
   },
   {
    "fieldname": "caption",
