@@ -440,7 +440,19 @@ async function frappeCall(method, args){
   });
   if(!res.ok){
     const errText = await res.text();
-    throw new Error(`${method} failed (${res.status}): ${errText.slice(0,200)}`);
+    let message = `Request failed (HTTP ${res.status})`;
+    try{
+      const parsed = JSON.parse(errText);
+      if(parsed._server_messages){
+        const serverMsgs = JSON.parse(parsed._server_messages);
+        const first = JSON.parse(serverMsgs[0]);
+        if(first.message) message = first.message.replace(/<[^>]*>/g, '').trim();
+      }else if(parsed.exception){
+        const parts = parsed.exception.split(': ');
+        message = parts.length > 1 ? parts.slice(1).join(': ').trim() : parsed.exception;
+      }
+    }catch(e){ /* not JSON or unexpected shape - keep generic message */ }
+    throw new Error(message);
   }
   const data = await res.json();
   return data.message;
@@ -708,7 +720,7 @@ function openDossier(id){
         document.getElementById('leaseRequestForm').classList.remove('open');
       }catch(err){
         console.error(err);
-        showToast("Couldn't submit lease request — try again");
+        showToast(err.message || "Couldn't submit lease request — try again");
       }finally{
         btn.disabled = false; btn.textContent = 'Submit request';
       }
