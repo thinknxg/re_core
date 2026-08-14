@@ -249,6 +249,31 @@
   .toast{position:fixed; bottom:30px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--hero-ink); color:var(--stone); padding:13px 24px; border-radius:11px; font-size:13px; opacity:0; pointer-events:none; transition:all .3s ease; z-index:200; font-weight:500; box-shadow:var(--shadow-lift);}
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
 
+  .compare-check{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft); margin-bottom:12px; cursor:pointer; user-select:none;}
+  .compare-check input{accent-color:var(--brass); width:14px; height:14px; cursor:pointer;}
+  .compare-check input:disabled{opacity:0.4; cursor:not-allowed;}
+
+  .compare-bar{
+    position:fixed; bottom:0; left:0; right:0; z-index:150;
+    background:var(--hero-ink); color:var(--stone);
+    padding:16px 28px; display:none; align-items:center; justify-content:center; gap:18px;
+    box-shadow:0 -14px 36px -12px rgba(11,21,18,0.5);
+  }
+  .compare-bar.show{display:flex;}
+  .compare-bar .label{font-size:13.5px; font-weight:500;}
+  .compare-bar .label b{color:var(--brass-soft); font-family:'IBM Plex Mono',monospace;}
+  .compare-bar button{border:none; border-radius:8px; padding:9px 18px; font-size:13px; font-weight:600; cursor:pointer;}
+  .compare-bar .btn-view{background:var(--brass); color:var(--white);}
+  .compare-bar .btn-clear{background:transparent; color:rgba(241,236,225,0.7); text-decoration:underline;}
+
+  .compare-table{width:100%; border-collapse:collapse; margin-top:8px;}
+  .compare-table th, .compare-table td{padding:12px 14px; text-align:left; border-bottom:1px solid var(--line); font-size:13.5px; vertical-align:top;}
+  .compare-table th{font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); width:120px;}
+  .compare-table img{width:100%; height:120px; object-fit:cover; border-radius:10px; margin-bottom:8px;}
+  .compare-table .cmp-title{font-family:'Fraunces',serif; font-size:16px; font-weight:500; margin-bottom:2px;}
+  .compare-table .cmp-price{font-family:'IBM Plex Mono',monospace; color:var(--moss-deep); font-weight:500;}
+  .compare-table .cmp-remove{font-size:11px; color:var(--rust); background:none; border:none; cursor:pointer; text-decoration:underline; margin-top:6px;}
+
   .empty-state{text-align:center; padding:90px 20px; color:var(--ink-soft);}
   .empty-state .serif{font-size:23px; color:var(--ink); margin-bottom:9px; display:block;}
 
@@ -363,6 +388,12 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="compare-bar" id="compareBar">
+  <div class="label"><b id="compareCount">0</b> units selected to compare</div>
+  <button class="btn-view" onclick="openCompareView()">Compare</button>
+  <button class="btn-clear" onclick="clearCompare()">Clear</button>
+</div>
 
 <script>
 /* ============================================================
@@ -521,6 +552,10 @@ function cardTemplate(p){
         </button>
       </div>
       <div class="card-body">
+        <label class="compare-check" data-compare="${p.id}">
+          <input type="checkbox" ${compareSet.has(p.id)?'checked':''} ${p.isStandalone?'disabled':''}>
+          <span>Compare</span>
+        </label>
         <div class="card-price">${rent(p.rent)}<span>/ year</span></div>
         <h3 class="card-title">${p.title || p.type + ' · ' + p.building}</h3>
         <div class="card-loc">${p.building}${p.location ? ' — ' + p.location : ''} · ${p.type}</div>
@@ -784,11 +819,91 @@ function closeDossier(){
 }
 
 /* ===== Event wiring ===== */
+let compareSet = new Set();
+
+function updateCompareBar(){
+  const bar = document.getElementById('compareBar');
+  const count = compareSet.size;
+  if(count >= 2){
+    bar.classList.add('show');
+    document.getElementById('compareCount').textContent = count;
+  } else {
+    bar.classList.remove('show');
+  }
+}
+
+function toggleCompare(id, checked){
+  if(checked){
+    if(compareSet.size >= 3){
+      showToast('You can compare up to 3 units at a time');
+      const wrapper = document.querySelector(`[data-compare="${id}"] input`);
+      if(wrapper) wrapper.checked = false;
+      return;
+    }
+    compareSet.add(id);
+  } else {
+    compareSet.delete(id);
+  }
+  updateCompareBar();
+}
+
+function clearCompare(){
+  compareSet.clear();
+  document.querySelectorAll('[data-compare] input').forEach(el => el.checked = false);
+  updateCompareBar();
+}
+
+function openCompareView(){
+  const units = [...compareSet].map(id => PROPERTIES.find(p => p.id === id)).filter(Boolean);
+  if(units.length < 2) return;
+
+  const rows = [
+    { label: 'Price', get: p => rent(p.rent) + ' / yr' },
+    { label: 'Type', get: p => p.type || '—' },
+    { label: 'Bedrooms', get: p => p.beds === 0 ? 'Studio' : p.beds },
+    { label: 'Bathrooms', get: p => p.baths },
+    { label: 'Area', get: p => p.sqm.toLocaleString() + ' sqm' },
+    { label: 'Furnishing', get: p => p.furnishing || '—' },
+    { label: 'Parking', get: p => p.parking || 0 },
+    { label: 'Location', get: p => p.location || '—' },
+    { label: 'Status', get: p => p.status },
+  ];
+
+  const dossier = document.getElementById('dossier');
+  dossier.innerHTML = `
+    <div class="dossier-body" style="padding:32px 36px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <span class="serif" style="font-size:24px;">Compare Units</span>
+        <button class="dossier-close" style="position:static;" onclick="closeDossier()">&times;</button>
+      </div>
+      <table class="compare-table">
+        <tr>
+          <th></th>
+          ${units.map(p => `<td>
+            <img src="${p.img}" alt="${p.title || p.building}">
+            <div class="cmp-title">${p.title || p.type + ' · ' + p.building}</div>
+            <div class="cmp-price">${rent(p.rent)}</div>
+            <button class="cmp-remove" onclick="compareSet.delete('${p.id}'); openCompareView(); updateCompareBar();">Remove</button>
+          </td>`).join('')}
+        </tr>
+        ${rows.map(r => `<tr><th>${r.label}</th>${units.map(p => `<td>${r.get(p)}</td>`).join('')}</tr>`).join('')}
+      </table>
+    </div>
+  `;
+  document.getElementById('overlay').classList.add('open');
+}
+
 document.getElementById('grid').addEventListener('click', (e)=>{
   const wishBtn = e.target.closest('[data-wish]');
   if(wishBtn){ e.stopPropagation(); toggleWish(wishBtn.dataset.wish, wishBtn); return; }
+  const compareBtn = e.target.closest('[data-compare]');
+  if(compareBtn){ e.stopPropagation(); return; }
   const card = e.target.closest('.card');
   if(card) openDossier(card.dataset.id);
+});
+document.getElementById('grid').addEventListener('change', (e)=>{
+  const compareBtn = e.target.closest('[data-compare]');
+  if(compareBtn){ toggleCompare(compareBtn.dataset.compare, e.target.checked); }
 });
 document.getElementById('overlay').addEventListener('click', (e)=>{ if(e.target.id==='overlay') closeDossier(); });
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDossier(); });
