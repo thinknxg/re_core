@@ -637,6 +637,126 @@ def get_my_requests():
     return {"enquiries": enquiries, "visits": visits, "leases": leases}
 
 
+def check_saved_searches():
+    """Scheduled job (daily): for each enabled Saved Search, find units that
+    became newly available since last_checked and match the criteria, notify
+    the visitor by email + Notification Log, then advance last_checked.
+    """
+    searches = frappe.get_all(
+        "Saved Search",
+        filters={"enabled": 1},
+        fields=["name", "lead", "location", "unit_type", "bedrooms", "min_rent", "max_rent", "last_checked"],
+    )
+
+    for s in searches:
+        conditions = ["u.published_to_portal = 1", "u.status = 'Vacant'", "p.is_live = 1",
+                      "u.modified > %(since)s"]
+        values = {"since": s.last_checked}
+
+        if s.location:
+            conditions.append("(p.city = %(location)s OR p.area = %(location)s OR CONCAT(p.area, ', ', p.city) = %(location)s)")
+            values["location"] = s.location
+        if s.unit_type:
+            conditions.append("u.unit_type = %(unit_type)s")
+            values["unit_type"] = s.unit_type
+        if s.bedrooms:
+            conditions.append("u.bedrooms >= %(bedrooms)s")
+            values["bedrooms"] = s.bedrooms
+        if s.min_rent:
+            conditions.append("u.annual_rent >= %(min_rent)s")
+            values["min_rent"] = s.min_rent
+        if s.max_rent:
+            conditions.append("u.annual_rent <= %(max_rent)s")
+            values["max_rent"] = s.max_rent
+
+        matches = frappe.db.sql(f"""
+            SELECT u.name as unit_name, u.unit_no, u.annual_rent, p.property_name, p.city, p.area
+            FROM `tabUnit` u
+            INNER JOIN `tabProperty` p ON u.property = p.name
+            WHERE {" AND ".join(conditions)}
+            LIMIT 20
+        """, values, as_dict=True)
+
+        if matches:
+            _notify_saved_search_match(s, matches)
+
+        frappe.db.set_value("Saved Search", s.name, "last_checked", frappe.utils.now())
+
+    frappe.db.commit()
+
+
+def _notify_saved_search_match(search, matches):
+    lead_doc = frappe.get_doc("Lead", search.lead)
+    user = frappe.db.get_value("User", {"portal_lead": search.lead}, "name")
+
+    summary = ", ".join(f"{m.unit_no or m.unit_name} at {m.property_name}" for m in matches[:5])
+
+    if user:
+        frappe.get_doc({
+            "doctype": "Notification Log",
+            "for_user": user,
+            "type": "Alert",
+            "document_type": "Saved Search",
+            "document_name": search.name,
+            "subject": _("{0} new listing(s) match your saved search").format(len(matches)),
+        }).insert(ignore_permissions=True)
+
+    if lead_doc.email_id:
+        try:
+            frappe.sendmail(
+                recipients=lead_doc.email_id,
+                subject=_("New listings match your saved search"),
+                message=_(
+                    "Hi {0},<br><br>"
+                    "{1} new listing(s) just became available matching your saved search:<br>{2}<br><br>"
+                    "Log in to the portal to view and save them.<br><br>— RE Core"
+                ).format(lead_doc.lead_name or "there", len(matches), summary),
+                now=True,
+            )
+        except Exception:
+            frappe.log_error(title="Saved search alert email failed", message=frappe.get_traceback())
+
+
+@frappe.whitelist()
+def create_saved_search(location=None, unit_type=None, bedrooms=None, min_rent=None, max_rent=None):
+    identity = _get_identity_for_current_user()
+    doc = frappe.get_doc({
+        "doctype": "Saved Search",
+        "lead": identity["lead"],
+        "location": location,
+        "unit_type": unit_type,
+        "bedrooms": bedrooms,
+        "min_rent": min_rent,
+        "max_rent": max_rent,
+        "last_checked": frappe.utils.now(),
+    })
+    doc.insert(ignore_permissions=True)
+    return {"name": doc.name}
+
+
+@frappe.whitelist()
+def get_my_saved_searches():
+    identity = _get_identity_for_current_user()
+    if not identity["lead"]:
+        return []
+    return frappe.get_all(
+        "Saved Search",
+        filters={"lead": identity["lead"]},
+        fields=["name", "location", "unit_type", "bedrooms", "min_rent", "max_rent", "enabled", "creation"],
+        order_by="creation desc",
+    )
+
+
+@frappe.whitelist()
+def delete_saved_search(name):
+    identity = _get_identity_for_current_user()
+    owner_lead = frappe.db.get_value("Saved Search", name, "lead")
+    if owner_lead != identity["lead"]:
+        frappe.throw(_("Not permitted."))
+    frappe.delete_doc("Saved Search", name, ignore_permissions=True)
+    return {"deleted": name}
+
+
 @frappe.whitelist(allow_guest=True)
 def calculate_rent_plan(annual_rent, cheques=4):
     """Splits the annual rent into an even cheque schedule — the standard

@@ -354,6 +354,7 @@
     </div>
     <div class="filter-divider"></div>
     <button class="btn-clear" id="clearFilters">Clear</button>
+    <button class="btn-clear" id="saveSearchBtn">Save search</button>
     <button class="btn-apply" id="applyFilters">Apply</button>
   </div>
 
@@ -908,6 +909,28 @@ document.getElementById('grid').addEventListener('change', (e)=>{
 document.getElementById('overlay').addEventListener('click', (e)=>{ if(e.target.id==='overlay') closeDossier(); });
 document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeDossier(); });
 
+document.getElementById('saveSearchBtn').onclick = async ()=>{
+  if(!requirePortalLogin()) return;
+  const location = document.getElementById('fLocation').value;
+  const type = document.getElementById('fType').value;
+  const beds = document.getElementById('fBeds').value;
+  const min = document.getElementById('fMin').value;
+  const max = document.getElementById('fMax').value;
+  if(!location && !type && !beds && !min && !max){
+    showToast('Set at least one filter before saving a search');
+    return;
+  }
+  try{
+    await frappeCall('re_core.re_core.listing_portal_api.listing_portal.create_saved_search', {
+      location: location || null, unit_type: type || null, bedrooms: beds || null,
+      min_rent: min || null, max_rent: max || null
+    });
+    showToast('Search saved — we\'ll email you when new matches appear');
+  }catch(err){
+    console.error(err);
+    showToast('Could not save search — try again');
+  }
+};
 document.getElementById('applyFilters').onclick = ()=>{
   activeFilters = {
     location: document.getElementById('fLocation').value,
@@ -994,7 +1017,10 @@ async function openMyRequests(){
   const body = document.getElementById('myRequestsBody');
   body.innerHTML = `<div class="empty-state"><span class="serif">Loading…</span></div>`;
   try{
-    const data = await frappeCall('re_core.re_core.listing_portal_api.listing_portal.get_my_requests', {});
+    const [data, savedSearches] = await Promise.all([
+      frappeCall('re_core.re_core.listing_portal_api.listing_portal.get_my_requests', {}),
+      frappeCall('re_core.re_core.listing_portal_api.listing_portal.get_my_saved_searches', {})
+    ]);
 
     const enquiryRow = e => `<div class="panel-card" style="padding:14px 16px;">
       <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -1019,10 +1045,20 @@ async function openMyRequests(){
       <div style="font-size:12.5px; color:var(--ink-soft); margin-top:4px;">${rent(l.total_contract_value)} total contract value</div>
     </div>`;
 
+    const searchRow = s => `<div class="panel-card" style="padding:14px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="font-size:13px;">
+          ${[s.location, s.unit_type, s.bedrooms ? s.bedrooms + '+ beds' : null, s.min_rent ? rent(s.min_rent) + '+' : null, s.max_rent ? 'up to ' + rent(s.max_rent) : null].filter(Boolean).join(' · ') || 'Any listing'}
+        </div>
+        <button class="cmp-remove" style="margin:0;" onclick="deleteSavedSearch('${s.name}')">Remove</button>
+      </div>
+    </div>`;
+
     body.innerHTML =
       myRequestsSection('Lease Requests', data.leases, leaseRow) +
       myRequestsSection('Site Visits', data.visits, visitRow) +
-      myRequestsSection('Enquiries', data.enquiries, enquiryRow);
+      myRequestsSection('Enquiries', data.enquiries, enquiryRow) +
+      myRequestsSection('Saved Searches', savedSearches, searchRow);
   }catch(err){
     console.error(err);
     body.innerHTML = `<div class="empty-state"><span class="serif">Couldn't load your requests</span>${err.message}</div>`;
@@ -1031,6 +1067,15 @@ async function openMyRequests(){
 
 function closeMyRequests(){
   document.getElementById('myRequestsOverlay').classList.remove('open');
+}
+
+async function deleteSavedSearch(name){
+  try{
+    await frappeCall('re_core.re_core.listing_portal_api.listing_portal.delete_saved_search', { name });
+    openMyRequests();
+  }catch(err){
+    showToast('Could not remove search');
+  }
 }
 
 function onAccountChipClick(){

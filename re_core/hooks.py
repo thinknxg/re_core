@@ -41,6 +41,7 @@ scheduler_events = {
         "re_core.tasks.lease_expiry_pipeline",
         "re_core.tasks.pdc_deposit_reminders",
         "re_core.tasks.document_expiry_alerts",
+        "re_core.re_core.listing_portal_api.listing_portal.check_saved_searches",
     ],
 }
 
