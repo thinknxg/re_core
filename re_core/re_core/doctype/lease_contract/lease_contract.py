@@ -29,6 +29,25 @@ class LeaseContract(Document):
         if self.docstatus == 0 and status not in ("Vacant", "Reserved") and current != self.name:
             frappe.throw(_("Unit {0} is {1}. Only Vacant or Reserved units can be leased.")
                          .format(self.unit, status))
+        self._validate_no_duplicate_draft()
+
+    def _validate_no_duplicate_draft(self):
+        """Prevent two visitors/agents from independently creating a second
+        pending Draft Lease Contract for the same unit while one is already
+        awaiting approval - closes the double-booking race condition.
+        """
+        if self.docstatus != 0:
+            return
+        other_draft = frappe.db.get_value(
+            "Lease Contract",
+            {"unit": self.unit, "docstatus": 0, "name": ["!=", self.name or ""]},
+            "name",
+        )
+        if other_draft:
+            frappe.throw(_(
+                "Unit {0} already has a pending lease request ({1}). "
+                "Please wait for it to be approved or rejected before submitting another."
+            ).format(self.unit, other_draft))
 
     def _compute_totals(self):
         if not self.charges:
