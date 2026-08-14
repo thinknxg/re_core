@@ -119,6 +119,64 @@ def lease_expiry_pipeline():
         frappe.db.set_value("Unit", lease.unit, {"status": "Vacant", "current_lease": None})
 
 
+# ------------------------------------------------------------------ document expiry
+
+def _re_manager_users():
+    return [u for u in frappe.get_all(
+        "Has Role", filters={"role": "RE Manager", "parenttype": "User"}, pluck="parent")
+        if frappe.db.get_value("User", u, "enabled")]
+
+
+def document_expiry_alerts():
+    """Warn RE Managers 60 and 30 days before a Tenant KYC Document or
+    Property Document expires (Ejari, trade licenses, ID documents, etc.),
+    so renewals happen before a compliance gap opens up.
+    """
+    users = _re_manager_users()
+    if not users:
+        return
+
+    for warn_days in (60, 30):
+        target = add_days(nowdate(), warn_days)
+
+        kyc_rows = frappe.db.sql(
+            """
+            SELECT tkd.name, tkd.id_type, tkd.id_number, tkd.expiry_date, tkd.parent AS tenant
+            FROM `tabTenant KYC Document` tkd
+            WHERE tkd.expiry_date = %s
+            """, target, as_dict=True)
+        for row in kyc_rows:
+            tenant_name = frappe.db.get_value("Tenant", row.tenant, "tenant_name") or row.tenant
+            _notify_document_expiry(
+                users, "Tenant", row.tenant,
+                _("{0} ({1}) for tenant {2} expires in {3} days ({4})").format(
+                    row.id_type or _("KYC document"), row.id_number or row.name,
+                    tenant_name, warn_days, row.expiry_date))
+
+        prop_rows = frappe.get_all(
+            "Property Document",
+            filters={"expiry_date": target},
+            fields=["name", "property", "document_type", "expiry_date"])
+        for row in prop_rows:
+            property_name = frappe.db.get_value("Property", row.property, "property_name") or row.property
+            _notify_document_expiry(
+                users, "Property Document", row.name,
+                _("{0} for property {1} expires in {2} days ({3})").format(
+                    row.document_type or _("Document"), property_name, warn_days, row.expiry_date))
+
+
+def _notify_document_expiry(users, document_type, document_name, subject):
+    for user in users:
+        frappe.get_doc({
+            "doctype": "Notification Log",
+            "for_user": user,
+            "type": "Alert",
+            "document_type": document_type,
+            "document_name": document_name,
+            "subject": subject,
+        }).insert(ignore_permissions=True)
+
+
 # ------------------------------------------------------------------ PDCs
 
 def pdc_deposit_reminders():

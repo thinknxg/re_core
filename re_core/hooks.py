@@ -40,6 +40,7 @@ scheduler_events = {
         "re_core.tasks.mark_overdue_installments",
         "re_core.tasks.lease_expiry_pipeline",
         "re_core.tasks.pdc_deposit_reminders",
+        "re_core.tasks.document_expiry_alerts",
     ],
 }
 

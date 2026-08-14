@@ -69,20 +69,16 @@ def get_sidebar_counts():
 
 @frappe.whitelist(methods=["POST"])
 def mark_notifications_read(document_type):
+    doc_types = frappe.parse_json(document_type) if isinstance(document_type, str) and document_type.startswith("[") else document_type
+    if isinstance(doc_types, str):
+        doc_types = [doc_types]
     frappe.db.set_value(
         "Notification Log",
-        {"for_user": frappe.session.user, "read": 0, "document_type": document_type},
+        {"for_user": frappe.session.user, "read": 0, "document_type": ["in", doc_types]},
         "read",
         1,
     )
     frappe.db.commit()
-    verify = frappe.db.get_all(
-        "Notification Log",
-        filters={"for_user": frappe.session.user, "document_type": document_type},
-        fields=["name", "read"],
-    )
-    with open("/tmp/mark_read_debug2.log", "a") as f:
-        f.write(f"document_type={document_type!r} user={frappe.session.user!r} state_after_commit={verify}\n")
     return {"ok": True}
 
 
@@ -168,6 +164,19 @@ def get_notifications():
             "label": f"{new_lease_requests_count} new lease request{'s' if new_lease_requests_count != 1 else ''}",
             "count": new_lease_requests_count,
             "screen": "lease_requests",
+        })
+
+    expiring_docs_count = frappe.db.count(
+        "Notification Log",
+        {"for_user": frappe.session.user, "read": 0,
+         "document_type": ["in", ["Property Document", "Tenant"]]},
+    )
+    if expiring_docs_count:
+        items.append({
+            "type": "expiring_documents",
+            "label": f"{expiring_docs_count} document{'s' if expiring_docs_count != 1 else ''} expiring soon",
+            "count": expiring_docs_count,
+            "screen": "dashboard",
         })
 
     return {
