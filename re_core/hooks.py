@@ -32,6 +32,8 @@ fixtures = [
     {"dt": "Print Format", "filters": [["name", "in", [
         "Lease Contract Standard", "Tenant Rent Invoice",
     ]]]},
+    {"dt": "Desktop Icon", "filters": [["name", "=", "RE Core"]]},
+    {"dt": "Workspace Sidebar", "filters": [["name", "=", "RE Core"]]},
 ]
 
 scheduler_events = {
@@ -42,6 +44,9 @@ scheduler_events = {
         "re_core.tasks.pdc_deposit_reminders",
         "re_core.tasks.document_expiry_alerts",
         "re_core.re_core.listing_portal_api.listing_portal.check_saved_searches",
+    ],
+    "monthly": [
+        "re_core.re_core.owner_statement_scheduler.generate_monthly_owner_statements",
     ],
 }
 
@@ -76,3 +81,12 @@ doc_events = {
 "on_submit": "re_core.re_core.security_deposit_accounting.create_deposit_journal_entry"
 },
 }
+
+add_to_apps_screen = [
+{
+"name": "re_core",
+		"logo": "/assets/re_core/images/re_core_logo.svg",
+"title": "RE Core",
+"route": "/app/re-core",
+}
+]

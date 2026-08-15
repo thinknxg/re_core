@@ -1,8 +1,8 @@
 {
  "app": "re_core",
  "charts": [],
- "content": "[{\"id\": \"blk1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>RE Core</b></span>\", \"col\": 12}}, {\"id\": \"blk2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Admin Dashboard\", \"col\": 3}}, {\"id\": \"blk3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Properties\", \"col\": 3}}, {\"id\": \"blk4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Units\", \"col\": 3}}, {\"id\": \"blk5\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Lease Contracts\", \"col\": 3}}, {\"id\": \"blk6\", \"type\": \"card\", \"data\": {\"card_name\": \"Properties\", \"col\": 4}}, {\"id\": \"blk7\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing\", \"col\": 4}}, {\"id\": \"blk8\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance\", \"col\": 4}}, {\"id\": \"blk9\", \"type\": \"card\", \"data\": {\"card_name\": \"Owner Finance\", \"col\": 4}}, {\"id\": \"blk10\", \"type\": \"card\", \"data\": {\"card_name\": \"Pre-Tenancy\", \"col\": 4}}]",
- "creation": "2026-08-06 10:20:50.701940",
+ "content": "[{\"id\": \"re-core-header\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>RE Core</b></span>\", \"col\": 12}}, {\"id\": \"re-core-sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"Property, leasing, CRM, and listings \\u2014 all in one place.\", \"col\": 12}}, {\"id\": \"card-properties\", \"type\": \"card\", \"data\": {\"card_name\": \"Properties\", \"col\": 4}}, {\"id\": \"card-leasing-&-tenants\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing & Tenants\", \"col\": 4}}, {\"id\": \"card-maintenance\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance\", \"col\": 4}}, {\"id\": \"card-accounting\", \"type\": \"card\", \"data\": {\"card_name\": \"Accounting\", \"col\": 4}}, {\"id\": \"card-marketing-&-enquiries\", \"type\": \"card\", \"data\": {\"card_name\": \"Marketing & Enquiries\", \"col\": 4}}, {\"id\": \"card-crm\", \"type\": \"card\", \"data\": {\"card_name\": \"CRM\", \"col\": 4}}, {\"id\": \"card-portal--listings\", \"type\": \"card\", \"data\": {\"card_name\": \"Portal / Listings\", \"col\": 4}}, {\"id\": \"card-settings\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
+ "creation": "2026-08-14 22:33:56.917906",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -18,7 +18,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Properties",
-   "link_count": 0,
+   "link_count": 5,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -66,9 +66,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Property Settings",
+   "label": "Property Document",
    "link_count": 0,
-   "link_to": "Property Settings",
+   "link_to": "Property Document",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -76,8 +76,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Leasing",
-   "link_count": 0,
+   "label": "Leasing & Tenants",
+   "link_count": 9,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -115,9 +115,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Post Dated Cheque",
+   "label": "Rent Installment",
    "link_count": 0,
-   "link_to": "Post Dated Cheque",
+   "link_to": "Rent Installment",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -135,6 +135,26 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Post Dated Cheque",
+   "link_count": 0,
+   "link_to": "Post Dated Cheque",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Move In Out Inspection",
+   "link_count": 0,
+   "link_to": "Move In Out Inspection",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Tenancy Bulk Payment",
    "link_count": 0,
    "link_to": "Tenancy Bulk Payment",
@@ -145,8 +165,18 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Maintenance",
+   "label": "Rent Credit Balance",
    "link_count": 0,
+   "link_to": "Rent Credit Balance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Maintenance",
+   "link_count": 2,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -174,21 +204,21 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Move In Out Inspection",
-   "link_count": 0,
-   "link_to": "Move In Out Inspection",
+   "label": "Accounting",
+   "link_count": 3,
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Link"
+   "type": "Card Break"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Owner Finance",
+   "label": "Owner Statement",
    "link_count": 0,
+   "link_to": "Owner Statement",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -213,18 +243,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Rent Credit Balance",
-   "link_count": 0,
-   "link_to": "Rent Credit Balance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Pre-Tenancy",
-   "link_count": 0,
+   "label": "Marketing & Enquiries",
+   "link_count": 4,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -258,9 +278,196 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Saved Search",
+   "link_count": 0,
+   "link_to": "Saved Search",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "CRM",
+   "link_count": 8,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Lead",
+   "link_count": 0,
+   "link_to": "RE Lead",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Deal",
+   "link_count": 0,
+   "link_to": "RE Deal",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Agent",
+   "link_count": 0,
+   "link_to": "RE Agent",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Site Visit",
+   "link_count": 0,
+   "link_to": "Site Visit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reservation",
+   "link_count": 0,
+   "link_to": "Reservation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Commission Entry",
+   "link_count": 0,
+   "link_to": "Commission Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lead Source RE",
+   "link_count": 0,
+   "link_to": "Lead Source RE",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Message Log",
+   "link_count": 0,
+   "link_to": "WhatsApp Message Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Portal / Listings",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Listing",
+   "link_count": 0,
+   "link_to": "Listing",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Listing Inquiry",
+   "link_count": 0,
+   "link_to": "Listing Inquiry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Listing Feed Settings",
+   "link_count": 0,
+   "link_to": "Listing Feed Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Settings",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Property Settings",
+   "link_count": 0,
+   "link_to": "Property Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE CRM Settings",
+   "link_count": 0,
+   "link_to": "RE CRM Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Portal Settings",
+   "link_count": 0,
+   "link_to": "RE Portal Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Settings",
+   "link_count": 0,
+   "link_to": "WhatsApp Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-08-06 11:15:00.632695",
+ "modified": "2026-08-15 10:03:35.621918",
  "modified_by": "Administrator",
  "module": "RE Core",
  "name": "RE Core",
