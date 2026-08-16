@@ -115,16 +115,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Rent Installment",
-   "link_count": 0,
-   "link_to": "Rent Installment",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Security Deposit",
    "link_count": 0,
    "link_to": "Security Deposit",
@@ -168,6 +158,16 @@
    "label": "Rent Credit Balance",
    "link_count": 0,
    "link_to": "Rent Credit Balance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenant Portal Session",
+   "link_count": 0,
+   "link_to": "Tenant Portal Session",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -467,7 +467,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-15 10:03:35.621918",
+ "modified": "2026-08-16 11:05:42.112808",
  "modified_by": "Administrator",
  "module": "RE Core",
  "name": "RE Core",
