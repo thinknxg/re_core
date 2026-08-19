@@ -1,0 +1,22 @@
+{
+ "doctype": "DocType",
+ "name": "Owner Statement Line",
+ "module": "Re Core",
+ "istable": 1,
+ "editable_grid": 1,
+ "fields": [
+  {"fieldname": "date", "fieldtype": "Date", "label": "Date", "in_list_view": 1},
+  {"fieldname": "entry_type", "fieldtype": "Select", "label": "Type",
+   "options": "Rent Invoice\nMaintenance", "in_list_view": 1},
+  {"fieldname": "reference_doctype", "fieldtype": "Data", "label": "Reference DocType", "hidden": 1},
+  {"fieldname": "reference", "fieldtype": "Dynamic Link", "label": "Reference",
+   "options": "reference_doctype", "in_list_view": 1},
+  {"fieldname": "lease_contract", "fieldtype": "Link", "label": "Lease Contract", "options": "Lease Contract"},
+  {"fieldname": "unit", "fieldtype": "Link", "label": "Unit", "options": "Unit", "in_list_view": 1},
+  {"fieldname": "description", "fieldtype": "Data", "label": "Description", "in_list_view": 1},
+  {"fieldname": "income", "fieldtype": "Currency", "label": "Income", "in_list_view": 1},
+  {"fieldname": "expense", "fieldtype": "Currency", "label": "Expense", "in_list_view": 1},
+  {"fieldname": "onetime_commission", "fieldtype": "Currency", "label": "Onetime Commission Deducted"}
+ ],
+ "permissions": []
+}

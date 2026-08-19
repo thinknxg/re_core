@@ -159,15 +159,40 @@ class LeaseContract(Document):
 
     # ------------------------------------------------------------ actions
     @frappe.whitelist()
-    def terminate(self, termination_date=None, reason=None):
-        """Early termination without cancelling the submitted document."""
+    def terminate(self, termination_date=None, reason=None, reasons=None,
+                  outstanding_rent=None, mode_of_payment=None, apply_charge_to_tenant=None):
+        """Early termination without cancelling the submitted document.
+
+        reasons: one of New Contract / Lost to another agent / Tenancy Surrendered /
+                 End of Tenancy / Tenancy Breach / Break Clause Activation.
+                 "New Contract" holds the unit as Reserved (a new lease is coming);
+                 every other reason frees it to Vacant, same as before.
+        """
         if self.docstatus != 1 or self.status not in ("Active", "Expiring"):
             frappe.throw(_("Only Active or Expiring leases can be terminated."))
+        expected_rent = self.get_outstanding_rent(upto_date=termination_date)
+        if flt(outstanding_rent, 3) != flt(expected_rent, 3):
+            frappe.throw(_(
+                "Outstanding Rent {0} does not match the calculated amount {1} for this lease. "
+                "Use Calculate Amount to fetch the correct figure before terminating."
+            ).format(flt(outstanding_rent, 3), flt(expected_rent, 3)))
         self.db_set("status", "Terminated")
-        frappe.db.set_value("Unit", self.unit, {"status": "Vacant", "current_lease": None})
+        unit_status = "Reserved" if reasons == "New Contract" else "Vacant"
+        frappe.db.set_value("Unit", self.unit, {"status": unit_status, "current_lease": None})
         self._flag_security_deposit(_("was terminated early"))
+        note_parts = []
         if reason:
-            self.add_comment("Comment", _("Terminated: {0}").format(reason))
+            note_parts.append(reason)
+        if reasons:
+            note_parts.append(_("Reason: {0}").format(reasons))
+        if flt(outstanding_rent):
+            note_parts.append(_("Outstanding Rent: {0}").format(outstanding_rent))
+        if mode_of_payment:
+            note_parts.append(_("Mode of Payment: {0}").format(mode_of_payment))
+        if apply_charge_to_tenant:
+            note_parts.append(_("Charge applied to tenant"))
+        if note_parts:
+            self.add_comment("Comment", _("Terminated: {0}").format(" | ".join(note_parts)))
         for row in frappe.get_all("Rent Installment",
                                   filters={"parent": self.rent_schedule,
                                            "status": ["in", ["Pending", "Overdue"]],
@@ -175,3 +200,14 @@ class LeaseContract(Document):
                                   pluck="name"):
             frappe.db.set_value("Rent Installment", row, "status", "Cancelled")
         return self.status
+
+    @frappe.whitelist()
+    def get_outstanding_rent(self, upto_date=None):
+        """Sum unpaid Rent Installments due on/before upto_date (Calculate Amount button)."""
+        if not self.rent_schedule:
+            return 0
+        filters = {"parent": self.rent_schedule, "status": ["in", ["Pending", "Overdue"]]}
+        if upto_date:
+            filters["due_date"] = ["<=", upto_date]
+        rows = frappe.get_all("Rent Installment", filters=filters, pluck="amount")
+        return flt(sum(flt(a) for a in rows), 3)

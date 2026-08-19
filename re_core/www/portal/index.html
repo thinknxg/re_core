@@ -1214,6 +1214,58 @@
         </div>
       </div>
 
+      <!-- Lease Request Edit Modal -->
+      <div id="lease-request-edit-overlay" style="display:none; position:fixed; inset:0; background:rgba(22,31,43,0.5); z-index:300; align-items:center; justify-content:center;">
+        <div style="background:var(--white); border-radius:12px; padding:28px; width:600px; max-width:92vw; max-height:88vh; overflow-y:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <span class="serif" style="font-size:20px;" id="lr-edit-title">Edit Lease Request</span>
+            <button onclick="closeLeaseRequestEdit()" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink-muted);">&times;</button>
+          </div>
+
+          <div style="background:var(--sand); border-radius:var(--radius); padding:14px 16px; margin-bottom:18px;">
+            <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:8px;">Tenant (from request)</div>
+            <div id="lr-tenant-info" style="font-size:14px; line-height:1.6;">—</div>
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:8px;">Term</div>
+          <div class="form-grid" style="margin-bottom:14px;">
+            <input class="form-input" type="date" id="lr-f-start_date" placeholder="Start Date">
+            <input class="form-input" type="date" id="lr-f-end_date" placeholder="End Date">
+            <input class="form-input" type="number" id="lr-f-notice_period_days" placeholder="Notice Period (Days)">
+            <label style="display:flex; align-items:center; gap:6px; font-size:14px;">
+              <input type="checkbox" id="lr-f-auto_renew"> Auto-Renew Offer
+            </label>
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:8px;">Financials</div>
+          <div class="form-grid" style="margin-bottom:14px;">
+            <select class="form-input" id="lr-f-payment_frequency">
+              <option value="Monthly">Monthly</option><option value="Quarterly">Quarterly</option>
+              <option value="Semi-Annual">Semi-Annual</option><option value="Annual">Annual</option>
+              <option value="Custom">Custom</option>
+            </select>
+            <input class="form-input" type="number" id="lr-f-custom_installments" placeholder="No. of Cheques (if Custom)">
+            <input class="form-input" type="number" step="0.01" id="lr-f-security_deposit_amount" placeholder="Security Deposit">
+            <input class="form-input" type="number" step="0.01" id="lr-f-broker_commission" placeholder="Broker Commission">
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:8px;">Compliance</div>
+          <div class="form-grid" style="margin-bottom:14px;">
+            <input class="form-input" id="lr-f-ejari_contract_no" placeholder="Ejari Contract No">
+            <select class="form-input" id="lr-f-owner_ref"><option value="">Owner…</option></select>
+            <select class="form-input" id="lr-f-company"><option value="">Company…</option></select>
+          </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em; margin-bottom:8px;">Terms &amp; Conditions</div>
+          <textarea class="form-input" id="lr-f-terms" rows="3" style="width:100%; margin-bottom:18px; resize:vertical;"></textarea>
+
+          <div class="action-row">
+            <button class="btn btn-ghost btn-sm" onclick="closeLeaseRequestEdit()">Cancel</button>
+            <button class="btn btn-primary btn-sm" onclick="saveLeaseRequestEdit()">Save Changes</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ════════════════════════════════════════════
            SCREEN: LEASE CONTRACTS (list)
       ════════════════════════════════════════════ -->
@@ -1256,16 +1308,46 @@
             <div id="terminate-form-msg" style="display:none;margin-bottom:4px;padding:10px 14px;border-radius:var(--radius);font-size: 15.0px;"></div>
             <div class="form-group">
               <label class="form-label">Lease Contract</label>
-              <select class="form-input form-select" id="terminate-lease-select">
+              <select class="form-input form-select" id="terminate-lease-select" onchange="onTerminateLeaseSelectChange(); calculateTerminateOutstandingRent();">
                 <option value="">Select an Active or Expiring lease…</option>
               </select>
             </div>
             <div class="form-group">
-              <label class="form-label">Termination Date</label>
-              <input class="form-input" type="date" id="terminate-date">
+              <label class="form-label">Schedule End Date</label>
+              <input class="form-input" type="date" id="terminate-date" onchange="calculateTerminateOutstandingRent()">
             </div>
             <div class="form-group">
-              <label class="form-label">Reason</label>
+              <label class="form-label">Reasons</label>
+              <select class="form-input form-select" id="terminate-reasons">
+                <option>New Contract</option>
+                <option>Lost to another agent</option>
+                <option>Tenancy Surrendered</option>
+                <option>End of Tenancy</option>
+                <option>Tenancy Breach</option>
+                <option>Break Clause Activation</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Security Deposit</label>
+              <input class="form-input" id="terminate-security-deposit" disabled>
+            </div>
+            <div class="form-group" style="flex-direction:row; align-items:center; gap:8px;">
+              <input type="checkbox" id="terminate-apply-charge" style="width:auto;">
+              <label class="form-label" style="margin:0;" for="terminate-apply-charge">Apply Charge to Tenant</label>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Outstanding Rent</label>
+              <div style="display:flex; gap:8px;">
+                <input class="form-input" type="number" step="0.001" id="terminate-outstanding-rent" style="flex:1;" readonly>
+                <button class="btn btn-ghost btn-sm" onclick="calculateTerminateOutstandingRent()">Calculate Amount</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mode of Payment</label>
+              <input class="form-input" id="terminate-mode-of-payment" placeholder="e.g. Cash, Bank Transfer">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Notes</label>
               <textarea class="form-input" id="terminate-reason" rows="3" placeholder="Optional" style="resize:vertical;"></textarea>
             </div>
             <div class="action-row">
@@ -3228,15 +3310,22 @@
   // ─────────────────────────────────────────────
   // CONTRACTS (create form)
   // ─────────────────────────────────────────────
+  let _terminateEligibleLeases = [];
+
   async function loadTerminateLeaseOptions() {
     const sel = document.getElementById('terminate-lease-select');
     sel.innerHTML = '<option value="">Loading…</option>';
     document.getElementById('terminate-date').value = '';
     document.getElementById('terminate-reason').value = '';
+    document.getElementById('terminate-security-deposit').value = '';
+    document.getElementById('terminate-outstanding-rent').value = '';
+    document.getElementById('terminate-mode-of-payment').value = '';
+    document.getElementById('terminate-apply-charge').checked = false;
     document.getElementById('terminate-form-msg').style.display = 'none';
     try {
-      const rows = await callApi('get_lease_contracts_list');
+      const rows = await callApiWithParams('re_core', 'get_lease_contracts_list', { source: 'All' });
       const eligible = (rows || []).filter(r => r.docstatus === 1 && ['Active', 'Expiring'].includes(r.status));
+      _terminateEligibleLeases = eligible;
       sel.innerHTML = eligible.length
         ? '<option value="">Select an Active or Expiring lease…</option>' +
           eligible.map(r => `<option value="${r.name}">${r.name} — ${r.tenant_name || r.tenant} @ ${r.unit_no || r.unit}</option>`).join('')
@@ -3246,6 +3335,30 @@
     } catch (err) {
       console.error(err);
       sel.innerHTML = '<option value="">Failed to load leases</option>';
+    }
+  }
+
+  function onTerminateLeaseSelectChange() {
+    const name = document.getElementById('terminate-lease-select').value;
+    const row = _terminateEligibleLeases.find(r => r.name === name);
+    document.getElementById('terminate-security-deposit').value =
+      row && row.security_deposit_amount ? row.security_deposit_amount : '';
+  }
+
+  async function calculateTerminateOutstandingRent() {
+    const name = document.getElementById('terminate-lease-select').value;
+    if (!name) {
+      showTerminateMsg('Select a lease contract first.', true);
+      return;
+    }
+    const uptoDate = document.getElementById('terminate-date').value;
+    try {
+      const amount = await callApiWithParams('re_core', 'get_lease_outstanding_rent',
+        { name, upto_date: uptoDate || null });
+      document.getElementById('terminate-outstanding-rent').value = amount || 0;
+    } catch (err) {
+      console.error(err);
+      showTerminateMsg('Failed to calculate outstanding rent: ' + err.message, true);
     }
   }
 
@@ -3261,13 +3374,21 @@
   async function submitTerminateLease() {
     const name = document.getElementById('terminate-lease-select').value;
     const terminationDate = document.getElementById('terminate-date').value;
+    const reasons = document.getElementById('terminate-reasons').value;
     const reason = document.getElementById('terminate-reason').value;
+    const outstandingRent = document.getElementById('terminate-outstanding-rent').value;
+    const modeOfPayment = document.getElementById('terminate-mode-of-payment').value;
+    const applyCharge = document.getElementById('terminate-apply-charge').checked;
+    const row = _terminateEligibleLeases.find(r => r.name === name);
 
     if (!name) {
       showTerminateMsg('Select a lease contract to terminate.', true);
       return;
     }
-    if (!confirm('Terminate ' + name + '? This will vacate the unit and cannot be undone.')) return;
+    const vacateNote = reasons === 'New Contract'
+      ? 'This will reserve the unit for a new contract.'
+      : 'This will vacate the unit.';
+    if (!confirm('Terminate ' + name + '? ' + vacateNote + ' This cannot be undone.')) return;
 
     const btn = document.getElementById('terminate-submit-btn');
     btn.disabled = true;
@@ -3278,10 +3399,38 @@
         name,
         termination_date: terminationDate || null,
         reason: reason || null,
+        reasons: reasons || null,
+        outstanding_rent: outstandingRent || 0,
+        mode_of_payment: modeOfPayment || null,
+        apply_charge_to_tenant: applyCharge ? 1 : 0,
       });
       showTerminateMsg('Lease ' + name + ' terminated successfully.', false);
       loadSidebarCounts();
-      loadTerminateLeaseOptions();
+
+      if (reasons === 'New Contract' && row) {
+        setTimeout(async () => {
+          showScreen('contracts');
+          _draftedLeaseContract = null;
+          const tenantEl = document.getElementById('contract-tenant');
+          const propertyEl = document.getElementById('contract-property');
+          const unitEl = document.getElementById('contract-unit');
+          if (tenantEl && row.tenant) tenantEl.value = row.tenant;
+          if (propertyEl && row.property) {
+            propertyEl.value = row.property;
+            if (typeof onContractPropertyChange === 'function') {
+              await onContractPropertyChange();
+            }
+          }
+          if (unitEl && row.unit) {
+            unitEl.value = row.unit;
+            if (typeof onContractUnitChange === 'function') {
+              onContractUnitChange();
+            }
+          }
+        }, 600);
+      } else {
+        loadTerminateLeaseOptions();
+      }
     } catch (err) {
       console.error(err);
       showTerminateMsg('Failed to terminate lease: ' + err.message, true);
@@ -3302,6 +3451,7 @@
           <td>${r.end_date || '—'}</td>
           <td class="mono">${fmtMoney(r.total_contract_value)}</td>
           <td>
+            <button class="btn btn-ghost btn-sm" onclick="editLeaseRequest('${r.name}')">Edit</button>
             <button class="btn btn-primary btn-sm" onclick="approveLeaseRequest('${r.name}')">Approve</button>
             <button class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="rejectLeaseRequest('${r.name}')">Reject</button>
           </td>
@@ -3341,6 +3491,75 @@
       loadSidebarCounts();
     } catch (err) {
       alert('Failed to reject request: ' + err.message);
+    }
+  }
+
+  const LEASE_REQUEST_FORM_FIELDS = [
+    'start_date', 'end_date', 'notice_period_days', 'auto_renew',
+    'payment_frequency', 'custom_installments', 'security_deposit_amount', 'broker_commission',
+    'ejari_contract_no', 'owner_ref', 'company', 'terms',
+  ];
+  const LEASE_REQUEST_CHECKBOX_FIELDS = ['auto_renew'];
+  let _leaseRequestEditingName = null;
+
+  function fillLeaseRequestForm(data) {
+    LEASE_REQUEST_FORM_FIELDS.forEach(f => {
+      const el = document.getElementById('lr-f-' + f);
+      if (!el || data[f] === undefined || data[f] === null) return;
+      if (LEASE_REQUEST_CHECKBOX_FIELDS.includes(f)) el.checked = !!data[f];
+      else el.value = data[f];
+    });
+  }
+
+  function readLeaseRequestForm() {
+    const out = {};
+    LEASE_REQUEST_FORM_FIELDS.forEach(f => {
+      const el = document.getElementById('lr-f-' + f);
+      if (!el) return;
+      if (LEASE_REQUEST_CHECKBOX_FIELDS.includes(f)) out[f] = el.checked ? 1 : 0;
+      else out[f] = el.value || null;
+    });
+    return out;
+  }
+
+  async function editLeaseRequest(name) {
+    _leaseRequestEditingName = name;
+    document.getElementById('lease-request-edit-overlay').style.display = 'flex';
+    document.getElementById('lr-tenant-info').textContent = 'Loading…';
+    try {
+      const [detail, owners, companies] = await Promise.all([
+        callApiWithParams('re_core', 'get_lease_contract', { name }),
+        getPropertyOwnersCached(),
+        getCompaniesCached(),
+      ]);
+      populateSelect(document.getElementById('lr-f-owner_ref'), owners, 'name', 'owner_name');
+      populateSelect(document.getElementById('lr-f-company'), companies, 'name', 'name');
+      fillLeaseRequestForm(detail);
+      document.getElementById('lr-tenant-info').innerHTML =
+        (detail.tenant_name || detail.tenant || '—') +
+        '<br><span class="mono" style="color:var(--ink-muted);">' +
+        (detail.unit || '') + ' · ' + (detail.property || '') + '</span>';
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load lease request: ' + err.message);
+      closeLeaseRequestEdit();
+    }
+  }
+
+  function closeLeaseRequestEdit() {
+    document.getElementById('lease-request-edit-overlay').style.display = 'none';
+    _leaseRequestEditingName = null;
+  }
+
+  async function saveLeaseRequestEdit() {
+    if (!_leaseRequestEditingName) return;
+    const values = readLeaseRequestForm();
+    try {
+      await postApi('re_core', 'update_lease_contract', { name: _leaseRequestEditingName, ...values });
+      closeLeaseRequestEdit();
+      loadLeaseRequestsList();
+    } catch (err) {
+      alert('Failed to save changes: ' + err.message);
     }
   }
 
@@ -3512,9 +3731,13 @@
 
   function goToTerminateLease(leaseName) {
     showScreen('terminate_lease');
-    setTimeout(() => {
+    setTimeout(async () => {
+      await loadTerminateLeaseOptions();
       const sel = document.getElementById('terminate-lease-select');
-      if (sel) sel.value = leaseName;
+      if (sel) {
+        sel.value = leaseName;
+        onTerminateLeaseSelectChange();
+      }
     }, 300);
   }
 
@@ -3557,7 +3780,7 @@
   async function loadLeaseContractsList() {
     const tbody = document.getElementById('lease-contracts-rows');
     try {
-      const rows = await callApi('get_lease_contracts_list');
+      const rows = await callApiWithParams('re_core', 'get_lease_contracts_list', { source: 'All' });
       window.__leaseContractRows = rows || [];
       renderLeaseContractsTable();
     } catch (err) {

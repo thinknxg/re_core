@@ -442,15 +442,26 @@ def get_units_for_property(property):
 
 @frappe.whitelist()
 def create_lease_contract(tenant, unit, property, start_date, end_date,
-                           annual_rent, payment_frequency=None, security_deposit=None,
+                           annual_rent=None, payment_frequency=None, security_deposit=None,
                            agent=None, owner_ref=None, notice_period_days=None, auto_renew=None,
                            custom_installments=None, broker_commission=None,
                            ejari_contract_no=None, terms=None):
     from frappe.utils import month_diff, getdate, flt
+    from re_core.re_core.charge_utils import build_lease_term_charges
 
     duration_months = month_diff(end_date, start_date)
     term_years = flt(duration_months) / 12
-    term_total = flt(annual_rent) * term_years if term_years > 0 else flt(annual_rent)
+
+    charges = build_lease_term_charges(property, unit, start_date, end_date)
+    if not charges:
+        # Fallback: neither Property nor Unit has charges configured yet -
+        # use the manually typed annual_rent (legacy behaviour).
+        term_total = flt(annual_rent) * term_years if term_years > 0 else flt(annual_rent)
+        charges = [{
+            "charge_type": "Rent",
+            "description": "Base Rent",
+            "amount": term_total,
+        }]
 
     doc = frappe.get_doc({
         "doctype": "Lease Contract",
@@ -470,11 +481,7 @@ def create_lease_contract(tenant, unit, property, start_date, end_date,
         "terms": terms,
         "status": "Draft",
         "request_source": "Admin",
-        "charges": [{
-            "charge_type": "Rent",
-            "description": "Base Rent",
-            "amount": term_total,
-        }],
+        "charges": charges,
     })
     doc.insert()
 
@@ -1628,10 +1635,85 @@ def update_inspection(name, estimated_damage_cost=None, summary=None, tenant_sig
 # LEASE CONTRACTS LIST (for pickers)
 # ─────────────────────────────────────────────
 @frappe.whitelist()
-def terminate_lease_contract(name, termination_date=None, reason=None):
+def terminate_lease_contract(name, termination_date=None, reason=None, reasons=None,
+                              outstanding_rent=None, mode_of_payment=None,
+                              apply_charge_to_tenant=None):
     doc = frappe.get_doc("Lease Contract", name)
-    status = doc.terminate(termination_date=termination_date, reason=reason)
-    return {"name": doc.name, "status": status}
+    status = doc.terminate(
+        termination_date=termination_date,
+        reason=reason,
+        reasons=reasons,
+        outstanding_rent=outstanding_rent,
+        mode_of_payment=mode_of_payment,
+        apply_charge_to_tenant=apply_charge_to_tenant,
+    )
+    return {"name": doc.name, "status": status, "unit": doc.unit, "reasons": reasons}
+
+@frappe.whitelist()
+def get_lease_outstanding_rent(name, upto_date=None):
+    doc = frappe.get_doc("Lease Contract", name)
+    return doc.get_outstanding_rent(upto_date=upto_date)
+
+
+@frappe.whitelist()
+def get_lease_request_detail(name):
+    doc = frappe.get_doc("Lease Contract", name)
+    if doc.docstatus != 0:
+        frappe.throw(_("Only Draft lease requests can be reviewed here."))
+
+    tenant = frappe.db.get_value(
+        "Tenant", doc.tenant,
+        ["tenant_name", "mobile", "email", "nationality", "tenant_type"],
+        as_dict=True,
+    ) if doc.tenant else {}
+
+    return {
+        "name": doc.name,
+        "tenant": doc.tenant,
+        "tenant_name": tenant.get("tenant_name"),
+        "tenant_mobile": tenant.get("mobile"),
+        "tenant_email": tenant.get("email"),
+        "tenant_nationality": tenant.get("nationality"),
+        "tenant_type": tenant.get("tenant_type"),
+        "unit": doc.unit,
+        "property": doc.property,
+        "owner_ref": doc.owner_ref,
+        "company": doc.company,
+        "start_date": doc.start_date,
+        "end_date": doc.end_date,
+        "notice_period_days": doc.notice_period_days,
+        "auto_renew": doc.auto_renew,
+        "payment_frequency": doc.payment_frequency,
+        "custom_installments": doc.custom_installments,
+        "security_deposit_amount": doc.security_deposit_amount,
+        "broker_commission": doc.broker_commission,
+        "ejari_contract_no": doc.ejari_contract_no,
+        "terms": doc.terms,
+        "total_contract_value": doc.total_contract_value,
+    }
+
+
+@frappe.whitelist()
+def update_lease_request(name, start_date=None, end_date=None, owner_ref=None, company=None,
+                          notice_period_days=None, auto_renew=None, payment_frequency=None,
+                          custom_installments=None, security_deposit_amount=None,
+                          broker_commission=None, ejari_contract_no=None, terms=None):
+    doc = frappe.get_doc("Lease Contract", name)
+    if doc.docstatus != 0:
+        frappe.throw(_("Only Draft lease requests can be edited here."))
+
+    fields = {
+        "start_date": start_date, "end_date": end_date, "owner_ref": owner_ref, "company": company,
+        "notice_period_days": notice_period_days, "auto_renew": auto_renew,
+        "payment_frequency": payment_frequency, "custom_installments": custom_installments,
+        "security_deposit_amount": security_deposit_amount, "broker_commission": broker_commission,
+        "ejari_contract_no": ejari_contract_no, "terms": terms,
+    }
+    for key, value in fields.items():
+        if value is not None:
+            doc.set(key, value)
+    doc.save(ignore_permissions=True)
+    return {"name": doc.name}
 
 
 @frappe.whitelist()
@@ -1751,6 +1833,57 @@ def get_lease_contracts_list(source="Admin"):
         r["tenant_name"] = tenant_map.get(r["tenant"], r["tenant"])
         r["unit_no"] = unit_map.get(r["unit"], r["unit"])
     return rows
+
+
+@frappe.whitelist()
+def get_lease_contract(name):
+    doc = frappe.get_doc("Lease Contract", name)
+
+    tenant = frappe.get_all(
+        "Tenant", filters={"name": doc.tenant}, fields=["tenant_name"]
+    ) if doc.tenant else []
+    tenant_name = tenant[0]["tenant_name"] if tenant else doc.tenant
+
+    return {
+        "name": doc.name,
+        "tenant": doc.tenant,
+        "tenant_name": tenant_name,
+        "unit": doc.unit,
+        "property": doc.property,
+        "start_date": doc.start_date,
+        "end_date": doc.end_date,
+        "notice_period_days": doc.notice_period_days,
+        "auto_renew": doc.auto_renew,
+        "payment_frequency": doc.payment_frequency,
+        "custom_installments": doc.custom_installments,
+        "security_deposit_amount": doc.security_deposit_amount,
+        "broker_commission": doc.broker_commission,
+        "ejari_contract_no": doc.ejari_contract_no,
+        "owner_ref": doc.owner_ref,
+        "company": doc.company,
+        "terms": doc.terms,
+    }
+
+
+@frappe.whitelist()
+def update_lease_contract(name, start_date=None, end_date=None, notice_period_days=None,
+                           auto_renew=None, payment_frequency=None, custom_installments=None,
+                           security_deposit_amount=None, broker_commission=None,
+                           ejari_contract_no=None, owner_ref=None, company=None, terms=None):
+    doc = frappe.get_doc("Lease Contract", name)
+    fields = {
+        "start_date": start_date, "end_date": end_date,
+        "notice_period_days": notice_period_days, "auto_renew": auto_renew,
+        "payment_frequency": payment_frequency, "custom_installments": custom_installments,
+        "security_deposit_amount": security_deposit_amount, "broker_commission": broker_commission,
+        "ejari_contract_no": ejari_contract_no, "owner_ref": owner_ref, "company": company,
+        "terms": terms,
+    }
+    for key, value in fields.items():
+        if value is not None:
+            doc.set(key, value)
+    doc.save()
+    return {"name": doc.name}
 
 
 # ─────────────────────────────────────────────

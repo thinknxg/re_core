@@ -1,8 +1,7 @@
 {
  "actions": [],
- "allow_rename": 0,
  "autoname": "format:UNIT-{#####}",
- "creation": "2026-01-01 00:00:00.000000",
+ "creation": "2026-01-01 00:00:00",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -27,7 +26,8 @@
   "annual_rent",
   "col_break_3",
   "current_lease",
-  "company"
+  "company",
+  "charges"
  ],
  "fields": [
   {
@@ -137,9 +137,11 @@
    "label": "Financials"
   },
   {
+   "description": "Auto-computed from Charges below (Rent rows, annualized).",
    "fieldname": "annual_rent",
    "fieldtype": "Currency",
-   "label": "Asking Annual Rent"
+   "label": "Asking Annual Rent",
+   "read_only": 1
   },
   {
    "fieldname": "col_break_3",
@@ -160,12 +162,14 @@
    "label": "Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "charges",
+   "fieldtype": "Table",
+   "label": "Charges",
+   "options": "Property Unit Charge"
   }
  ],
- "index_web_pages_for_search": 0,
- "is_submittable": 0,
- "issingle": 0,
- "istable": 0,
  "links": [
   {
    "group": "Leasing",
@@ -208,11 +212,11 @@
    "link_fieldname": "unit"
   }
  ],
- "modified": "2026-01-01 00:00:00.000000",
+ "modified": "2026-08-19 12:53:09.305229",
  "modified_by": "Administrator",
  "module": "RE Core",
  "name": "Unit",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -239,28 +243,25 @@
    "write": 1
   },
   {
-   "create": 0,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Leasing Officer",
-   "share": 1,
-   "write": 0
+   "share": 1
   },
   {
-   "create": 0,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Maintenance Supervisor",
-   "share": 1,
-   "write": 0
+   "share": 1
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "unit_no,property",
  "sort_field": "modified",
  "sort_order": "DESC",

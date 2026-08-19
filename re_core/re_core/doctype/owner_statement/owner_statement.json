@@ -1,0 +1,37 @@
+{
+ "doctype": "DocType",
+ "name": "Owner Statement",
+ "module": "Re Core",
+ "is_submittable": 1,
+ "autoname": "format:OS-{property_owner}-{period_from}",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "fields": [
+  {"fieldname": "property_owner", "fieldtype": "Link", "label": "Property Owner",
+   "options": "Property Owner", "reqd": 1, "in_list_view": 1, "in_standard_filter": 1},
+  {"fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company"},
+  {"fieldname": "column_break_period", "fieldtype": "Column Break"},
+  {"fieldname": "period_from", "fieldtype": "Date", "label": "Period From", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "period_to", "fieldtype": "Date", "label": "Period To", "reqd": 1, "in_list_view": 1},
+  {"fieldname": "section_break_amounts", "fieldtype": "Section Break", "label": "Amounts"},
+  {"fieldname": "rent_invoiced", "fieldtype": "Currency", "label": "Rent Invoiced", "read_only": 1},
+  {"fieldname": "management_fee", "fieldtype": "Currency", "label": "Management Fee", "read_only": 1},
+  {"fieldname": "column_break_amounts", "fieldtype": "Column Break"},
+  {"fieldname": "onetime_commission_deducted", "fieldtype": "Currency",
+   "label": "Onetime Commission Deducted", "read_only": 1},
+  {"fieldname": "owner_expenses", "fieldtype": "Currency", "label": "Owner Expenses (Maintenance)", "read_only": 1},
+  {"fieldname": "section_break_net", "fieldtype": "Section Break"},
+  {"fieldname": "net_payable", "fieldtype": "Currency", "label": "Net Payable to Owner",
+   "read_only": 1, "bold": 1, "in_list_view": 1},
+  {"fieldname": "section_break_pi", "fieldtype": "Section Break", "label": "Remittance"},
+  {"fieldname": "purchase_invoice", "fieldtype": "Link", "label": "Purchase Invoice",
+   "options": "Purchase Invoice", "read_only": 1},
+  {"fieldname": "section_break_lines", "fieldtype": "Section Break", "label": "Statement Lines"},
+  {"fieldname": "statement_lines", "fieldtype": "Table", "options": "Owner Statement Line"},
+  {"fieldname": "amended_from", "fieldtype": "Link", "label": "Amended From",
+   "options": "Owner Statement", "no_copy": 1, "print_hide": 1, "read_only": 1}
+ ],
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "submit": 1, "cancel": 1, "print": 1, "email": 1}
+ ]
+}
