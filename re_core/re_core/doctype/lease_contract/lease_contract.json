@@ -1,8 +1,7 @@
 {
  "actions": [],
- "allow_rename": 0,
  "autoname": "format:LEASE-{YYYY}-{####}",
- "creation": "2026-01-01 00:00:00.000000",
+ "creation": "2026-01-01 00:00:00",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -79,21 +78,21 @@
    "label": "Col Break 1"
   },
   {
+   "description": "Leave blank for a whole-property lease (no unit subdivision).",
    "fieldname": "unit",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Unit",
-   "options": "Unit",
-   "reqd": 1
+   "options": "Unit"
   },
   {
+   "description": "Auto-fetched from Unit when a Unit is set; otherwise select directly for a whole-property lease.",
    "fetch_from": "unit.property",
    "fieldname": "property",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Property",
-   "options": "Property",
-   "read_only": 1
+   "options": "Property"
   },
   {
    "fetch_from": "property.owner_ref",
@@ -142,12 +141,13 @@
    "label": "Col Break 2"
   },
   {
-   "default": 60,
+   "default": "60",
    "fieldname": "notice_period_days",
    "fieldtype": "Int",
    "label": "Notice Period Days"
   },
   {
+   "default": "0",
    "fieldname": "auto_renew",
    "fieldtype": "Check",
    "label": "Auto-Renew Offer"
@@ -281,16 +281,13 @@
    "read_only": 1
   }
  ],
- "index_web_pages_for_search": 0,
  "is_submittable": 1,
- "issingle": 0,
- "istable": 0,
  "links": [],
- "modified": "2026-01-01 00:00:00.000000",
+ "modified": "2026-08-20 12:19:40.117887",
  "modified_by": "Administrator",
  "module": "RE Core",
  "name": "Lease Contract",
- "naming_rule": "Expression",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -335,28 +332,21 @@
    "write": 1
   },
   {
-   "create": 0,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Accounts User",
-   "share": 1,
-   "write": 0
+   "share": 1
   },
   {
-   "create": 0,
-   "email": 0,
-   "export": 0,
    "print": 1,
    "read": 1,
-   "report": 0,
-   "role": "Tenant",
-   "share": 0,
-   "write": 0
+   "role": "Tenant"
   }
  ],
+ "row_format": "Dynamic",
  "search_fields": "tenant,unit,property",
  "sort_field": "modified",
  "sort_order": "DESC",

@@ -9,15 +9,26 @@ FREQUENCY_COUNT = {"Annual": 1, "Semi-Annual": 2, "Quarterly": 4}
 class LeaseContract(Document):
     # ------------------------------------------------------------ validate
     def validate(self):
+        self._sync_property_from_unit()
         self._set_company()
         self._validate_dates()
         self._validate_unit()
         self._compute_totals()
-        self.title = f"{self.tenant_name or self.tenant} @ {self.unit}"
+        target = self.unit or self.property
+        self.title = f"{self.tenant_name or self.tenant} @ {target}"
 
     def _set_company(self):
         if not self.company and self.property:
             self.company = frappe.db.get_value("Property", self.property, "company")
+
+    def _sync_property_from_unit(self):
+        # property is independently editable now (needed for whole-property
+        # leases with no Unit), but should still auto-follow the Unit when
+        # one is set, matching the old fetch_from behaviour.
+        if self.unit:
+            unit_property = frappe.db.get_value("Unit", self.unit, "property")
+            if unit_property:
+                self.property = unit_property
 
     def _validate_dates(self):
         if getdate(self.end_date) <= getdate(self.start_date):
@@ -25,6 +36,14 @@ class LeaseContract(Document):
         self.duration_months = month_diff(self.end_date, self.start_date)
 
     def _validate_unit(self):
+        if not self.unit:
+            # Whole-property lease (no unit subdivision) - skip Unit status
+            # checks entirely, but still guard against duplicate drafts on
+            # the same Property.
+            if not self.property:
+                frappe.throw(_("Set either a Unit or a Property for this lease."))
+            self._validate_no_duplicate_draft()
+            return
         status, current = frappe.db.get_value("Unit", self.unit, ["status", "current_lease"])
         if self.docstatus == 0 and status not in ("Vacant", "Reserved") and current != self.name:
             frappe.throw(_("Unit {0} is {1}. Only Vacant or Reserved units can be leased.")
@@ -33,21 +52,35 @@ class LeaseContract(Document):
 
     def _validate_no_duplicate_draft(self):
         """Prevent two visitors/agents from independently creating a second
-        pending Draft Lease Contract for the same unit while one is already
-        awaiting approval - closes the double-booking race condition.
+        pending Draft Lease Contract for the same unit (or, for whole-property
+        leases, the same property) while one is already awaiting approval -
+        closes the double-booking race condition.
         """
         if self.docstatus != 0:
             return
-        other_draft = frappe.db.get_value(
-            "Lease Contract",
-            {"unit": self.unit, "docstatus": 0, "name": ["!=", self.name or ""]},
-            "name",
-        )
-        if other_draft:
-            frappe.throw(_(
-                "Unit {0} already has a pending lease request ({1}). "
-                "Please wait for it to be approved or rejected before submitting another."
-            ).format(self.unit, other_draft))
+        if self.unit:
+            other_draft = frappe.db.get_value(
+                "Lease Contract",
+                {"unit": self.unit, "docstatus": 0, "name": ["!=", self.name or ""]},
+                "name",
+            )
+            if other_draft:
+                frappe.throw(_(
+                    "Unit {0} already has a pending lease request ({1}). "
+                    "Please wait for it to be approved or rejected before submitting another."
+                ).format(self.unit, other_draft))
+        else:
+            other_draft = frappe.db.get_value(
+                "Lease Contract",
+                {"property": self.property, "unit": ["in", ("", None)],
+                 "docstatus": 0, "name": ["!=", self.name or ""]},
+                "name",
+            )
+            if other_draft:
+                frappe.throw(_(
+                    "Property {0} already has a pending whole-property lease request ({1}). "
+                    "Please wait for it to be approved or rejected before submitting another."
+                ).format(self.property, other_draft))
 
     def _compute_totals(self):
         if not self.charges:
@@ -57,8 +90,11 @@ class LeaseContract(Document):
     # ------------------------------------------------------------ submit
     def on_submit(self):
         self.db_set("status", "Active")
-        frappe.db.set_value("Unit", self.unit,
-                            {"status": "Occupied", "current_lease": self.name})
+        if self.unit:
+            frappe.db.set_value("Unit", self.unit,
+                                {"status": "Occupied", "current_lease": self.name})
+        else:
+            frappe.db.set_value("Property", self.property, "current_lease", self.name)
         schedule = self._create_rent_schedule()
         self.db_set("rent_schedule", schedule.name)
         if flt(self.security_deposit_amount) > 0:
@@ -147,7 +183,10 @@ class LeaseContract(Document):
     # ------------------------------------------------------------ cancel
     def on_cancel(self):
         self.db_set("status", "Terminated")
-        frappe.db.set_value("Unit", self.unit, {"status": "Vacant", "current_lease": None})
+        if self.unit:
+            frappe.db.set_value("Unit", self.unit, {"status": "Vacant", "current_lease": None})
+        else:
+            frappe.db.set_value("Property", self.property, "current_lease", None)
         self._flag_security_deposit(_("was cancelled"))
         if self.rent_schedule:
             frappe.db.set_value("Rent Schedule", self.rent_schedule, "status", "Cancelled")
@@ -167,6 +206,8 @@ class LeaseContract(Document):
                  End of Tenancy / Tenancy Breach / Break Clause Activation.
                  "New Contract" holds the unit as Reserved (a new lease is coming);
                  every other reason frees it to Vacant, same as before.
+                 For whole-property leases (no unit), there is no Reserved/Vacant
+                 status to set - the Property's current_lease link is simply cleared.
         """
         if self.docstatus != 1 or self.status not in ("Active", "Expiring"):
             frappe.throw(_("Only Active or Expiring leases can be terminated."))
@@ -177,8 +218,11 @@ class LeaseContract(Document):
                 "Use Calculate Amount to fetch the correct figure before terminating."
             ).format(flt(outstanding_rent, 3), flt(expected_rent, 3)))
         self.db_set("status", "Terminated")
-        unit_status = "Reserved" if reasons == "New Contract" else "Vacant"
-        frappe.db.set_value("Unit", self.unit, {"status": unit_status, "current_lease": None})
+        if self.unit:
+            unit_status = "Reserved" if reasons == "New Contract" else "Vacant"
+            frappe.db.set_value("Unit", self.unit, {"status": unit_status, "current_lease": None})
+        else:
+            frappe.db.set_value("Property", self.property, "current_lease", None)
         self._flag_security_deposit(_("was terminated early"))
         note_parts = []
         if reason:

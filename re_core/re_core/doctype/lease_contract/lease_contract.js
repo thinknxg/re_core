@@ -56,4 +56,46 @@ frm.add_custom_button(__("Security Deposit"), () =>
 frappe.set_route("Form", "Security Deposit", frm.doc.security_deposit), __("View"));
 }
 },
+unit(frm) { auto_populate_lease_charges(frm, false); },
+property(frm) { auto_populate_lease_charges(frm, false); },
+start_date(frm) { auto_populate_lease_charges(frm, false); },
+end_date(frm) { auto_populate_lease_charges(frm, false); },
 });
+
+function auto_populate_lease_charges(frm, force) {
+if (frm.doc.docstatus !== 0) return;
+if (!frm.doc.property && !frm.doc.unit) return;
+if (!frm.doc.start_date || !frm.doc.end_date) return;
+// Don't clobber manually entered/edited rows unless the admin explicitly
+// clicked "Auto-fill Charges" (force = true). A freshly opened form can
+// have a single blank grid row by default - that doesn't count as
+// "already has data".
+const has_real_charge_rows = (frm.doc.charges || []).some(r => r.amount);
+if (!force && has_real_charge_rows) return;
+
+frappe.call({
+method: "re_core.re_core.api.get_lease_term_charges_preview",
+args: {
+property: frm.doc.property,
+unit: frm.doc.unit,
+start_date: frm.doc.start_date,
+end_date: frm.doc.end_date,
+},
+callback: (r) => {
+const charges = (r.message && r.message.charges) || [];
+if (!charges.length) return;
+frm.clear_table("charges");
+charges.forEach((c) => {
+const row = frm.add_child("charges");
+row.charge_type = c.charge_type;
+row.description = c.description;
+row.amount = c.amount;
+});
+frm.refresh_field("charges");
+frappe.show_alert({
+message: __("Charges auto-filled from Property/Unit ({0} rows). Review and edit as needed.", [charges.length]),
+indicator: "green",
+});
+},
+});
+}

@@ -441,28 +441,59 @@ def get_units_for_property(property):
 
 
 @frappe.whitelist()
-def create_lease_contract(tenant, unit, property, start_date, end_date,
+def compute_charge_term_total(amount, frequency, start_date, end_date):
+    """Convert a per-period charge amount into a lease-term total, for live
+    recalculation as the admin edits Frequency/Amount on the Lease Contract
+    Charges editor (mirrors Property/Unit Charges entry style)."""
+    from re_core.re_core.charge_utils import per_period_to_term_total
+    return per_period_to_term_total(amount, frequency, start_date, end_date)
+
+
+@frappe.whitelist()
+def get_lease_term_charges_preview(property=None, unit=None, start_date=None, end_date=None):
+    """Preview what Lease Contract charges would auto-populate from the
+    Property's and Unit's Charges tables, for a given lease term."""
+    from frappe.utils import flt
+    from re_core.re_core.charge_utils import build_lease_term_charges
+    if not (start_date and end_date):
+        return {"charges": [], "total": 0}
+    charges = build_lease_term_charges(property, unit, start_date, end_date)
+    total = sum(flt(c["amount"]) for c in charges)
+    return {"charges": charges, "total": flt(total, 3)}
+
+
+@frappe.whitelist()
+def create_lease_contract(tenant, property, unit=None, start_date=None, end_date=None,
                            annual_rent=None, payment_frequency=None, security_deposit=None,
                            agent=None, owner_ref=None, notice_period_days=None, auto_renew=None,
                            custom_installments=None, broker_commission=None,
-                           ejari_contract_no=None, terms=None):
+                           ejari_contract_no=None, terms=None, charges=None):
+    import json
+    if not unit and not property:
+        frappe.throw(_("Set either a Unit or a Property for this lease."))
+    unit = unit or None
     from frappe.utils import month_diff, getdate, flt
     from re_core.re_core.charge_utils import build_lease_term_charges
 
-    duration_months = month_diff(end_date, start_date)
-    term_years = flt(duration_months) / 12
+    if isinstance(charges, str):
+        charges = json.loads(charges) if charges else None
 
-    charges = build_lease_term_charges(property, unit, start_date, end_date)
-    if not charges:
-        # Fallback: neither Property nor Unit has charges configured yet -
-        # use the manually typed annual_rent (legacy behaviour).
-        term_total = flt(annual_rent) * term_years if term_years > 0 else flt(annual_rent)
-        charges = [{
-            "charge_type": "Rent",
-            "description": "Base Rent",
-            "amount": term_total,
-        }]
-
+    if charges:
+        # Frontend sent explicit (possibly edited) rows - use them as-is.
+        charges = [c for c in charges if flt(c.get("amount"))]
+    else:
+        duration_months = month_diff(end_date, start_date)
+        term_years = flt(duration_months) / 12
+        charges = build_lease_term_charges(property, unit, start_date, end_date)
+        if not charges:
+            # Fallback: neither Property nor Unit has charges configured yet -
+            # use the manually typed annual_rent (legacy behaviour).
+            term_total = flt(annual_rent) * term_years if term_years > 0 else flt(annual_rent)
+            charges = [{
+                "charge_type": "Rent",
+                "description": "Base Rent",
+                "amount": term_total,
+            }]
     doc = frappe.get_doc({
         "doctype": "Lease Contract",
         "tenant": tenant,
@@ -955,6 +986,12 @@ def get_property_detail(property):
         "units": unit_rows,
         "owner_name": owner_name,
         "company": p.company,
+        "charges": [
+            {"charge_type": c.charge_type, "description": c.description,
+             "amount": c.amount, "frequency": c.frequency,
+             "item_tax_template": c.item_tax_template}
+            for c in p.charges
+        ],
     }
 
 
@@ -2142,7 +2179,10 @@ def create_property(property_name, property_type, owner_ref, country, company=No
                      annual_rent=None, current_lease=None,
                      ownership_type=None, management_fee_type=None, management_fee_value=None,
                      onetime_commission=None, no_of_floors=None,
-                     is_live=None, portal_visibility=None):
+                     is_live=None, portal_visibility=None, charges=None):
+    import json
+    if isinstance(charges, str):
+        charges = json.loads(charges) if charges else []
     doc = frappe.get_doc({
         "doctype": "Property",
         "property_name": property_name,
@@ -2177,6 +2217,7 @@ def create_property(property_name, property_type, owner_ref, country, company=No
         "no_of_floors": no_of_floors,
         "is_live": is_live,
         "portal_visibility": portal_visibility,
+        "charges": charges or [],
     }).insert()
     return {"name": doc.name}
 
@@ -2192,8 +2233,13 @@ def update_property(name, property_name=None, property_type=None, owner_ref=None
                      annual_rent=None, current_lease=None,
                      ownership_type=None, management_fee_type=None, management_fee_value=None,
                      onetime_commission=None, no_of_floors=None,
-                     is_live=None, portal_visibility=None):
+                     is_live=None, portal_visibility=None, charges=None):
     doc = frappe.get_doc("Property", name)
+    if charges is not None:
+        import json
+        if isinstance(charges, str):
+            charges = json.loads(charges) if charges else []
+        doc.set("charges", charges)
     fields = {
         "property_name": property_name, "property_type": property_type, "owner_ref": owner_ref,
         "country": country, "company": company, "status": status, "city": city, "area": area,
@@ -2224,7 +2270,10 @@ def create_unit(property, unit_no, unit_type, unit_title=None, floor=None, usage
                  furnishing=None, parking_slots=None, annual_rent=None,
                  current_lease=None, company=None,
                  ownership_type=None, owner_ref=None, management_fee_type=None,
-                 management_fee_value=None, onetime_commission=None, published_to_portal=None):
+                 management_fee_value=None, onetime_commission=None, published_to_portal=None, charges=None):
+    import json
+    if isinstance(charges, str):
+        charges = json.loads(charges) if charges else []
     doc = frappe.get_doc({
         "doctype": "Unit",
         "property": property,
@@ -2248,6 +2297,7 @@ def create_unit(property, unit_no, unit_type, unit_title=None, floor=None, usage
         "management_fee_value": management_fee_value,
         "onetime_commission": onetime_commission,
         "published_to_portal": published_to_portal,
+        "charges": charges or [],
     }).insert()
     return {"name": doc.name}
 
@@ -2257,8 +2307,13 @@ def update_unit(name, unit_type=None, unit_title=None, floor=None, usage=None, s
                  area_sqm=None, bedrooms=None, bathrooms=None, furnishing=None, parking_slots=None,
                  annual_rent=None, current_lease=None, company=None,
                  ownership_type=None, owner_ref=None, management_fee_type=None,
-                 management_fee_value=None, onetime_commission=None, published_to_portal=None):
+                 management_fee_value=None, onetime_commission=None, published_to_portal=None, charges=None):
     doc = frappe.get_doc("Unit", name)
+    if charges is not None:
+        import json
+        if isinstance(charges, str):
+            charges = json.loads(charges) if charges else []
+        doc.set("charges", charges)
     fields = {
         "unit_type": unit_type, "unit_title": unit_title, "floor": floor, "usage": usage,
         "status": status, "area_sqm": area_sqm, "bedrooms": bedrooms, "bathrooms": bathrooms,

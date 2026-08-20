@@ -835,9 +835,15 @@
 
           <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Financials</div>
           <div class="form-grid">
-            <input class="form-input" type="number" step="0.01" id="prop-f-annual_rent" placeholder="Asking Annual Rent">
+            <input class="form-input" type="number" step="0.01" id="prop-f-annual_rent" placeholder="Asking Annual Rent (auto-computed from Charges)" readonly>
             <input class="form-input" id="prop-f-current_lease" placeholder="Current Lease (e.g. LEASE-2026-0001)">
           </div>
+
+          <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em; display:flex; justify-content:space-between; align-items:center;">
+            <span>Charges</span>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="addPropertyChargeRow()">+ Add Charge</button>
+          </div>
+          <div id="prop-charges-rows" style="display:flex; flex-direction:column; gap:8px;"></div>
 
           <div style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Notes</div>
           <textarea class="form-input" id="prop-f-notes" placeholder="Notes" rows="3" style="resize:vertical;"></textarea>
@@ -1397,15 +1403,23 @@
               </div>
               <div class="form-group">
                 <label class="form-label">Lease Start Date</label>
-                <input class="form-input" type="date" id="contract-start-date">
+                <input class="form-input" type="date" id="contract-start-date" onchange="refreshContractChargesPreview()">
               </div>
               <div class="form-group">
                 <label class="form-label">Lease End Date</label>
-                <input class="form-input" type="date" id="contract-end-date">
+                <input class="form-input" type="date" id="contract-end-date" onchange="refreshContractChargesPreview()">
               </div>
               <div class="form-group">
                 <label class="form-label">Annual Rent (OMR)</label>
                 <input class="form-input" id="contract-rent" placeholder="0.00">
+                <div style="grid-column:1/-1; margin-top:8px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="font-size:12px; font-weight:600; color:var(--ink-muted); text-transform:uppercase; letter-spacing:.03em;">Charges (auto-populated, editable)</span>
+                    <button type="button" class="btn btn-ghost btn-sm" onclick="addContractChargeRow()">+ Add Charge</button>
+                  </div>
+                  <div id="contract-charges-rows" style="display:flex; flex-direction:column; gap:8px;"></div>
+                  <div id="contract-charges-total" style="margin-top:6px; font-size:13px; color:var(--ink-muted);"></div>
+                </div>
               </div>
               <div class="form-group">
                 <label class="form-label">Payment Mode</label>
@@ -3856,13 +3870,15 @@
       });
       const data = await response.json();
       const units = data.message || [];
-      unitSel.innerHTML = units.length
-        ? '<option value="">Select unit…</option>' + units.map(u => `<option value="${u.name}" data-rent="${u.annual_rent || 0}">${u.unit_no} · ${u.unit_type} · ${u.area_sqm || '—'} m²</option>`).join('')
-        : '<option value="">No vacant units on this property</option>';
+      const wholePropertyOption = '<option value="">Whole Property (no unit)</option>';
+      unitSel.innerHTML = wholePropertyOption + (units.length
+        ? units.map(u => `<option value="${u.name}" data-rent="${u.annual_rent || 0}">${u.unit_no} · ${u.unit_type} · ${u.area_sqm || '—'} m²</option>`).join('')
+        : '');
     } catch (err) {
       console.error(err);
-      unitSel.innerHTML = '<option value="">Failed to load units</option>';
+      unitSel.innerHTML = '<option value="">Whole Property (no unit)</option>';
     }
+    refreshContractChargesPreview();
   }
 
   function onContractUnitChange() {
@@ -3871,7 +3887,109 @@
     if (rent && Number(rent) > 0) {
       document.getElementById('contract-rent').value = rent;
     }
+    refreshContractChargesPreview();
   }
+
+  let _contractChargeRows = [];
+
+  function renderContractChargeRows() {
+    const c = document.getElementById('contract-charges-rows');
+    c.innerHTML = _contractChargeRows.length
+      ? _contractChargeRows.map((_, i) => renderContractChargeRow(i)).join('')
+      : '<div style="color:var(--ink-muted); font-size:13px;">No charges yet. Click + Add Charge, or pick a Property/Unit with Charges configured.</div>';
+    const total = _contractChargeRows.reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+    document.getElementById('contract-charges-total').textContent = total
+      ? 'Term Total: ' + fmtMoney(total) : '';
+    document.getElementById('contract-rent').value = total || '';
+  }
+
+  function renderContractChargeRow(idx) {
+    const row = _contractChargeRows[idx];
+    return `
+      <div style="display:flex; gap:6px; align-items:center;">
+        <select class="form-input" style="min-width:120px;" onchange="updateContractChargeRow(${idx}, 'charge_type', this.value)">
+          ${['Rent','Service Charge','Parking','Furniture','Utilities','Other'].map(t => `<option ${t === row.charge_type ? 'selected' : ''}>${t}</option>`).join('')}
+        </select>
+        <input class="form-input" placeholder="Description" style="flex:1; min-width:90px;" value="${row.description || ''}"
+               onchange="updateContractChargeRow(${idx}, 'description', this.value)">
+        <input class="form-input" type="number" step="0.01" placeholder="Amount per period" style="width:130px;" value="${row.source_amount || ''}"
+               onchange="updateContractChargeRow(${idx}, 'source_amount', this.value)">
+        <select class="form-input" style="width:120px;" onchange="updateContractChargeRow(${idx}, 'frequency', this.value)">
+          ${['Monthly','Quarterly','Semi-Annual','Annual'].map(f => `<option ${f === row.frequency ? 'selected' : ''}>${f}</option>`).join('')}
+        </select>
+        <span style="font-size:12px; color:var(--ink-muted); min-width:110px; text-align:right;">= ${fmtMoney(row.amount || 0)}</span>
+        <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="updateContractChargeRow(${idx}, '__remove__')">&times;</button>
+      </div>`;
+  }
+
+  function addContractChargeRow() {
+    _contractChargeRows.push({ charge_type: 'Rent', description: '', source_amount: '', frequency: 'Annual', amount: 0 });
+    renderContractChargeRows();
+  }
+
+  async function updateContractChargeRow(idx, field, value) {
+    if (field === '__remove__') {
+      _contractChargeRows.splice(idx, 1);
+      renderContractChargeRows();
+      return;
+    }
+    _contractChargeRows[idx][field] = value;
+    await recalcContractChargeRow(idx);
+    renderContractChargeRows();
+  }
+
+  async function recalcContractChargeRow(idx) {
+    const row = _contractChargeRows[idx];
+    const startDate = document.getElementById('contract-start-date').value;
+    const endDate = document.getElementById('contract-end-date').value;
+    if (!row.source_amount || !row.frequency || !startDate || !endDate) {
+      row.amount = 0;
+      return;
+    }
+    try {
+      const result = await callApiWithParams('re_core', 'compute_charge_term_total', {
+        amount: row.source_amount, frequency: row.frequency, start_date: startDate, end_date: endDate,
+      });
+      row.amount = result || 0;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function recalcAllContractChargeRows() {
+    for (let i = 0; i < _contractChargeRows.length; i++) {
+      await recalcContractChargeRow(i);
+    }
+    renderContractChargeRows();
+  }
+
+  async function refreshContractChargesPreview() {
+    const property = document.getElementById('contract-property').value;
+    const unit = document.getElementById('contract-unit').value;
+    const startDate = document.getElementById('contract-start-date').value;
+    const endDate = document.getElementById('contract-end-date').value;
+    if (!property || !startDate || !endDate) return;
+    try {
+      const data = await callApiWithParams('re_core', 'get_lease_term_charges_preview', {
+        property, unit, start_date: startDate, end_date: endDate,
+      });
+      if (!_contractChargeRows.length && data.charges && data.charges.length) {
+        _contractChargeRows = data.charges.map(c => ({
+          charge_type: c.charge_type, description: c.description || '',
+          source_amount: c.source_amount, frequency: c.frequency,
+          amount: c.amount,
+        }));
+        renderContractChargeRows();
+      } else if (_contractChargeRows.length) {
+        // Dates changed after rows already exist - recompute term totals for the new term.
+        await recalcAllContractChargeRows();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+
 
   function showContractMsg(text, isError) {
     const el = document.getElementById('contract-form-msg');
@@ -3904,6 +4022,8 @@
       if (el) el.value = '';
     });
     document.getElementById('contract-auto-renew').checked = false;
+    _contractChargeRows = [];
+    renderContractChargeRows();
   }
 
   async function saveLeaseContractDraft() {
@@ -3916,15 +4036,16 @@
     const paymentFrequency = document.getElementById('contract-payment-frequency').value;
     const deposit = document.getElementById('contract-deposit').value;
     const agent = document.getElementById('contract-agent').value;
+    const charges = _contractChargeRows.filter(r => r.amount).map(r => ({ charge_type: r.charge_type, description: r.description, amount: r.amount }));
 
-    if (!tenant || !unit || !property || !startDate || !endDate || !rent) {
-      showContractMsg('Please fill in tenant, property, unit, dates, and rent before saving.', true);
+    if (!tenant || !property || !startDate || !endDate || (!rent && !charges.length)) {
+      showContractMsg('Please fill in tenant, property, dates, and at least one Charge row before saving. (Unit is optional for a whole-property lease.)', true);
       return;
     }
 
     const btn = document.getElementById('contract-submit-btn');
     btn.disabled = true;
-    btn.textContent = 'Saving…';
+    btn.textContent = 'Saving\u2026';
 
     try {
       const params = new URLSearchParams({
@@ -3938,6 +4059,7 @@
         terms: document.getElementById('contract-terms').value || '',
       });
       if (agent) params.append('agent', agent);
+      if (charges.length) params.append('charges', JSON.stringify(charges));
       const csrfToken = await getCsrfToken();
       const response = await fetch('/api/method/re_core.re_core.api.create_lease_contract', {
         method: 'POST',
@@ -6439,6 +6561,53 @@
   let _propertyFormMode = 'create';
   let _propertyFormEditingName = null;
 
+  // ─────────────────────────────────────────────
+  // Reusable Charges rows editor (Property / Unit)
+  // ─────────────────────────────────────────────
+  const CHARGE_TYPE_OPTIONS = ['Rent', 'Service Charge', 'Parking', 'Furniture', 'Utilities', 'Other'];
+  const CHARGE_FREQUENCY_OPTIONS = ['Monthly', 'Quarterly', 'Semi-Annual', 'Annual'];
+
+  function renderChargeRow(containerId, rows, idx, onChange) {
+    const row = rows[idx];
+    return `
+      <div style="display:flex; gap:6px; align-items:center;" data-charge-idx="${idx}">
+        <select class="form-input" style="min-width:110px;" onchange="${onChange}(${idx}, 'charge_type', this.value)">
+          ${CHARGE_TYPE_OPTIONS.map(t => `<option ${t === row.charge_type ? 'selected' : ''}>${t}</option>`).join('')}
+        </select>
+        <input class="form-input" placeholder="Description" style="flex:1; min-width:100px;" value="${row.description || ''}"
+               onchange="${onChange}(${idx}, 'description', this.value)">
+        <input class="form-input" type="number" step="0.01" placeholder="Amount" style="width:110px;" value="${row.amount || ''}"
+               onchange="${onChange}(${idx}, 'amount', this.value)">
+        <select class="form-input" style="width:120px;" onchange="${onChange}(${idx}, 'frequency', this.value)">
+          ${CHARGE_FREQUENCY_OPTIONS.map(f => `<option ${f === row.frequency ? 'selected' : ''}>${f}</option>`).join('')}
+        </select>
+        <button type="button" class="btn btn-ghost btn-sm" style="color:var(--red);" onclick="${onChange}(${idx}, '__remove__')">&times;</button>
+      </div>`;
+  }
+
+  let _propertyChargeRows = [];
+
+  function renderPropertyChargeRows() {
+    const c = document.getElementById('prop-charges-rows');
+    c.innerHTML = _propertyChargeRows.length
+      ? _propertyChargeRows.map((_, i) => renderChargeRow('prop-charges-rows', _propertyChargeRows, i, 'updatePropertyChargeRow')).join('')
+      : '<div style="color:var(--ink-muted); font-size:13px;">No charges yet. Click + Add Charge.</div>';
+  }
+
+  function addPropertyChargeRow() {
+    _propertyChargeRows.push({ charge_type: 'Rent', description: '', amount: '', frequency: 'Annual' });
+    renderPropertyChargeRows();
+  }
+
+  function updatePropertyChargeRow(idx, field, value) {
+    if (field === '__remove__') {
+      _propertyChargeRows.splice(idx, 1);
+    } else {
+      _propertyChargeRows[idx][field] = value;
+    }
+    renderPropertyChargeRows();
+  }
+
   function clearPropertyForm() {
     PROPERTY_FORM_FIELDS.forEach(f => {
       const el = document.getElementById('prop-f-' + f);
@@ -6446,6 +6615,8 @@
       if (PROPERTY_CHECKBOX_FIELDS.includes(f)) el.checked = false;
       else el.value = '';
     });
+    _propertyChargeRows = [];
+    renderPropertyChargeRows();
   }
 
   function fillPropertyForm(data) {
@@ -6455,16 +6626,25 @@
       if (PROPERTY_CHECKBOX_FIELDS.includes(f)) el.checked = !!data[f];
       else el.value = data[f];
     });
+    _propertyChargeRows = (data.charges || []).map(c => ({
+      charge_type: c.charge_type || 'Rent',
+      description: c.description || '',
+      amount: c.amount || '',
+      frequency: c.frequency || 'Annual',
+    }));
+    renderPropertyChargeRows();
   }
 
   function readPropertyForm() {
     const out = {};
     PROPERTY_FORM_FIELDS.forEach(f => {
+      if (f === 'annual_rent') return; // read-only, server computes this from charges
       const el = document.getElementById('prop-f-' + f);
       if (!el) return;
       if (PROPERTY_CHECKBOX_FIELDS.includes(f)) out[f] = el.checked ? 1 : 0;
       else out[f] = el.value || null;
     });
+    out.charges = _propertyChargeRows.filter(r => r.amount);
     return out;
   }
 

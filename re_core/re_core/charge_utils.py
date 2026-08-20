@@ -26,18 +26,30 @@ def compute_annual_rent(charge_rows):
     return flt(total, 3)
 
 
+def term_years_between(start_date, end_date):
+    from frappe.utils import month_diff
+    duration_months = month_diff(end_date, start_date) or 1
+    return flt(duration_months) / 12
+
+
+def per_period_to_term_total(amount, frequency, start_date, end_date):
+    """Convert a per-period amount + frequency into a total for the given lease term."""
+    return flt(annualize(amount, frequency) * term_years_between(start_date, end_date), 3)
+
+
 def build_lease_term_charges(property_name, unit_name, start_date, end_date):
     """Pull Property Unit Charge rows from both the Property and its Unit,
     convert each periodic amount into a total for the lease term, and return
-    rows ready to append to a Lease Contract's 'charges' table.
+    rows ready to append to a Lease Contract's 'charges' table. Each row also
+    carries its original per-period 'source_amount' and 'frequency' so the
+    frontend can display/edit them the same way as on Property/Unit, rather
+    than only showing the converted term total.
     Property and Unit charges are independent - both are included, unrelated
     to each other (no fallback/priority between them).
     """
     import frappe
-    from frappe.utils import month_diff
 
-    duration_months = month_diff(end_date, start_date) or 1
-    term_years = flt(duration_months) / 12
+    term_years = term_years_between(start_date, end_date)
 
     rows = []
     sources = []
@@ -55,11 +67,13 @@ def build_lease_term_charges(property_name, unit_name, start_date, end_date):
         ))
 
     for row in sources:
-        term_total = annualize(row.amount, row.frequency) * term_years
+        term_total = flt(annualize(row.amount, row.frequency) * term_years, 3)
         rows.append({
             "charge_type": row.charge_type,
             "description": row.description,
-            "amount": flt(term_total, 3),
+            "amount": term_total,
             "item_tax_template": row.item_tax_template,
+            "source_amount": row.amount,
+            "frequency": row.frequency,
         })
     return rows
