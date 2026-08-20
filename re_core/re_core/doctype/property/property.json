@@ -49,7 +49,8 @@
   "annual_rent",
   "column_break_financials",
   "current_lease",
-  "charges"
+  "charges",
+  "rent_frequency"
  ],
  "fields": [
   {
@@ -312,6 +313,14 @@
    "fieldtype": "Table",
    "label": "Charges",
    "options": "Property Unit Charge"
+  },
+  {
+   "description": "Auto-derived from the first 'Rent' row in Charges below.",
+   "fieldname": "rent_frequency",
+   "fieldtype": "Select",
+   "label": "Rent Frequency",
+   "options": "\nMonthly\nQuarterly\nSemi-Annual\nAnnual",
+   "read_only": 1
   }
  ],
  "image_field": "cover_image",
@@ -367,7 +376,7 @@
    "link_fieldname": "property"
   }
  ],
- "modified": "2026-08-19 12:53:06.427803",
+ "modified": "2026-08-20 13:17:15.014417",
  "modified_by": "Administrator",
  "module": "RE Core",
  "name": "Property",

@@ -1,7 +1,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from re_core.re_core.charge_utils import compute_annual_rent
+from re_core.re_core.charge_utils import compute_annual_rent, get_primary_rent_frequency
 class Unit(Document):
     def validate(self):
         prop_fields = frappe.db.get_value(
@@ -32,6 +32,7 @@ class Unit(Document):
             if not self.onetime_commission:
                 self.onetime_commission = prop_fields.get("onetime_commission")
         self.annual_rent = compute_annual_rent(self.charges)
+        self.rent_frequency = get_primary_rent_frequency(self.charges)
     def on_update(self):
         frappe.db.set_value("Property", self.property, "total_units",
                             frappe.db.count("Unit", {"property": self.property}) or 0,

@@ -26,6 +26,15 @@ def compute_annual_rent(charge_rows):
     return flt(total, 3)
 
 
+def get_primary_rent_frequency(charge_rows):
+    """Return the Frequency of the first 'Rent' type row, for display purposes
+    (e.g. showing '25,000/mo' on listings instead of always annualizing)."""
+    for row in (charge_rows or []):
+        if row.charge_type == "Rent":
+            return row.frequency
+    return None
+
+
 def term_years_between(start_date, end_date):
     from frappe.utils import month_diff
     duration_months = month_diff(end_date, start_date) or 1

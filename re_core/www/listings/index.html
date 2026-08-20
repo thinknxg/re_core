@@ -413,6 +413,7 @@ const FIELD_MAP = {
   type:      'unit_type',       // Studio / 1BR / 2BR / 3BR / 4BR+ / Penthouse / Shop / Office / Warehouse
   usage:     'usage',           // Residential / Commercial
   rent:      'annual_rent',
+  rentFrequency: 'rent_frequency',
   beds:      'bedrooms',
   baths:     'bathrooms',
   sqm:       'area_sqm',
@@ -515,6 +516,16 @@ async function loadProperties(filters={}){
 
 function rent(n){ return '﷼ ' + Math.round(n).toLocaleString('en-US'); }
 
+const RENT_FREQUENCY_PERIODS = { Monthly: 12, Quarterly: 4, 'Semi-Annual': 2, Annual: 1 };
+const RENT_FREQUENCY_SUFFIX = { Monthly: '/mo', Quarterly: '/qtr', 'Semi-Annual': '/6mo', Annual: '/yr' };
+function displayRent(p){
+  const freq = p.rentFrequency;
+  const periods = RENT_FREQUENCY_PERIODS[freq] || 1;
+  const perPeriod = (p.rent || 0) / periods;
+  const suffix = RENT_FREQUENCY_SUFFIX[freq] || '/yr';
+  return rent(perPeriod) + suffix;
+}
+
 function populateFilterOptions(){
   const locs = [...new Set(PROPERTIES.map(p=>p.location).filter(Boolean))].sort();
   const types = [...new Set(PROPERTIES.map(p=>p.type).filter(Boolean))].sort();
@@ -557,7 +568,7 @@ function cardTemplate(p){
           <input type="checkbox" ${compareSet.has(p.id)?'checked':''} ${p.isStandalone?'disabled':''}>
           <span>Compare</span>
         </label>
-        <div class="card-price">${rent(p.rent)}<span>/ year</span></div>
+        <div class="card-price">${displayRent(p)}</div>
         <h3 class="card-title">${p.title || p.type + ' · ' + p.building}</h3>
         <div class="card-loc">${p.building}${p.location ? ' — ' + p.location : ''} · ${p.type}</div>
         <div class="dim-row">
@@ -642,7 +653,7 @@ function openDossier(id){
           <h2 class="dossier-title">${p.title || (p.type + ' · ' + p.building)}</h2>
           <div class="dossier-loc">${p.building}${p.location ? ' — ' + p.location : ''} · ${p.type}</div>
         </div>
-        <div class="dossier-price">${rent(p.rent)}<span>Annual rent</span></div>
+        <div class="dossier-price">${displayRent(p)}</div>
       </div>
 
       <div class="ruler">
@@ -859,7 +870,7 @@ function openCompareView(){
   if(units.length < 2) return;
 
   const rows = [
-    { label: 'Price', get: p => rent(p.rent) + ' / yr' },
+    { label: 'Price', get: p => displayRent(p) },
     { label: 'Type', get: p => p.type || '—' },
     { label: 'Bedrooms', get: p => p.beds === 0 ? 'Studio' : p.beds },
     { label: 'Bathrooms', get: p => p.baths },
@@ -883,7 +894,7 @@ function openCompareView(){
           ${units.map(p => `<td>
             <img src="${p.img}" alt="${p.title || p.building}">
             <div class="cmp-title">${p.title || p.type + ' · ' + p.building}</div>
-            <div class="cmp-price">${rent(p.rent)}</div>
+            <div class="cmp-price">${displayRent(p)}</div>
             <button class="cmp-remove" onclick="compareSet.delete('${p.id}'); openCompareView(); updateCompareBar();">Remove</button>
           </td>`).join('')}
         </tr>

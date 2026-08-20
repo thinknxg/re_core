@@ -148,6 +148,7 @@ def _unit_row_to_dict(row):
         "bedrooms": row.bedrooms,
         "bathrooms": row.bathrooms,
         "annual_rent": row.annual_rent,
+        "rent_frequency": row.rent_frequency,
         "property": row.property,
         "property_name": row.property_name,
         "city": row.city,
@@ -176,6 +177,7 @@ def _property_row_to_dict(row):
         "bedrooms": row.bedrooms,
         "bathrooms": row.bathrooms,
         "annual_rent": row.annual_rent,
+        "rent_frequency": row.rent_frequency,
         "property": row.property,
         "property_name": row.property_name,
         "city": row.city,
@@ -232,7 +234,7 @@ def get_live_properties(location=None, unit_type=None, min_rent=None, max_rent=N
         SELECT
             u.name as unit_name, u.unit_no, u.unit_title, u.floor, u.unit_type,
             u.usage, u.status, u.furnishing, u.parking_slots, u.area_sqm,
-            u.bedrooms, u.bathrooms, u.annual_rent,
+            u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency,
             p.name as property, p.property_name, p.city, p.area,
             COALESCE(p.cover_image, (
                 SELECT pp.image FROM `tabProperty Photo` pp
@@ -257,7 +259,7 @@ def get_live_properties(location=None, unit_type=None, min_rent=None, max_rent=N
             SELECT
                 p.name as property, p.property_name, p.property_type, p.usage,
                 p.furnishing, p.parking_slots, p.area_sqm, p.bedrooms, p.bathrooms,
-                p.annual_rent, p.city, p.area,
+                p.annual_rent, p.rent_frequency, p.city, p.area,
                 COALESCE(p.cover_image, (
                     SELECT pp.image FROM `tabProperty Photo` pp
                     WHERE pp.parent = p.name
@@ -295,7 +297,7 @@ def get_property_detail(unit=None, property=None):
             SELECT
                 u.name as unit_name, u.unit_no, u.unit_title, u.floor, u.unit_type,
                 u.usage, u.status, u.furnishing, u.parking_slots, u.area_sqm,
-                u.bedrooms, u.bathrooms, u.annual_rent,
+                u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency,
                 p.name as property, p.property_name, p.city, p.area, p.address_line,
                 p.cover_image, p.latitude, p.longitude
             FROM `tabUnit` u
@@ -312,7 +314,7 @@ def get_property_detail(unit=None, property=None):
             SELECT
                 p.name as property, p.property_name, p.property_type, p.usage,
                 p.furnishing, p.parking_slots, p.area_sqm, p.bedrooms, p.bathrooms,
-                p.annual_rent, p.city, p.area, p.address_line,
+                p.annual_rent, p.rent_frequency, p.city, p.area, p.address_line,
                 COALESCE(p.cover_image, (
                     SELECT pp.image FROM `tabProperty Photo` pp
                     WHERE pp.parent = p.name
