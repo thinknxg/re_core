@@ -149,6 +149,7 @@ def _unit_row_to_dict(row):
         "bathrooms": row.bathrooms,
         "annual_rent": row.annual_rent,
         "rent_frequency": row.rent_frequency,
+        "is_featured": row.is_featured,
         "property": row.property,
         "property_name": row.property_name,
         "city": row.city,
@@ -178,6 +179,7 @@ def _property_row_to_dict(row):
         "bathrooms": row.bathrooms,
         "annual_rent": row.annual_rent,
         "rent_frequency": row.rent_frequency,
+        "is_featured": row.is_featured,
         "property": row.property,
         "property_name": row.property_name,
         "city": row.city,
@@ -234,7 +236,7 @@ def get_live_properties(location=None, unit_type=None, min_rent=None, max_rent=N
         SELECT
             u.name as unit_name, u.unit_no, u.unit_title, u.floor, u.unit_type,
             u.usage, u.status, u.furnishing, u.parking_slots, u.area_sqm,
-            u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency,
+            u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency, u.is_featured,
             p.name as property, p.property_name, p.city, p.area,
             COALESCE(p.cover_image, (
                 SELECT pp.image FROM `tabProperty Photo` pp
@@ -259,7 +261,7 @@ def get_live_properties(location=None, unit_type=None, min_rent=None, max_rent=N
             SELECT
                 p.name as property, p.property_name, p.property_type, p.usage,
                 p.furnishing, p.parking_slots, p.area_sqm, p.bedrooms, p.bathrooms,
-                p.annual_rent, p.rent_frequency, p.city, p.area,
+                p.annual_rent, p.rent_frequency, p.is_featured, p.city, p.area,
                 COALESCE(p.cover_image, (
                     SELECT pp.image FROM `tabProperty Photo` pp
                     WHERE pp.parent = p.name
@@ -285,6 +287,7 @@ def get_live_properties(location=None, unit_type=None, min_rent=None, max_rent=N
     page_length = int(page_length or 12)
     page = results[start:start + page_length]
     _attach_photos(page)
+    _attach_amenities(page)
     return page
 
 def _attach_photos(rows, limit_per_listing=6):
@@ -317,6 +320,28 @@ def _attach_photos(rows, limit_per_listing=6):
         r["photos"] = photos
 
 
+def _attach_amenities(rows):
+    """Batch-fetch Amenity names per Property, for the filter bar and card
+    display (Amenity is a Table MultiSelect on Property)."""
+    property_names = list({r["property"] for r in rows if r.get("property")})
+    if not property_names:
+        for r in rows:
+            r["amenities"] = []
+        return
+
+    amenity_rows = frappe.get_all(
+        "Property Amenity",
+        filters={"parent": ["in", property_names]},
+        fields=["parent", "amenity"],
+    )
+    amenities_by_property = {}
+    for a in amenity_rows:
+        amenities_by_property.setdefault(a.parent, []).append(a.amenity)
+
+    for r in rows:
+        r["amenities"] = amenities_by_property.get(r.get("property"), [])
+
+
 @frappe.whitelist(allow_guest=True)
 def get_property_detail(unit=None, property=None):
     """Full detail for a single dossier view — either a Unit, or a standalone
@@ -328,7 +353,7 @@ def get_property_detail(unit=None, property=None):
             SELECT
                 u.name as unit_name, u.unit_no, u.unit_title, u.floor, u.unit_type,
                 u.usage, u.status, u.furnishing, u.parking_slots, u.area_sqm,
-                u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency,
+                u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency, u.is_featured,
                 p.name as property, p.property_name, p.city, p.area, p.address_line,
                 p.cover_image, p.latitude, p.longitude
             FROM `tabUnit` u

@@ -132,6 +132,52 @@
   .filter-group select:focus, .filter-group input:focus{border-color:var(--brass); outline:none;}
   .filter-group input[type=text]{background-image:none; padding-right:11px; min-width:150px;}
   .filter-divider{width:1px; align-self:stretch; background:var(--line); margin:0 2px;}
+  .range-slider{position:relative; height:22px; margin-top:6px;}
+  .range-slider-track{position:absolute; top:50%; left:0; right:0; height:4px; background:var(--stone-deep); border-radius:2px; transform:translateY(-50%);}
+  .range-slider-fill{position:absolute; top:50%; height:4px; background:var(--brass); border-radius:2px; transform:translateY(-50%);}
+  .range-slider input[type="range"]{
+    position:absolute; top:0; left:0; width:100%; height:22px; margin:0;
+    background:transparent; appearance:none; -webkit-appearance:none; pointer-events:none;
+  }
+  .range-slider input[type="range"]::-webkit-slider-thumb{
+    appearance:none; -webkit-appearance:none; pointer-events:auto;
+    width:16px; height:16px; border-radius:50%; background:var(--brass); border:2px solid var(--white);
+    box-shadow:0 1px 4px rgba(11,21,18,0.35); cursor:pointer; margin-top:0;
+  }
+  .range-slider input[type="range"]::-moz-range-thumb{
+    pointer-events:auto; width:16px; height:16px; border-radius:50%; background:var(--brass);
+    border:2px solid var(--white); box-shadow:0 1px 4px rgba(11,21,18,0.35); cursor:pointer;
+  }
+  .range-slider input[type="range"]::-webkit-slider-runnable-track{background:transparent;}
+  .range-slider input[type="range"]::-moz-range-track{background:transparent;}
+  .range-slider-labels{display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); margin-top:4px;}
+  .amenity-check-row{display:flex; align-items:center; gap:8px; padding:5px 4px; font-size:13px; cursor:pointer;}
+  .amenity-check-row:hover{background:var(--stone);}
+  .featured-row{
+    display:flex; gap:18px; overflow-x:auto; padding-bottom:8px; scroll-snap-type:x proximity;
+    scrollbar-width:thin; scrollbar-color:var(--brass-soft) transparent;
+  }
+  .featured-row .card{flex:0 0 340px; scroll-snap-align:start; border:1px solid var(--brass-soft);}
+  .featured-row .card-media{height:230px;}
+  .featured-badge{
+    position:absolute; top:12px; left:12px; z-index:2;
+    background:var(--brass); color:var(--white); font-size:11px; font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase; padding:4px 10px; border-radius:20px;
+  }
+  @keyframes shimmer{0%{background-position:-400px 0;} 100%{background-position:400px 0;}}
+  .skeleton-shimmer{
+    background:linear-gradient(90deg, var(--stone-deep) 0%, var(--stone) 50%, var(--stone-deep) 100%);
+    background-size:800px 100%; animation:shimmer 1.4s ease-in-out infinite;
+  }
+  .skel-card{background:var(--white); border-radius:14px; overflow:hidden; border:1px solid var(--line); box-shadow:var(--shadow-soft);}
+  .skel-media{height:208px;}
+  .skel-body{padding:16px;}
+  .skel-line{height:12px; border-radius:6px; margin-bottom:10px;}
+  .skel-line.short{width:55%;}
+  .skel-line.price{height:18px; width:40%; margin-bottom:12px;}
+  .skel-line.title{height:15px; width:80%;}
+  .skel-dims{display:flex; gap:14px; margin-top:14px;}
+  .skel-dims .skel-line{width:40px; height:22px; margin-bottom:0;}
   .btn-clear{margin-left:auto; font-size:12.5px; color:var(--ink-soft); background:none; border:none; text-decoration:underline; text-underline-offset:3px;}
   .btn-apply{background:var(--moss); color:var(--stone); border:none; border-radius:8px; padding:10px 20px; font-size:13px; font-weight:600; letter-spacing:0.01em; transition:background .15s ease, transform .15s ease;}
   .btn-apply:hover{background:var(--moss-deep); transform:translateY(-1px);}
@@ -359,17 +405,25 @@
         <option value="4">4+</option>
       </select>
     </div>
-    <div class="filter-group">
-      <label>Min annual rent</label>
-      <select id="fMin">
-        <option value="">No min</option>
-      </select>
+    <div class="filter-group" style="min-width:220px;">
+      <label>Annual rent range</label>
+      <div class="range-slider" id="rentRangeSlider">
+        <div class="range-slider-track"></div>
+        <div class="range-slider-fill" id="rentRangeFill"></div>
+        <input type="range" id="fMin" min="0" max="500000" step="5000" value="0">
+        <input type="range" id="fMax" min="0" max="500000" step="5000" value="500000">
+      </div>
+      <div class="range-slider-labels">
+        <span id="rentRangeMinLabel">﷼0</span>
+        <span id="rentRangeMaxLabel">﷼500,000+</span>
+      </div>
     </div>
-    <div class="filter-group">
-      <label>Max annual rent</label>
-      <select id="fMax">
-        <option value="">No max</option>
-      </select>
+    <div class="filter-group" style="position:relative;">
+      <label>Amenities</label>
+      <button type="button" class="form-input" id="amenitiesDropdownBtn" style="text-align:left; cursor:pointer;">
+        <span id="amenitiesDropdownLabel">Any</span>
+      </button>
+      <div id="amenitiesDropdownPanel" style="display:none; position:absolute; top:100%; left:0; z-index:20; background:var(--white); border:1px solid var(--line-strong); border-radius:8px; box-shadow:var(--shadow-soft); padding:10px; margin-top:4px; max-height:220px; overflow-y:auto; min-width:200px;"></div>
     </div>
     <div class="filter-divider"></div>
     <button class="btn-clear" id="clearFilters">Clear</button>
@@ -385,10 +439,19 @@
         <option value="newest">Sort — Newest</option>
         <option value="price_asc">Sort — Rent ↑</option>
         <option value="price_desc">Sort — Rent ↓</option>
+        <option value="beds_desc">Sort — Most Beds</option>
+        <option value="sqm_desc">Sort — Largest Area</option>
       </select>
     </div>
   </div>
 
+  <div id="featuredSection" style="display:none; margin-bottom:32px;">
+    <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:14px;">
+      <span class="serif" style="font-size:22px; color:var(--ink);">Featured</span>
+      <span style="font-size:12.5px; color:var(--ink-soft);">Hand-picked listings</span>
+    </div>
+    <div class="featured-row" id="featuredRow"></div>
+  </div>
   <div class="grid" id="grid"></div>
   <div id="mapView" style="display:none; height:640px; border-radius:14px; overflow:hidden; border:1px solid var(--line); margin-bottom:40px;"></div>
 </div>
@@ -447,6 +510,7 @@ const FIELD_MAP = {
   photos:    'photos',
   lat:       'latitude',
   lng:       'longitude',
+  featured:  'is_featured',
   building:  'property_name',
   amenities: 'amenities'
 };
@@ -521,9 +585,28 @@ let PROPERTIES = [];
 let wishlist = new Set();
 let activeFilters = {};
 
+function skeletonCard(){
+  return `
+    <div class="skel-card">
+      <div class="skel-media skeleton-shimmer"></div>
+      <div class="skel-body">
+        <div class="skel-line price skeleton-shimmer"></div>
+        <div class="skel-line title skeleton-shimmer"></div>
+        <div class="skel-line short skeleton-shimmer"></div>
+        <div class="skel-dims">
+          <div class="skel-line skeleton-shimmer"></div>
+          <div class="skel-line skeleton-shimmer"></div>
+          <div class="skel-line skeleton-shimmer"></div>
+        </div>
+      </div>
+    </div>`;
+}
+function renderSkeletons(count=6){
+  return Array.from({length: count}).map(skeletonCard).join('');
+}
 async function loadProperties(filters={}){
   const grid = document.getElementById('grid');
-  grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><span class="serif">Loading listings…</span></div>`;
+  grid.innerHTML = renderSkeletons();
   try{
     const raw = await frappeCall('re_core.re_core.listing_portal_api.listing_portal.get_live_properties', filters);
     PROPERTIES = (raw || []).map(normalizeProperty);
@@ -557,9 +640,68 @@ function populateFilterOptions(){
   const types = [...new Set(PROPERTIES.map(p=>p.type).filter(Boolean))].sort();
   document.getElementById('fLocation').innerHTML = '<option value="">All locations</option>' + locs.map(l=>`<option value="${l}">${l}</option>`).join('');
   document.getElementById('fType').innerHTML = '<option value="">All types</option>' + types.map(t=>`<option value="${t}">${t}</option>`).join('');
-  const rents = [30000,50000,75000,100000,150000,200000];
-  document.getElementById('fMin').innerHTML = '<option value="">No min</option>' + rents.map(b=>`<option value="${b}">${rent(b)}/yr</option>`).join('');
-  document.getElementById('fMax').innerHTML = '<option value="">No max</option>' + rents.map(b=>`<option value="${b}">${rent(b)}/yr</option>`).join('');
+
+  const rentValues = PROPERTIES.map(p=>p.rent).filter(v=>v>0);
+  const rentMax = rentValues.length ? Math.ceil(Math.max(...rentValues) / 5000) * 5000 : 500000;
+  const fMin = document.getElementById('fMin'), fMax = document.getElementById('fMax');
+  fMin.max = rentMax; fMax.max = rentMax;
+  if(!fMin.value || Number(fMin.value) === 0) fMin.value = 0;
+  if(!fMax.value || Number(fMax.value) === 500000) fMax.value = rentMax;
+  updateRentSliderUI();
+
+  const amenitySet = new Set();
+  PROPERTIES.forEach(p => (p.amenities||[]).forEach(a => amenitySet.add(a)));
+  const amenityList = [...amenitySet].sort();
+  const panel = document.getElementById('amenitiesDropdownPanel');
+  panel.innerHTML = amenityList.length
+    ? amenityList.map(a => `
+        <label class="amenity-check-row">
+          <input type="checkbox" value="${a}" class="amenity-check">
+          <span>${a}</span>
+        </label>`).join('')
+    : '<div style="padding:6px; color:var(--ink-soft); font-size:12.5px;">No amenities tagged yet.</div>';
+}
+
+function updateRentSliderUI(){
+  const fMin = document.getElementById('fMin'), fMax = document.getElementById('fMax');
+  let minV = Number(fMin.value), maxV = Number(fMax.value);
+  if(minV > maxV){ [minV, maxV] = [maxV, minV]; }
+  const range = Number(fMin.max) || 500000;
+  const fill = document.getElementById('rentRangeFill');
+  fill.style.left = (minV / range * 100) + '%';
+  fill.style.right = (100 - maxV / range * 100) + '%';
+  document.getElementById('rentRangeMinLabel').textContent = rent(minV);
+  document.getElementById('rentRangeMaxLabel').textContent = maxV >= range ? rent(maxV) + '+' : rent(maxV);
+}
+
+['fMin','fMax'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    const fMin = document.getElementById('fMin'), fMax = document.getElementById('fMax');
+    if(Number(fMin.value) > Number(fMax.value)){
+      if(id === 'fMin') fMin.value = fMax.value; else fMax.value = fMin.value;
+    }
+    updateRentSliderUI();
+  });
+});
+
+document.getElementById('amenitiesDropdownBtn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const panel = document.getElementById('amenitiesDropdownPanel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+});
+document.addEventListener('click', (e) => {
+  const panel = document.getElementById('amenitiesDropdownPanel');
+  if(panel && panel.style.display !== 'none' && !e.target.closest('#amenitiesDropdownPanel') && !e.target.closest('#amenitiesDropdownBtn')){
+    panel.style.display = 'none';
+  }
+});
+document.getElementById('amenitiesDropdownPanel').addEventListener('change', () => {
+  const checked = [...document.querySelectorAll('.amenity-check:checked')].map(el => el.value);
+  document.getElementById('amenitiesDropdownLabel').textContent = checked.length
+    ? checked.length + ' selected' : 'Any';
+});
+function getSelectedAmenities(){
+  return [...document.querySelectorAll('.amenity-check:checked')].map(el => el.value);
 }
 
 function getFiltered(){
@@ -569,11 +711,17 @@ function getFiltered(){
     if(activeFilters.beds && p.beds < Number(activeFilters.beds)) return false;
     if(activeFilters.min && p.rent < Number(activeFilters.min)) return false;
     if(activeFilters.max && p.rent > Number(activeFilters.max)) return false;
+    if(activeFilters.amenities && activeFilters.amenities.length){
+      const has = new Set(p.amenities || []);
+      if(!activeFilters.amenities.every(a => has.has(a))) return false;
+    }
     return true;
   });
   const sort = document.getElementById('sortSelect').value;
   if(sort==='price_asc') list = [...list].sort((a,b)=>a.rent-b.rent);
   if(sort==='price_desc') list = [...list].sort((a,b)=>b.rent-a.rent);
+  if(sort==='beds_desc') list = [...list].sort((a,b)=>b.beds-a.beds);
+  if(sort==='sqm_desc') list = [...list].sort((a,b)=>b.sqm-a.sqm);
   return list;
 }
 
@@ -594,6 +742,7 @@ function cardMediaTemplate(p){
       <div class="card-media">
         <div class="card-carousel">${slides}</div>
         ${nav}
+        ${p.featured ? '<div class="featured-badge">Featured</div>' : ''}
         <div class="status-tag ${STATUS_CLASS[p.status] || ''}">${p.isStandalone ? 'Whole Property' : p.status}</div>
         <button class="wish-btn ${wishlist.has(p.id)?'active':''}" data-wish="${p.id}" aria-label="Save unit">
           <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.5-8.5C.9 9.2 2.4 5.5 6 5.5c2 0 3.3 1 4 2 0 0-.5 0 0 0s2-2 4-2c3.6 0 5.1 3.7 3.5 7C19 16.65 12 21 12 21z"/></svg>
@@ -623,13 +772,25 @@ function cardTemplate(p){
     </div>`;
 }
 
+function renderFeaturedRow(){
+  const section = document.getElementById('featuredSection');
+  const row = document.getElementById('featuredRow');
+  const featured = getFiltered().filter(p => p.featured);
+  if(!featured.length){
+    section.style.display = 'none';
+    row.innerHTML = '';
+    return;
+  }
+  section.style.display = 'block';
+  row.innerHTML = featured.map(cardTemplate).join('');
+}
 function renderGrid(){
+  renderFeaturedRow();
   const list = getFiltered();
   const grid = document.getElementById('grid');
   document.getElementById('resultCount').textContent = list.length;
   document.getElementById('statTotal').textContent = PROPERTIES.filter(p=>p.status==='Vacant').length;
   document.getElementById('statOffer').textContent = PROPERTIES.filter(p=>p.status==='Reserved').length;
-
   if(list.length===0){
     grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
       <span class="serif">No units match those filters</span>
@@ -637,7 +798,6 @@ function renderGrid(){
     </div>`;
     return;
   }
-
   grid.innerHTML = list.map(cardTemplate).join('');
 }
 
@@ -1072,6 +1232,7 @@ document.getElementById('applyFilters').onclick = ()=>{
     beds: document.getElementById('fBeds').value,
     min: document.getElementById('fMin').value,
     max: document.getElementById('fMax').value,
+    amenities: getSelectedAmenities(),
   };
   // Sent straight to the backend, which does the real filtering server-side
   // (get_live_properties already accepts location/property_type/min_budget/max_budget/bedrooms).
@@ -1084,7 +1245,12 @@ document.getElementById('applyFilters').onclick = ()=>{
   });
 };
 document.getElementById('clearFilters').onclick = ()=>{
-  ['fLocation','fType','fBeds','fMin','fMax'].forEach(id=>document.getElementById(id).value='');
+  ['fLocation','fType','fBeds'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fMin').value = 0;
+  document.getElementById('fMax').value = document.getElementById('fMin').max;
+  updateRentSliderUI();
+  document.querySelectorAll('.amenity-check').forEach(el => el.checked = false);
+  document.getElementById('amenitiesDropdownLabel').textContent = 'Any';
   activeFilters = {};
   loadProperties();
 };

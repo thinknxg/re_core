@@ -50,7 +50,8 @@
   "column_break_financials",
   "current_lease",
   "charges",
-  "rent_frequency"
+  "rent_frequency",
+  "is_featured"
  ],
  "fields": [
   {
@@ -321,6 +322,13 @@
    "label": "Rent Frequency",
    "options": "\nMonthly\nQuarterly\nSemi-Annual\nAnnual",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Show in the highlighted Featured row at the top of the public listings page.",
+   "fieldname": "is_featured",
+   "fieldtype": "Check",
+   "label": "Featured on Portal"
   }
  ],
  "image_field": "cover_image",
@@ -376,7 +384,7 @@
    "link_fieldname": "property"
   }
  ],
- "modified": "2026-08-20 13:17:15.014417",
+ "modified": "2026-08-21 12:33:52.913908",
  "modified_by": "Administrator",
  "module": "RE Core",
  "name": "Property",
