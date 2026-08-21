@@ -156,6 +156,23 @@
   .card-media::after{content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 60%, rgba(11,21,18,0.32) 100%); pointer-events:none;}
   .card-media img{width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s cubic-bezier(.2,.8,.2,1);}
   .card:hover .card-media img{transform:scale(1.07);}
+  .card-carousel{display:flex; width:100%; height:100%; overflow-x:auto; scroll-snap-type:x mandatory; scrollbar-width:none;}
+  .card-carousel::-webkit-scrollbar{display:none;}
+  .card-carousel .carousel-slide{flex:0 0 100%; scroll-snap-align:start; height:100%;}
+  .card-carousel img{width:100%; height:100%; object-fit:cover; display:block;}
+  .carousel-arrow{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+    width:28px; height:28px; border-radius:50%; border:none;
+    background:rgba(11,21,18,0.5); color:var(--paper); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; opacity:0; transition:opacity .2s ease, background .2s ease;
+  }
+  .card:hover .carousel-arrow{opacity:1;}
+  .carousel-arrow:hover{background:rgba(11,21,18,0.78);}
+  .carousel-arrow.prev{left:8px;} .carousel-arrow.next{right:8px;}
+  .carousel-arrow svg{width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2.4;}
+  .carousel-dots{position:absolute; bottom:10px; left:0; right:0; z-index:2; display:flex; justify-content:center; gap:5px;}
+  .carousel-dots span{width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.5); transition:background .2s ease, transform .2s ease;}
+  .carousel-dots span.active{background:var(--paper); transform:scale(1.3);}
   .status-tag{position:absolute; top:13px; left:13px; z-index:1; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:0.06em; text-transform:uppercase; padding:5px 10px; border-radius:20px; background:rgba(11,21,18,0.85); color:var(--stone);}
   .status-tag.offer{background:rgba(174,138,71,0.94);}
   .wish-btn{position:absolute; top:11px; right:11px; z-index:1; width:33px; height:33px; border-radius:50%; background:rgba(252,250,246,0.92); border:none; display:flex; align-items:center; justify-content:center; transition:transform .18s ease, background .18s ease;}
@@ -282,6 +299,8 @@
   #authSubmitBtn{background:linear-gradient(135deg, var(--brass), var(--brass-deep)); transition:transform .15s ease, box-shadow .15s ease;}
   #authSubmitBtn:hover{transform:translateY(-1px); box-shadow:var(--shadow-soft);}
 </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 </head>
 <body class="blueprint-bg">
 
@@ -360,14 +379,18 @@
 
   <div class="result-meta">
     <div class="count"><b id="resultCount">0</b> units found</div>
-    <select class="sort-select" id="sortSelect">
-      <option value="newest">Sort — Newest</option>
-      <option value="price_asc">Sort — Rent ↑</option>
-      <option value="price_desc">Sort — Rent ↓</option>
-    </select>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <button class="btn-clear" id="mapToggleBtn" type="button">Map View</button>
+      <select class="sort-select" id="sortSelect">
+        <option value="newest">Sort — Newest</option>
+        <option value="price_asc">Sort — Rent ↑</option>
+        <option value="price_desc">Sort — Rent ↓</option>
+      </select>
+    </div>
   </div>
 
   <div class="grid" id="grid"></div>
+  <div id="mapView" style="display:none; height:640px; border-radius:14px; overflow:hidden; border:1px solid var(--line); margin-bottom:40px;"></div>
 </div>
 
 <!-- ===== Dossier overlay ===== -->
@@ -421,6 +444,9 @@ const FIELD_MAP = {
   parking:   'parking_slots',
   status:    'status',          // Vacant / Reserved / Occupied / Under Maintenance / Blocked
   img:       'cover_image',
+  photos:    'photos',
+  lat:       'latitude',
+  lng:       'longitude',
   building:  'property_name',
   amenities: 'amenities'
 };
@@ -553,16 +579,31 @@ function getFiltered(){
 
 const STATUS_CLASS = { 'Vacant':'', 'Reserved':'offer', 'Under Maintenance':'offer' };
 
-function cardTemplate(p){
+function cardMediaTemplate(p){
+  const photos = (p.photos && p.photos.length) ? p.photos : [p.img];
+  const slides = photos.map(src => `<div class="carousel-slide"><img src="${src}" alt="${p.title || p.building}" loading="lazy"></div>`).join('');
+  const nav = photos.length > 1 ? `
+        <button class="carousel-arrow prev" data-carousel-prev aria-label="Previous photo">
+          <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <button class="carousel-arrow next" data-carousel-next aria-label="Next photo">
+          <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+        <div class="carousel-dots">${photos.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>` : '';
   return `
-    <div class="card" data-id="${p.id}">
       <div class="card-media">
-        <img src="${p.img}" alt="${p.title || p.building}" loading="lazy">
+        <div class="card-carousel">${slides}</div>
+        ${nav}
         <div class="status-tag ${STATUS_CLASS[p.status] || ''}">${p.isStandalone ? 'Whole Property' : p.status}</div>
         <button class="wish-btn ${wishlist.has(p.id)?'active':''}" data-wish="${p.id}" aria-label="Save unit">
           <svg viewBox="0 0 24 24"><path d="M12 21s-7-4.35-9.5-8.5C.9 9.2 2.4 5.5 6 5.5c2 0 3.3 1 4 2 0 0-.5 0 0 0s2-2 4-2c3.6 0 5.1 3.7 3.5 7C19 16.65 12 21 12 21z"/></svg>
         </button>
-      </div>
+      </div>`;
+}
+function cardTemplate(p){
+  return `
+    <div class="card" data-id="${p.id}">
+      ${cardMediaTemplate(p)}
       <div class="card-body">
         <label class="compare-check" data-compare="${p.id}">
           <input type="checkbox" ${compareSet.has(p.id)?'checked':''} ${p.isStandalone?'disabled':''}>
@@ -599,6 +640,69 @@ function renderGrid(){
 
   grid.innerHTML = list.map(cardTemplate).join('');
 }
+
+let _leafletMap = null;
+let _leafletMarkers = [];
+let _mapViewActive = false;
+
+function renderMapView(){
+  const list = getFiltered().filter(p => p.lat && p.lng);
+  const mapEl = document.getElementById('mapView');
+
+  if(!_leafletMap){
+    _leafletMap = L.map(mapEl).setView([23.5880, 58.3829], 11); // Muscat, Oman default center
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(_leafletMap);
+  }
+
+  _leafletMarkers.forEach(m => _leafletMap.removeLayer(m));
+  _leafletMarkers = [];
+
+  if(!list.length) return;
+
+  const bounds = [];
+  list.forEach(p => {
+    const marker = L.marker([p.lat, p.lng]).addTo(_leafletMap);
+    marker.bindPopup(`
+      <div style="min-width:180px; font-family:'Inter',sans-serif;">
+        <img src="${p.img}" style="width:100%; height:90px; object-fit:cover; border-radius:6px; margin-bottom:6px;" onerror="this.style.display='none'">
+        <div style="font-weight:600; font-size:13px;">${p.title || p.type + ' · ' + p.building}</div>
+        <div style="font-size:12px; color:#666; margin:2px 0;">${p.building}${p.location ? ' — ' + p.location : ''}</div>
+        <div style="font-weight:700; font-size:13px; margin-top:4px;">${displayRent(p)}</div>
+        <button onclick="openDossier('${p.id}')" style="margin-top:6px; width:100%; padding:5px; border:none; border-radius:5px; background:#3A5140; color:#fff; cursor:pointer; font-size:12px;">View details</button>
+      </div>
+    `);
+    _leafletMarkers.push(marker);
+    bounds.push([p.lat, p.lng]);
+  });
+
+  if(bounds.length){
+    _leafletMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+  }
+}
+
+function toggleMapView(){
+  _mapViewActive = !_mapViewActive;
+  const grid = document.getElementById('grid');
+  const mapEl = document.getElementById('mapView');
+  const btn = document.getElementById('mapToggleBtn');
+  if(_mapViewActive){
+    grid.style.display = 'none';
+    mapEl.style.display = 'block';
+    btn.textContent = 'Grid View';
+    setTimeout(() => {
+      if(_leafletMap) _leafletMap.invalidateSize();
+      renderMapView();
+    }, 50);
+  } else {
+    grid.style.display = '';
+    mapEl.style.display = 'none';
+    btn.textContent = 'Map View';
+  }
+}
+document.getElementById('mapToggleBtn').addEventListener('click', toggleMapView);
 
 async function toggleWish(id, btn){
   const target = PROPERTIES.find(x=>x.id===id);
@@ -905,14 +1009,33 @@ function openCompareView(){
   document.getElementById('overlay').classList.add('open');
 }
 
+function scrollCarousel(mediaEl, dir){
+  const track = mediaEl.querySelector('.card-carousel');
+  if(!track) return;
+  const slideWidth = track.clientWidth;
+  track.scrollBy({ left: dir * slideWidth, behavior: 'smooth' });
+}
 document.getElementById('grid').addEventListener('click', (e)=>{
   const wishBtn = e.target.closest('[data-wish]');
   if(wishBtn){ e.stopPropagation(); toggleWish(wishBtn.dataset.wish, wishBtn); return; }
   const compareBtn = e.target.closest('[data-compare]');
   if(compareBtn){ e.stopPropagation(); return; }
+  const prevBtn = e.target.closest('[data-carousel-prev]');
+  if(prevBtn){ e.stopPropagation(); scrollCarousel(prevBtn.closest('.card-media'), -1); return; }
+  const nextBtn = e.target.closest('[data-carousel-next]');
+  if(nextBtn){ e.stopPropagation(); scrollCarousel(nextBtn.closest('.card-media'), 1); return; }
   const card = e.target.closest('.card');
   if(card) openDossier(card.dataset.id);
 });
+document.getElementById('grid').addEventListener('scroll', (e)=>{}, true);
+document.addEventListener('scroll', (e)=>{
+  const track = e.target.closest && e.target.closest('.card-carousel');
+  if(!track) return;
+  const dots = track.parentElement.querySelectorAll('.carousel-dots span');
+  if(!dots.length) return;
+  const idx = Math.round(track.scrollLeft / track.clientWidth);
+  dots.forEach((d,i)=> d.classList.toggle('active', i===idx));
+}, true);
 document.getElementById('grid').addEventListener('change', (e)=>{
   const compareBtn = e.target.closest('[data-compare]');
   if(compareBtn){ toggleCompare(compareBtn.dataset.compare, e.target.checked); }

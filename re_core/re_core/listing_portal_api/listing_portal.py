@@ -283,7 +283,38 @@ def get_live_properties(location=None, unit_type=None, min_rent=None, max_rent=N
 
     start = int(start or 0)
     page_length = int(page_length or 12)
-    return results[start:start + page_length]
+    page = results[start:start + page_length]
+    _attach_photos(page)
+    return page
+
+def _attach_photos(rows, limit_per_listing=6):
+    """Batch-fetch up to `limit_per_listing` photos per Property, for the
+    card carousel. Unit-level cards use their parent Property's photo pool
+    (Property Photo can optionally be tagged to a specific unit via the
+    'unit' field, but the carousel shows the property's general photos)."""
+    property_names = list({r["property"] for r in rows if r.get("property")})
+    if not property_names:
+        for r in rows:
+            r["photos"] = [r.get("cover_image")] if r.get("cover_image") else []
+        return
+
+    photo_rows = frappe.get_all(
+        "Property Photo",
+        filters={"parent": ["in", property_names]},
+        fields=["parent", "image"],
+        order_by="parent asc, is_cover desc, idx asc",
+    )
+    photos_by_property = {}
+    for p in photo_rows:
+        photos_by_property.setdefault(p.parent, [])
+        if len(photos_by_property[p.parent]) < limit_per_listing:
+            photos_by_property[p.parent].append(p.image)
+
+    for r in rows:
+        photos = photos_by_property.get(r.get("property"), [])
+        if not photos and r.get("cover_image"):
+            photos = [r["cover_image"]]
+        r["photos"] = photos
 
 
 @frappe.whitelist(allow_guest=True)
