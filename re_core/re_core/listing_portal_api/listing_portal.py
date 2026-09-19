@@ -236,7 +236,7 @@ def get_live_properties(location=None, unit_type=None, min_rent=None, max_rent=N
         SELECT
             u.name as unit_name, u.unit_no, u.unit_title, u.floor, u.unit_type,
             u.usage, u.status, u.furnishing, u.parking_slots, u.area_sqm,
-            u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency, u.is_featured,
+            u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency, p.is_featured,
             p.name as property, p.property_name, p.city, p.area,
             COALESCE(p.cover_image, (
                 SELECT pp.image FROM `tabProperty Photo` pp
@@ -353,7 +353,7 @@ def get_property_detail(unit=None, property=None):
             SELECT
                 u.name as unit_name, u.unit_no, u.unit_title, u.floor, u.unit_type,
                 u.usage, u.status, u.furnishing, u.parking_slots, u.area_sqm,
-                u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency, u.is_featured,
+                u.bedrooms, u.bathrooms, u.annual_rent, u.rent_frequency, p.is_featured,
                 p.name as property, p.property_name, p.city, p.area, p.address_line,
                 p.cover_image, p.latitude, p.longitude
             FROM `tabUnit` u
