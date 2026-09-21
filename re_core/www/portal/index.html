@@ -1312,6 +1312,18 @@
           </div>
           <div class="card-body" style="padding:18px; display:flex; flex-direction:column; gap:14px; max-width:520px;">
             <div id="terminate-form-msg" style="display:none;margin-bottom:4px;padding:10px 14px;border-radius:var(--radius);font-size: 15.0px;"></div>
+            <div class="form-group" id="terminate-property-group">
+              <label class="form-label">Property</label>
+              <select class="form-input form-select" id="terminate-property-select" onchange="onTerminatePropertyChange()">
+                <option value="">Select a property…</option>
+              </select>
+            </div>
+            <div class="form-group" id="terminate-unit-group">
+              <label class="form-label">Unit</label>
+              <select class="form-input form-select" id="terminate-unit-select" onchange="renderTerminateLeaseSelect()" disabled>
+                <option value="">Select property first…</option>
+              </select>
+            </div>
             <div class="form-group">
               <label class="form-label">Lease Contract</label>
               <select class="form-input form-select" id="terminate-lease-select" onchange="onTerminateLeaseSelectChange(); calculateTerminateOutstandingRent();">
@@ -1891,6 +1903,12 @@
             <select id="pdc-filter-lease" class="filter-select" onchange="loadPdcList()">
               <option value="">All Lease Contracts</option>
             </select>
+            <select id="pdc-filter-property" class="filter-select" onchange="onPdcFilterPropertyChange()">
+              <option value="">All Properties</option>
+            </select>
+            <select id="pdc-filter-unit" class="filter-select" onchange="onPdcFilterUnitChange()">
+              <option value="">All Units</option>
+            </select>
             <select id="pdc-filter-status" class="filter-select" onchange="loadPdcList()">
               <option value="">All Statuses</option>
               <option value="Received">Received</option>
@@ -1917,6 +1935,8 @@
           <div id="pdc-add-form" style="display:none; margin:0 18px 14px; padding:14px; background:var(--sand); border-radius:var(--radius); flex-direction:column; gap:8px;">
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <select class="form-input" id="pdc-new-tenant" style="flex:1; min-width:160px;"><option value="">Tenant…</option></select>
+              <select class="form-input" id="pdc-new-property" style="flex:1; min-width:160px;" onchange="onPdcNewPropertyChange()"><option value="">Property (optional)…</option></select>
+              <select class="form-input" id="pdc-new-unit" style="flex:1; min-width:160px;" onchange="onPdcNewLeaseFilterChange()"><option value="">Unit (optional)…</option></select>
               <select class="form-input" id="pdc-new-lease" style="flex:1; min-width:160px;" onchange="onPdcLeaseChange()"><option value="">Lease Contract (optional)…</option></select>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -1941,6 +1961,7 @@
               </div>
               <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
                 <select class="form-input" id="bulk-pdc-property" style="flex:1; min-width:180px;"><option value="">Property…</option></select>
+                <select class="form-input" id="bulk-pdc-unit" style="flex:1; min-width:180px;"><option value="">Unit…</option></select>
                 <input class="form-input" type="date" id="bulk-pdc-from-date" style="min-width:140px;">
                 <input class="form-input" type="date" id="bulk-pdc-to-date" style="min-width:140px;">
                 <select class="form-input" id="bulk-pdc-mode" style="min-width:120px;">
@@ -1952,7 +1973,7 @@
               <div class="scroll-x">
                 <table>
                   <thead><tr><th>Tenant</th><th>Due Date</th><th>Amount</th><th>Outstanding</th><th>Pay Amount</th><th>Cheque No</th><th>Bank</th><th>Cheque Date</th></tr></thead>
-                  <tbody id="bulk-pdc-rows"><tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">Load a property and date range.</td></tr></tbody>
+                  <tbody id="bulk-pdc-rows"><tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">Load a property or unit and date range.</td></tr></tbody>
                 </table>
               </div>
               <div class="action-row" style="margin-top:14px;">
@@ -3326,9 +3347,14 @@
   // ─────────────────────────────────────────────
   let _terminateEligibleLeases = [];
 
+  let _terminateHasProperty = true;
+
   async function loadTerminateLeaseOptions() {
+    const propSel = document.getElementById('terminate-property-select');
     const sel = document.getElementById('terminate-lease-select');
+    propSel.innerHTML = '<option value="">Loading…</option>';
     sel.innerHTML = '<option value="">Loading…</option>';
+    setTerminateUnitState('Select property first…');
     document.getElementById('terminate-date').value = '';
     document.getElementById('terminate-reason').value = '';
     document.getElementById('terminate-security-deposit').value = '';
@@ -3340,16 +3366,83 @@
       const rows = await callApiWithParams('re_core', 'get_lease_contracts_list', { source: 'All' });
       const eligible = (rows || []).filter(r => r.docstatus === 1 && ['Active', 'Expiring'].includes(r.status));
       _terminateEligibleLeases = eligible;
-      sel.innerHTML = eligible.length
-        ? '<option value="">Select an Active or Expiring lease…</option>' +
-          eligible.map(r => `<option value="${r.name}">${r.name} — ${r.tenant_name || r.tenant} @ ${r.unit_no || r.unit}</option>`).join('')
+      _terminateHasProperty = !eligible.length || eligible.some(r => r.property);
+      document.getElementById('terminate-property-group').style.display = _terminateHasProperty ? '' : 'none';
+      const props = [];
+      eligible.forEach(r => {
+        if (r.property && !props.find(x => x.id === r.property)) {
+          props.push({ id: r.property, label: r.property_name || r.property });
+        }
+      });
+      propSel.innerHTML = props.length
+        ? '<option value="">Select a property…</option>' + props.map(x => `<option value="${x.id}">${x.label}</option>`).join('')
         : '<option value="">No Active or Expiring leases found</option>';
-      const today = new Date().toISOString().slice(0, 10);
-      document.getElementById('terminate-date').value = today;
+      document.getElementById('terminate-date').value = new Date().toISOString().slice(0, 10);
+      if (props.length === 1) {
+        propSel.value = props[0].id;
+        onTerminatePropertyChange();
+      } else {
+        renderTerminateLeaseSelect();
+      }
     } catch (err) {
       console.error(err);
+      propSel.innerHTML = '<option value="">Failed to load</option>';
       sel.innerHTML = '<option value="">Failed to load leases</option>';
     }
+  }
+
+  function setTerminateUnitState(text) {
+    const u = document.getElementById('terminate-unit-select');
+    u.innerHTML = '<option value="">' + text + '</option>';
+    u.disabled = true;
+  }
+
+  function onTerminatePropertyChange() {
+    const prop = document.getElementById('terminate-property-select').value;
+    const unitSel = document.getElementById('terminate-unit-select');
+    const unitGroup = document.getElementById('terminate-unit-group');
+    const units = [];
+    _terminateEligibleLeases.filter(r => r.property === prop && r.unit).forEach(r => {
+      if (!units.find(u => u.id === r.unit)) units.push({ id: r.unit, label: r.unit_no || r.unit });
+    });
+    if (prop && units.length) {
+      unitSel.innerHTML = '<option value="">Select a unit…</option>' +
+        units.map(u => `<option value="${u.id}">${u.label}</option>`).join('');
+      unitSel.disabled = false;
+      if (units.length === 1) unitSel.value = units[0].id;
+    } else {
+      setTerminateUnitState(prop ? 'No units (standalone property)' : 'Select property first…');
+    }
+    renderTerminateLeaseSelect();
+  }
+
+  function renderTerminateLeaseSelect() {
+    const sel = document.getElementById('terminate-lease-select');
+    const prop = document.getElementById('terminate-property-select').value;
+    const unit = document.getElementById('terminate-unit-select').value;
+    document.getElementById('terminate-outstanding-rent').value = '';
+    if (!_terminateEligibleLeases.length) {
+      sel.innerHTML = '<option value="">No Active or Expiring leases found</option>';
+      sel.disabled = true;
+      onTerminateLeaseSelectChange();
+      return;
+    }
+    if (_terminateHasProperty && !prop) {
+      sel.innerHTML = '<option value="">Select a property first…</option>';
+      sel.disabled = true;
+      onTerminateLeaseSelectChange();
+      return;
+    }
+    const rows = _terminateEligibleLeases.filter(r =>
+      (!_terminateHasProperty || r.property === prop) && (!unit || r.unit === unit));
+    sel.disabled = false;
+    sel.innerHTML = rows.length
+      ? '<option value="">Select a lease…</option>' +
+        rows.map(r => `<option value="${r.name}">${r.name} — ${r.tenant_name || r.tenant}${(r.unit_no || r.unit) ? ' @ ' + (r.unit_no || r.unit) : ''}</option>`).join('')
+      : '<option value="">No Active or Expiring leases found</option>';
+    if (rows.length === 1) sel.value = rows[0].name;
+    onTerminateLeaseSelectChange();
+    if (rows.length === 1) calculateTerminateOutstandingRent();
   }
 
   function onTerminateLeaseSelectChange() {
@@ -4851,14 +4944,58 @@
   // ─────────────────────────────────────────────
   // POST DATED CHEQUES
   // ─────────────────────────────────────────────
+  let _pdcLeasesCache = [];
+
+  function _filterPdcLeaseOptions(selectId, propertyId, unitId) {
+    const sel = document.getElementById(selectId);
+    const current = sel.value;
+    let filtered = _pdcLeasesCache;
+    if (unitId) {
+      filtered = filtered.filter(l => l.unit === unitId);
+    } else if (propertyId) {
+      filtered = filtered.filter(l => l.property === propertyId);
+    }
+    const placeholder = selectId === 'pdc-filter-lease' ? 'All Lease Contracts' : 'Lease Contract (optional)…';
+    sel.innerHTML = '<option value="">' + placeholder + '</option>'
+      + filtered.map(l => `<option value="${l.name}">${l.tenant_name || l.name}</option>`).join('');
+    if (filtered.some(l => l.name === current)) sel.value = current;
+  }
+
+  function onPdcFilterPropertyChange() {
+    document.getElementById('pdc-filter-unit').value = '';
+    _filterPdcLeaseOptions('pdc-filter-lease', document.getElementById('pdc-filter-property').value, '');
+    loadPdcList();
+  }
+
+  function onPdcFilterUnitChange() {
+    _filterPdcLeaseOptions('pdc-filter-lease', document.getElementById('pdc-filter-property').value, document.getElementById('pdc-filter-unit').value);
+    loadPdcList();
+  }
+
+  function onPdcNewPropertyChange() {
+    document.getElementById('pdc-new-unit').value = '';
+    _filterPdcLeaseOptions('pdc-new-lease', document.getElementById('pdc-new-property').value, '');
+  }
+
+  function onPdcNewLeaseFilterChange() {
+    _filterPdcLeaseOptions('pdc-new-lease', document.getElementById('pdc-new-property').value, document.getElementById('pdc-new-unit').value);
+  }
+
   async function loadPdc() {
     try {
       const tenants = await getTenantsCached();
       populateSelect(document.getElementById('pdc-filter-tenant'), tenants, 'name', 'tenant_name');
       populateSelect(document.getElementById('pdc-new-tenant'), tenants, 'name', 'tenant_name');
       const leases = await getLeaseContractsCached();
+      _pdcLeasesCache = leases || [];
       populateSelect(document.getElementById('pdc-filter-lease'), leases, 'name', 'tenant_name');
       populateSelect(document.getElementById('pdc-new-lease'), leases, 'name', 'tenant_name');
+      const properties = await callApi('get_properties_list');
+      populateSelect(document.getElementById('pdc-filter-property'), properties, 'name', 'property_name');
+      populateSelect(document.getElementById('pdc-new-property'), properties, 'name', 'property_name');
+      const units = await callApi('get_units_for_dropdown');
+      populateSelect(document.getElementById('pdc-filter-unit'), units, 'name', 'display_label');
+      populateSelect(document.getElementById('pdc-new-unit'), units, 'name', 'display_label');
     } catch (err) { console.error(err); }
     loadPdcList();
   }
@@ -4989,6 +5126,8 @@
     const tbody = document.getElementById('pdc-rows');
     const tenant = document.getElementById('pdc-filter-tenant')?.value || '';
     const lease = document.getElementById('pdc-filter-lease')?.value || '';
+    const property = document.getElementById('pdc-filter-property')?.value || '';
+    const unit = document.getElementById('pdc-filter-unit')?.value || '';
     const status = document.getElementById('pdc-filter-status')?.value || '';
     const fromDate = document.getElementById('pdc-filter-from-date')?.value || '';
     const toDate = document.getElementById('pdc-filter-to-date')?.value || '';
@@ -5000,6 +5139,8 @@
       const params = {};
       if (tenant) params.tenant = tenant;
       if (lease) params.lease_contract = lease;
+      if (property) params.property = property;
+      if (unit) params.unit = unit;
       if (status) params.status = status;
       if (fromDate) params.from_date = fromDate;
       if (toDate) params.to_date = toDate;
@@ -7084,6 +7225,15 @@
         console.error('Failed to load properties', err);
       }
     }
+    const unitSel = document.getElementById('bulk-pdc-unit');
+    if (unitSel.options.length <= 1) {
+      try {
+        const units = await callApi('get_units_for_dropdown');
+        populateSelect(unitSel, units, 'name', 'display_label');
+      } catch (err) {
+        console.error('Failed to load units', err);
+      }
+    }
   }
 
   function closeBulkPdcForm() {
@@ -7100,17 +7250,18 @@
 
   async function loadBulkPdcRows() {
     const property = document.getElementById('bulk-pdc-property').value;
+    const unit = document.getElementById('bulk-pdc-unit').value;
     const fromDate = document.getElementById('bulk-pdc-from-date').value;
     const toDate = document.getElementById('bulk-pdc-to-date').value;
-    if (!property || !fromDate || !toDate) {
-      showBulkPdcMsg('Please select Property, From Date and To Date.', true);
+    if ((!property && !unit) || !fromDate || !toDate) {
+      showBulkPdcMsg('Please select either Property or Unit, plus From Date and To Date.', true);
       return;
     }
     const tbody = document.getElementById('bulk-pdc-rows');
     tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--ink-muted);padding:24px;">Loading…</td></tr>';
     try {
       const rows = await callApiWithParams('re_core', 'get_bulk_pdc_due_installments', {
-        property, from_date: fromDate, to_date: toDate
+        property, unit, from_date: fromDate, to_date: toDate
       });
       _bulkPdcRowsData = rows || [];
       if (!_bulkPdcRowsData.length) {
@@ -7137,6 +7288,7 @@
 
   async function submitBulkPdc() {
     const property = document.getElementById('bulk-pdc-property').value;
+    const unit = document.getElementById('bulk-pdc-unit').value;
     const modeOfPayment = document.getElementById('bulk-pdc-mode').value;
     if (!_bulkPdcRowsData.length) {
       showBulkPdcMsg('Nothing loaded to submit.', true);
@@ -7173,7 +7325,7 @@
     btn.textContent = 'Submitting…';
     try {
       const results = await postApi('re_core', 'submit_bulk_pdc_payments', {
-        property, mode_of_payment: modeOfPayment, rows: payload
+        property, unit, mode_of_payment: modeOfPayment, rows: payload
       });
       const failed = (results || []).filter(r => r.status === 'Failed');
       if (failed.length) {

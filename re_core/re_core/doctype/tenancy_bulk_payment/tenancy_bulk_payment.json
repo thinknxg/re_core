@@ -9,6 +9,7 @@
  "field_order": [
   "naming_series",
   "property",
+  "unit",
   "company",
   "col_break_tbp1",
   "from_date",
@@ -32,7 +33,15 @@
    "in_list_view": 1,
    "label": "Property",
    "options": "Property",
-   "reqd": 1
+   "reqd": 0
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Unit",
+   "options": "Unit",
+   "description": "Use Property for building-wide bulk PDC, or Unit to scope it to a single unit."
   },
   {
    "fetch_from": "property.company",

@@ -5,8 +5,8 @@ frappe.ui.form.on("Tenancy Bulk Payment", {
 refresh(frm) {
 if (frm.doc.docstatus === 0) {
 frm.add_custom_button(__("Fetch Due Installments"), () => {
-if (!frm.doc.property || !frm.doc.from_date || !frm.doc.to_date) {
-frappe.msgprint(__("Please set Property, From Date and To Date first."));
+if ((!frm.doc.property && !frm.doc.unit) || !frm.doc.from_date || !frm.doc.to_date) {
+frappe.msgprint(__("Please set either Property or Unit, plus From Date and To Date."));
 return;
 }
 if (frm.is_dirty()) {
@@ -36,6 +36,13 @@ frm.doc.status === "Processed" ? "green" : "orange"
 },
 
 property(frm) {
+frm.set_value("rows", []);
+if (frm.doc.property) {
+frm.set_value("unit", "");
+}
+},
+
+unit(frm) {
 frm.set_value("rows", []);
 },
 

@@ -286,6 +286,25 @@ def get_units_list():
     }
 
 
+@frappe.whitelist()
+def get_units_for_dropdown():
+    rows = frappe.get_all(
+        "Unit",
+        fields=["name", "unit_no", "property"],
+        order_by="unit_no asc",
+        limit_page_length=0,
+    )
+    prop_names = list({r["property"] for r in rows if r["property"]})
+    prop_map = {
+        p["name"]: p["property_name"]
+        for p in frappe.get_all("Property", filters={"name": ["in", prop_names]},
+                                 fields=["name", "property_name"])
+    } if prop_names else {}
+    for r in rows:
+        r["display_label"] = f"{r['unit_no']} — {prop_map.get(r['property'], r['property'] or '')}"
+    return rows
+
+
 # ─────────────────────────────────────────────
 # TENANTS
 # ─────────────────────────────────────────────
@@ -1131,7 +1150,8 @@ def get_property_financials(property):
 # POST DATED CHEQUES
 # ─────────────────────────────────────────────
 @frappe.whitelist()
-def get_pdc_list(tenant=None, lease_contract=None, status=None, from_date=None, to_date=None):
+def get_pdc_list(tenant=None, lease_contract=None, status=None, from_date=None, to_date=None,
+                  property=None, unit=None):
     filters = {}
     if tenant:
         filters["tenant"] = tenant
@@ -1149,6 +1169,20 @@ def get_pdc_list(tenant=None, lease_contract=None, status=None, from_date=None, 
     total_received = frappe.db.count("Post Dated Cheque", {"status": "Received"})
     total_deposited = frappe.db.count("Post Dated Cheque", {"status": "Deposited"})
     total_bounced = frappe.db.count("Post Dated Cheque", {"status": "Bounced"})
+
+    if not lease_contract and (property or unit):
+        lease_filters = {"unit": unit} if unit else {"property": property}
+        matching_leases = frappe.get_all("Lease Contract", filters=lease_filters, pluck="name")
+        if not matching_leases:
+            return {
+                "stats": {
+                    "received": total_received,
+                    "deposited": total_deposited,
+                    "bounced": total_bounced,
+                },
+                "rows": [],
+            }
+        filters["lease_contract"] = ["in", matching_leases]
 
     rows = frappe.get_all(
         "Post Dated Cheque",
@@ -1866,9 +1900,20 @@ def get_lease_contracts_list(source="Admin"):
         u["name"]: u["unit_no"]
         for u in frappe.get_all("Unit", filters={"name": ["in", unit_names]}, fields=["name", "unit_no"])
     } if unit_names else {}
+    prop_names = list({r["property"] for r in rows if r["property"]})
+    _title = frappe.get_meta("Property").title_field or "name"
+    prop_map = {
+        pr["name"]: pr[_title]
+        for pr in frappe.get_all(
+            "Property",
+            filters={"name": ["in", prop_names]},
+            fields=["name"] if _title == "name" else ["name", _title],
+        )
+    } if prop_names else {}
     for r in rows:
         r["tenant_name"] = tenant_map.get(r["tenant"], r["tenant"])
         r["unit_no"] = unit_map.get(r["unit"], r["unit"])
+        r["property_name"] = prop_map.get(r["property"], r["property"])
     return rows
 
 
@@ -2533,8 +2578,14 @@ def record_partial_payment(installment_name, amount, mode_of_payment="Cash", pay
 # BULK PDC PAYMENT ENTRY
 # ─────────────────────────────────────────────
 @frappe.whitelist()
-def get_bulk_pdc_due_installments(property, from_date, to_date):
-    return frappe.db.sql("""
+def get_bulk_pdc_due_installments(property=None, unit=None, from_date=None, to_date=None):
+    if not property and not unit:
+        frappe.throw(_("Select either a Property or a Unit."))
+
+    scope_condition = "lc.unit = %(scope_value)s" if unit else "lc.property = %(scope_value)s"
+    scope_value = unit if unit else property
+
+    return frappe.db.sql(f"""
         select
             ri.name as rent_installment,
             ri.due_date,
@@ -2547,22 +2598,28 @@ def get_bulk_pdc_due_installments(property, from_date, to_date):
         inner join `tabRent Schedule` rs on rs.name = ri.parent
         inner join `tabLease Contract` lc on lc.name = rs.lease_contract
         left join `tabTenant` t on t.name = rs.tenant
-        where lc.property = %(property)s
+        where {scope_condition}
             and ri.due_date between %(from_date)s and %(to_date)s
             and ri.status in ('Pending', 'Partially Paid', 'Overdue')
             and ifnull(ri.sales_invoice, '') != ''
         order by ri.due_date
-    """, {"property": property, "from_date": from_date, "to_date": to_date}, as_dict=True)
+    """, {"scope_value": scope_value, "from_date": from_date, "to_date": to_date}, as_dict=True)
 
 
 @frappe.whitelist()
-def submit_bulk_pdc_payments(property, rows, mode_of_payment="Cash", company=None):
+def submit_bulk_pdc_payments(property=None, unit=None, rows=None, mode_of_payment="Cash", company=None):
     if isinstance(rows, str):
         rows = frappe.parse_json(rows)
     if not rows:
         frappe.throw("No rows to process.")
+    if not property and not unit:
+        frappe.throw(_("Select either a Property or a Unit."))
     if not company:
-        company = frappe.db.get_value("Property", property, "company")
+        if unit:
+            unit_property = frappe.db.get_value("Unit", unit, "property")
+            company = frappe.db.get_value("Property", unit_property, "company")
+        else:
+            company = frappe.db.get_value("Property", property, "company")
 
     results = []
     for row in rows:

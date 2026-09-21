@@ -12,8 +12,10 @@ from re_core.re_core.api import record_partial_payment
 class TenancyBulkPayment(Document):
     @frappe.whitelist()
     def fetch_due_installments(self):
-        if not (self.property and self.from_date and self.to_date):
-            frappe.throw(_("Property, From Date and To Date are required before fetching installments."))
+        if not (self.property or self.unit):
+            frappe.throw(_("Select either a Property or a Unit before fetching installments."))
+        if not (self.from_date and self.to_date):
+            frappe.throw(_("From Date and To Date are required before fetching installments."))
 
         self.set("rows", [])
         for r in self.get_due_installments():
@@ -32,7 +34,10 @@ class TenancyBulkPayment(Document):
         return len(self.rows)
 
     def get_due_installments(self):
-        return frappe.db.sql("""
+        scope_condition = "lc.unit = %(scope_value)s" if self.unit else "lc.property = %(scope_value)s"
+        scope_value = self.unit if self.unit else self.property
+
+        return frappe.db.sql(f"""
             select
                 ri.name as rent_installment,
                 ri.due_date,
@@ -45,13 +50,13 @@ class TenancyBulkPayment(Document):
             from `tabRent Installment` ri
             inner join `tabRent Schedule` rs on rs.name = ri.parent
             inner join `tabLease Contract` lc on lc.name = rs.lease_contract
-            where lc.property = %(property)s
+            where {scope_condition}
             and ri.due_date between %(from_date)s and %(to_date)s
             and ri.status in ('Pending', 'Partially Paid')
             and ifnull(ri.sales_invoice, '') != ''
             order by ri.due_date
         """, {
-            "property": self.property,
+            "scope_value": scope_value,
             "from_date": self.from_date,
             "to_date": self.to_date,
         }, as_dict=True)
