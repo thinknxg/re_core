@@ -2,7 +2,7 @@
  "app": "re_core",
  "charts": [],
  "content": "[{\"id\": \"re-core-header\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>RE Core</b></span>\", \"col\": 12}}, {\"id\": \"re-core-sub\", \"type\": \"paragraph\", \"data\": {\"text\": \"Property, leasing, CRM, and listings \\u2014 all in one place.\", \"col\": 12}}, {\"id\": \"card-properties\", \"type\": \"card\", \"data\": {\"card_name\": \"Properties\", \"col\": 4}}, {\"id\": \"card-leasing-&-tenants\", \"type\": \"card\", \"data\": {\"card_name\": \"Leasing & Tenants\", \"col\": 4}}, {\"id\": \"card-maintenance\", \"type\": \"card\", \"data\": {\"card_name\": \"Maintenance\", \"col\": 4}}, {\"id\": \"card-accounting\", \"type\": \"card\", \"data\": {\"card_name\": \"Accounting\", \"col\": 4}}, {\"id\": \"card-marketing-&-enquiries\", \"type\": \"card\", \"data\": {\"card_name\": \"Marketing & Enquiries\", \"col\": 4}}, {\"id\": \"card-crm\", \"type\": \"card\", \"data\": {\"card_name\": \"CRM\", \"col\": 4}}, {\"id\": \"card-portal--listings\", \"type\": \"card\", \"data\": {\"card_name\": \"Portal / Listings\", \"col\": 4}}, {\"id\": \"card-settings\", \"type\": \"card\", \"data\": {\"card_name\": \"Settings\", \"col\": 4}}]",
- "creation": "2026-08-14 22:33:56.917906",
+ "creation": "2026-09-21 23:43:02.590373",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -115,6 +115,16 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Rent Installment",
+   "link_count": 0,
+   "link_to": "Rent Installment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Security Deposit",
    "link_count": 0,
    "link_to": "Security Deposit",
@@ -158,16 +168,6 @@
    "label": "Rent Credit Balance",
    "link_count": 0,
    "link_to": "Rent Credit Balance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Tenant Portal Session",
-   "link_count": 0,
-   "link_to": "Tenant Portal Session",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -467,7 +467,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-08-16 11:05:42.112808",
+ "modified": "2026-09-22 11:29:04.858901",
  "modified_by": "Administrator",
  "module": "RE Core",
  "name": "RE Core",
@@ -501,6 +501,27 @@
    "label": "Lease Contracts",
    "link_to": "Lease Contract",
    "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Portal Home",
+   "type": "URL",
+   "url": "/portal"
+  },
+  {
+   "color": "Green",
+   "doc_view": "",
+   "label": "Listings",
+   "type": "URL",
+   "url": "/listings"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "label": "Tenant Self-Service",
+   "type": "URL",
+   "url": "/tenant-self-service"
   }
  ],
  "title": "RE Core",
