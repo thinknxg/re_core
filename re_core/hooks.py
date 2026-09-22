@@ -5,7 +5,7 @@ app_description = "GCC Real Estate Platform — Property, Tenant & Lease Managem
 app_email = "dev@kreatao.com"
 app_license = "MIT"
 
-required_apps = ["erpnext", "re_crm"]
+required_apps = ["erpnext"]
 
 after_install = "re_core.install.after_install"
 
