@@ -1,0 +1,23 @@
+{
+ "creation": "2026-11-11 19:50:00.000000",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "idx": 0,
+ "modified": "2026-11-11 19:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "RE Overdue Installments",
+ "owner": "Administrator",
+ "label": "Overdue Installments",
+ "document_type": "Rent Installment",
+ "function": "Count",
+ "filters_json": "[[\"Rent Installment\", \"status\", \"=\", \"Overdue\"]]",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "color": "#FF5858",
+ "show_full_number": 0,
+ "parent_document_type": "Rent Schedule"
+}

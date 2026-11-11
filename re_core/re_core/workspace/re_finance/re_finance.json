@@ -1,0 +1,166 @@
+{
+ "creation": "2026-11-11 19:50:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "idx": 0,
+ "modified": "2026-11-11 19:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "RE Finance",
+ "owner": "Administrator",
+ "app": "re_core",
+ "label": "RE Finance",
+ "title": "RE Finance",
+ "public": 1,
+ "type": "Workspace",
+ "icon": "banknote",
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "hide_custom": 0,
+ "sequence_id": 2,
+ "link_type": "DocType",
+ "content": "[{\"id\": \"h-1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h3\\\"><b>Finance & Collections</b></span>\", \"col\": 12}}, {\"id\": \"p-2\", \"type\": \"paragraph\", \"data\": {\"text\": \"Rent collection, cheques and deposits, linked to ERPNext Sales Invoice and Payment Entry.\", \"col\": 12}}, {\"id\": \"h-3\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Collections at a glance</b></span>\", \"col\": 12}}, {\"id\": \"n-4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Overdue Installments\", \"col\": 4}}, {\"id\": \"n-5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Overdue Rent Amount\", \"col\": 4}}, {\"id\": \"n-6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE PDCs Awaiting Deposit\", \"col\": 4}}, {\"id\": \"n-7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Bounced PDCs\", \"col\": 4}}, {\"id\": \"n-8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Deposits Held\", \"col\": 4}}, {\"id\": \"h-9\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Shortcuts</b></span>\", \"col\": 12}}, {\"id\": \"s-10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rent Schedules\", \"col\": 3}}, {\"id\": \"s-11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Outstanding Rent\", \"col\": 3}}, {\"id\": \"s-12\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rent Collection\", \"col\": 3}}, {\"id\": \"s-13\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PDC Management\", \"col\": 3}}, {\"id\": \"s-14\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PDC Status\", \"col\": 3}}, {\"id\": \"s-15\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Security Deposits\", \"col\": 3}}, {\"id\": \"s-16\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Sales Invoices\", \"col\": 3}}, {\"id\": \"s-17\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Payment Entries\", \"col\": 3}}, {\"id\": \"s-18\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Accounts Receivable\", \"col\": 3}}, {\"id\": \"s-19\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Owner Statements\", \"col\": 3}}, {\"id\": \"h-20\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Analytics</b></span>\", \"col\": 12}}, {\"id\": \"c-21\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Rent Billed vs Collected\", \"col\": 6}}, {\"id\": \"c-22\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Rent Arrears Ageing\", \"col\": 6}}, {\"id\": \"c-23\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE PDC Lifecycle\", \"col\": 6}}, {\"id\": \"h-24\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Needs attention</b></span>\", \"col\": 12}}, {\"id\": \"q-25\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"PDCs To Deposit\", \"col\": 6}}, {\"id\": \"q-26\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Bounced Cheques\", \"col\": 6}}]",
+ "charts": [
+  {
+   "chart_name": "RE Rent Billed vs Collected",
+   "label": "Rent Billed vs Collected"
+  },
+  {
+   "chart_name": "RE Rent Arrears Ageing",
+   "label": "Rent Arrears Ageing"
+  },
+  {
+   "chart_name": "RE PDC Lifecycle",
+   "label": "PDC Lifecycle"
+  }
+ ],
+ "number_cards": [
+  {
+   "number_card_name": "RE Overdue Installments",
+   "label": "Overdue Installments"
+  },
+  {
+   "number_card_name": "RE Overdue Rent Amount",
+   "label": "Overdue Rent Amount"
+  },
+  {
+   "number_card_name": "RE PDCs Awaiting Deposit",
+   "label": "PDCs Awaiting Deposit"
+  },
+  {
+   "number_card_name": "RE Bounced PDCs",
+   "label": "Bounced PDCs"
+  },
+  {
+   "number_card_name": "RE Deposits Held",
+   "label": "Security Deposits Held"
+  }
+ ],
+ "shortcuts": [
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "label": "Rent Schedules",
+   "link_to": "Rent Schedule",
+   "type": "DocType",
+   "stats_filter": "{\"status\": \"Active\"}"
+  },
+  {
+   "color": "Red",
+   "doc_view": "",
+   "label": "Outstanding Rent",
+   "link_to": "RE Outstanding Rent",
+   "type": "Report",
+   "report_ref_doctype": "Rent Schedule"
+  },
+  {
+   "color": "Green",
+   "doc_view": "",
+   "label": "Rent Collection",
+   "link_to": "RE Rent Collection",
+   "type": "Report",
+   "report_ref_doctype": "Rent Schedule"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "",
+   "label": "PDC Management",
+   "link_to": "Post Dated Cheque",
+   "type": "DocType",
+   "stats_filter": "{\"docstatus\": 1, \"status\": \"Received\"}"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "",
+   "label": "PDC Status",
+   "link_to": "RE PDC Status",
+   "type": "Report",
+   "report_ref_doctype": "Post Dated Cheque"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "",
+   "label": "Security Deposits",
+   "link_to": "Security Deposit",
+   "type": "DocType",
+   "stats_filter": "{\"docstatus\": 1, \"status\": \"Held\"}"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Sales Invoices",
+   "link_to": "Sales Invoice",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Payment Entries",
+   "link_to": "Payment Entry",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Accounts Receivable",
+   "link_to": "Accounts Receivable",
+   "type": "Report",
+   "report_ref_doctype": "Sales Invoice"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "",
+   "label": "Owner Statements",
+   "link_to": "Owner Statement",
+   "type": "DocType"
+  }
+ ],
+ "quick_lists": [
+  {
+   "document_type": "Post Dated Cheque",
+   "label": "PDCs To Deposit",
+   "quick_list_filter": "[[\"Post Dated Cheque\", \"docstatus\", \"=\", 1], [\"Post Dated Cheque\", \"status\", \"=\", \"Received\"]]"
+  },
+  {
+   "document_type": "Post Dated Cheque",
+   "label": "Bounced Cheques",
+   "quick_list_filter": "[[\"Post Dated Cheque\", \"docstatus\", \"=\", 1], [\"Post Dated Cheque\", \"status\", \"=\", \"Bounced\"]]"
+  }
+ ],
+ "links": [],
+ "custom_blocks": [],
+ "roles": [
+  {
+   "role": "RE Manager"
+  },
+  {
+   "role": "Property Manager"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+{
+ "creation": "2026-11-11 19:50:00.000000",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "idx": 0,
+ "modified": "2026-11-11 19:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "RE Open Maintenance",
+ "owner": "Administrator",
+ "label": "Open Maintenance Requests",
+ "document_type": "Maintenance Request",
+ "function": "Count",
+ "filters_json": "[[\"Maintenance Request\", \"status\", \"in\", [\"Open\", \"In Progress\", \"On Hold\"]]]",
+ "is_public": 1,
+ "is_standard": 1,
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type",
+ "color": "#FFA00A",
+ "show_full_number": 0
+}

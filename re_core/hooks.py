@@ -87,6 +87,6 @@ add_to_apps_screen = [
 "name": "re_core",
 		"logo": "/assets/re_core/images/re_core_logo.svg",
 "title": "RE Core",
-"route": "/app/re-core",
+"route": "/app/property-operations",
 }
 ]
