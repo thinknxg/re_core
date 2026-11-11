@@ -19,7 +19,7 @@
  "hide_custom": 0,
  "sequence_id": 1,
  "link_type": "DocType",
- "content": "[{\"id\": \"h-1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h3\\\"><b>Property Operations</b></span>\", \"col\": 12}}, {\"id\": \"p-2\", \"type\": \"paragraph\", \"data\": {\"text\": \"Real estate management overview: portfolio, tenants, leases, collections and maintenance.\", \"col\": 12}}, {\"id\": \"h-3\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live overview</b></span>\", \"col\": 12}}, {\"id\": \"n-4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Total Properties\", \"col\": 4}}, {\"id\": \"n-5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Total Units\", \"col\": 4}}, {\"id\": \"n-6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Occupied Units\", \"col\": 4}}, {\"id\": \"n-7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Vacant Units\", \"col\": 4}}, {\"id\": \"n-8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Active Leases\", \"col\": 4}}, {\"id\": \"n-9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Overdue Installments\", \"col\": 4}}, {\"id\": \"h-10\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational alerts</b></span>\", \"col\": 12}}, {\"id\": \"n-11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Overdue Rent Amount\", \"col\": 3}}, {\"id\": \"n-12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Expiring Leases\", \"col\": 3}}, {\"id\": \"n-13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Open Maintenance\", \"col\": 3}}, {\"id\": \"n-14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE PDCs Awaiting Deposit\", \"col\": 3}}, {\"id\": \"h-15\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick actions &amp; shortcuts</b></span>\", \"col\": 12}}, {\"id\": \"s-16\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Properties\", \"col\": 3}}, {\"id\": \"s-17\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Units\", \"col\": 3}}, {\"id\": \"s-18\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tenants\", \"col\": 3}}, {\"id\": \"s-19\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Owners\", \"col\": 3}}, {\"id\": \"s-20\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"s-21\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Lease\", \"col\": 3}}, {\"id\": \"s-22\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rent Schedules\", \"col\": 3}}, {\"id\": \"s-23\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Installments\", \"col\": 3}}, {\"id\": \"s-24\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PDC Management\", \"col\": 3}}, {\"id\": \"s-25\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Deposits\", \"col\": 3}}, {\"id\": \"s-26\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance\", \"col\": 3}}, {\"id\": \"s-27\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inspections\", \"col\": 3}}, {\"id\": \"h-28\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Analytics</b></span>\", \"col\": 12}}, {\"id\": \"c-29\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Units by Status\", \"col\": 6}}, {\"id\": \"c-30\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Occupied Units by Property\", \"col\": 6}}, {\"id\": \"c-31\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Rent Billed vs Collected\", \"col\": 6}}, {\"id\": \"c-32\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Rent Arrears Ageing\", \"col\": 6}}, {\"id\": \"c-33\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Lease Expirations by Month\", \"col\": 6}}, {\"id\": \"c-34\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Maintenance by Status\", \"col\": 6}}, {\"id\": \"c-35\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE PDC Lifecycle\", \"col\": 6}}, {\"id\": \"h-36\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Needs attention</b></span>\", \"col\": 12}}, {\"id\": \"q-37\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Leases Expiring\", \"col\": 4}}, {\"id\": \"q-38\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Maintenance\", \"col\": 4}}, {\"id\": \"q-39\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"PDCs To Deposit\", \"col\": 4}}, {\"id\": \"h-40\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Modules</b></span>\", \"col\": 12}}, {\"id\": \"k-41\", \"type\": \"card\", \"data\": {\"card_name\": \"01 \\u00b7 Portfolio Management\", \"col\": 4}}, {\"id\": \"k-42\", \"type\": \"card\", \"data\": {\"card_name\": \"02 \\u00b7 Tenant Management\", \"col\": 4}}, {\"id\": \"k-43\", \"type\": \"card\", \"data\": {\"card_name\": \"03 \\u00b7 Lease Management\", \"col\": 4}}, {\"id\": \"k-44\", \"type\": \"card\", \"data\": {\"card_name\": \"04 \\u00b7 Finance & Collections\", \"col\": 4}}, {\"id\": \"k-45\", \"type\": \"card\", \"data\": {\"card_name\": \"05 \\u00b7 Maintenance\", \"col\": 4}}, {\"id\": \"k-46\", \"type\": \"card\", \"data\": {\"card_name\": \"06 \\u00b7 Reports & Settings\", \"col\": 4}}]",
+ "content": "[{\"id\": \"h-1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h3\\\"><b>Property Operations</b></span>\", \"col\": 12}}, {\"id\": \"p-2\", \"type\": \"paragraph\", \"data\": {\"text\": \"Real estate management overview: portfolio, tenants, leases, collections and maintenance.\", \"col\": 12}}, {\"id\": \"h-3\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live overview</b></span>\", \"col\": 12}}, {\"id\": \"n-4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Total Properties\", \"col\": 4}}, {\"id\": \"n-5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Total Units\", \"col\": 4}}, {\"id\": \"n-6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Occupied Units\", \"col\": 4}}, {\"id\": \"n-7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Vacant Units\", \"col\": 4}}, {\"id\": \"n-8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Active Leases\", \"col\": 4}}, {\"id\": \"n-9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Overdue Installments\", \"col\": 4}}, {\"id\": \"h-10\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational alerts</b></span>\", \"col\": 12}}, {\"id\": \"n-11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Overdue Rent Amount\", \"col\": 3}}, {\"id\": \"n-12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Expiring Leases\", \"col\": 3}}, {\"id\": \"n-13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Open Maintenance\", \"col\": 3}}, {\"id\": \"n-14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE PDCs Awaiting Deposit\", \"col\": 3}}, {\"id\": \"h-15\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick actions &amp; shortcuts</b></span>\", \"col\": 12}}, {\"id\": \"s-16\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Properties\", \"col\": 3}}, {\"id\": \"s-17\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Units\", \"col\": 3}}, {\"id\": \"s-18\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tenants\", \"col\": 3}}, {\"id\": \"s-19\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Owners\", \"col\": 3}}, {\"id\": \"s-20\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"s-21\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Lease\", \"col\": 3}}, {\"id\": \"s-22\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rent Schedules\", \"col\": 3}}, {\"id\": \"s-23\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Installments\", \"col\": 3}}, {\"id\": \"s-24\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PDC Management\", \"col\": 3}}, {\"id\": \"s-25\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Deposits\", \"col\": 3}}, {\"id\": \"s-26\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance\", \"col\": 3}}, {\"id\": \"s-27\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inspections\", \"col\": 3}}, {\"id\": \"s-28\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"RE Leads\", \"col\": 3}}, {\"id\": \"s-29\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"RE Deals\", \"col\": 3}}, {\"id\": \"s-30\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Listings\", \"col\": 3}}, {\"id\": \"s-31\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Customer Threads\", \"col\": 3}}, {\"id\": \"h-32\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Analytics</b></span>\", \"col\": 12}}, {\"id\": \"c-33\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Units by Status\", \"col\": 6}}, {\"id\": \"c-34\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Occupied Units by Property\", \"col\": 6}}, {\"id\": \"c-35\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Rent Billed vs Collected\", \"col\": 6}}, {\"id\": \"c-36\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Rent Arrears Ageing\", \"col\": 6}}, {\"id\": \"c-37\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Lease Expirations by Month\", \"col\": 6}}, {\"id\": \"c-38\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Maintenance by Status\", \"col\": 6}}, {\"id\": \"c-39\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE PDC Lifecycle\", \"col\": 6}}, {\"id\": \"h-40\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Needs attention</b></span>\", \"col\": 12}}, {\"id\": \"q-41\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Leases Expiring\", \"col\": 4}}, {\"id\": \"q-42\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Maintenance\", \"col\": 4}}, {\"id\": \"q-43\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"PDCs To Deposit\", \"col\": 4}}, {\"id\": \"h-44\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Modules</b></span>\", \"col\": 12}}, {\"id\": \"k-45\", \"type\": \"card\", \"data\": {\"card_name\": \"01 \\u00b7 Portfolio Management\", \"col\": 4}}, {\"id\": \"k-46\", \"type\": \"card\", \"data\": {\"card_name\": \"02 \\u00b7 Tenant Management\", \"col\": 4}}, {\"id\": \"k-47\", \"type\": \"card\", \"data\": {\"card_name\": \"03 \\u00b7 Lease Management\", \"col\": 4}}, {\"id\": \"k-48\", \"type\": \"card\", \"data\": {\"card_name\": \"04 \\u00b7 Finance & Collections\", \"col\": 4}}, {\"id\": \"k-49\", \"type\": \"card\", \"data\": {\"card_name\": \"05 \\u00b7 Maintenance\", \"col\": 4}}, {\"id\": \"k-50\", \"type\": \"card\", \"data\": {\"card_name\": \"06 \\u00b7 Reports & Settings\", \"col\": 4}}, {\"id\": \"k-51\", \"type\": \"card\", \"data\": {\"card_name\": \"07 \\u00b7 CRM & Leasing Sales (re_crm)\", \"col\": 4}}, {\"id\": \"k-52\", \"type\": \"card\", \"data\": {\"card_name\": \"08 \\u00b7 Portal & Listings (RE-Portal)\", \"col\": 4}}, {\"id\": \"k-53\", \"type\": \"card\", \"data\": {\"card_name\": \"09 \\u00b7 Voice & Messaging (RE-Voice)\", \"col\": 4}}]",
  "charts": [
   {
    "chart_name": "RE Units by Status",
@@ -183,6 +183,34 @@
    "doc_view": "",
    "label": "Inspections",
    "link_to": "Move In Out Inspection",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "RE Leads",
+   "link_to": "RE Lead",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "RE Deals",
+   "link_to": "RE Deal",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "Listings",
+   "link_to": "Listing",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "Customer Threads",
+   "link_to": "Customer Thread",
    "type": "DocType"
   }
  ],
@@ -563,6 +591,323 @@
    "label": "Property Settings",
    "link_count": 0,
    "link_to": "Property Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "07 · CRM & Leasing Sales (re_crm)",
+   "link_count": 10,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Lead",
+   "link_count": 0,
+   "link_to": "RE Lead",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Deal",
+   "link_count": 0,
+   "link_to": "RE Deal",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reservation",
+   "link_count": 0,
+   "link_to": "Reservation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Site Visit",
+   "link_count": 0,
+   "link_to": "Site Visit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Agent",
+   "link_count": 0,
+   "link_to": "RE Agent",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Commission Entry",
+   "link_count": 0,
+   "link_to": "Commission Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lead Source RE",
+   "link_count": 0,
+   "link_to": "Lead Source RE",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE CRM Settings",
+   "link_count": 0,
+   "link_to": "RE CRM Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Settings",
+   "link_count": 0,
+   "link_to": "WhatsApp Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Message Log",
+   "link_count": 0,
+   "link_to": "WhatsApp Message Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "08 · Portal & Listings (RE-Portal)",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Listing",
+   "link_count": 0,
+   "link_to": "Listing",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Listing Inquiry",
+   "link_count": 0,
+   "link_to": "Listing Inquiry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Portal Chat Session",
+   "link_count": 0,
+   "link_to": "Portal Chat Session",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Listing Feed Settings",
+   "link_count": 0,
+   "link_to": "Listing Feed Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Portal Chat Settings",
+   "link_count": 0,
+   "link_to": "Portal Chat Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Portal Settings",
+   "link_count": 0,
+   "link_to": "RE Portal Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "09 · Voice & Messaging (RE-Voice)",
+   "link_count": 13,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer Thread",
+   "link_count": 0,
+   "link_to": "Customer Thread",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Conversation Session",
+   "link_count": 0,
+   "link_to": "Conversation Session",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Message",
+   "link_count": 0,
+   "link_to": "Voice Message",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Command",
+   "link_count": 0,
+   "link_to": "Voice Command",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Intent",
+   "link_count": 0,
+   "link_to": "Voice Intent",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lead Score Log",
+   "link_count": 0,
+   "link_to": "Lead Score Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lead Score Model",
+   "link_count": 0,
+   "link_to": "Lead Score Model",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sentiment Reading",
+   "link_count": 0,
+   "link_to": "Sentiment Reading",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Template",
+   "link_count": 0,
+   "link_to": "WhatsApp Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Webhook Log",
+   "link_count": 0,
+   "link_to": "WhatsApp Webhook Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Usage Log",
+   "link_count": 0,
+   "link_to": "Voice Usage Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Locale Profile",
+   "link_count": 0,
+   "link_to": "Voice Locale Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Settings",
+   "link_count": 0,
+   "link_to": "AI Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"

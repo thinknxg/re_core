@@ -29,6 +29,7 @@ Standard workspaces shipped from the module folder (synced by `bench migrate`, n
 - Reports: RE Outstanding Rent, RE Rent Collection, RE Lease Expiry, RE PDC Status, RE Maintenance
   Overview (plus the existing Rent Roll). Rent charts/reports resolve permitted Rent Schedules first, so
   company/user permissions and the Tenant row-level rule still apply.
+The workspace also surfaces the companion apps (sections 07-09 and four shortcuts): **re_crm** (RE CRM), **RE-Portal** (RE Portal) and **RE-Voice** (Voice CRM). Links to apps that are not installed on a site are simply hidden by Frappe.
 Workspace visibility is not a substitute for document permissions; those stay unchanged.
 
 ## Install
