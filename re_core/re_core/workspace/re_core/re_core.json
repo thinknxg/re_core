@@ -482,7 +482,7 @@
    "doc_view": "",
    "label": "Admin Dashboard",
    "type": "URL",
-   "url": "/portal"
+   "url": "/re-portal"
   },
   {
    "doc_view": "",
@@ -507,7 +507,7 @@
    "doc_view": "",
    "label": "Portal Home",
    "type": "URL",
-   "url": "/portal"
+   "url": "/re-portal"
   },
   {
    "color": "Green",

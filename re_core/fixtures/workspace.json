@@ -730,7 +730,7 @@
     "restrict_to_domain": null,
     "stats_filter": null,
     "type": "URL",
-    "url": "/portal"
+    "url": "/re-portal"
    },
    {
     "color": null,
@@ -786,7 +786,7 @@
     "restrict_to_domain": null,
     "stats_filter": null,
     "type": "URL",
-    "url": "/portal"
+    "url": "/re-portal"
    },
    {
     "color": "Green",

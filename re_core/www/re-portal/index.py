@@ -5,7 +5,7 @@ no_cache = 1
 
 def get_context(context):
     if frappe.session.user == "Guest":
-        frappe.local.flags.redirect_location = "/login?redirect-to=/portal"
+        frappe.local.flags.redirect_location = "/login?redirect-to=/re-portal"
         raise frappe.Redirect
 
     fullname = frappe.utils.get_fullname(frappe.session.user)
