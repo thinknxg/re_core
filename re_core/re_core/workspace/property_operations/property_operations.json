@@ -1,0 +1,937 @@
+{
+ "creation": "2026-11-11 19:50:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "idx": 0,
+ "modified": "2026-11-11 19:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "Property Operations",
+ "owner": "Administrator",
+ "app": "re_core",
+ "label": "Property Operations",
+ "title": "Property Operations",
+ "public": 1,
+ "type": "Workspace",
+ "icon": "building-2",
+ "indicator_color": "blue",
+ "is_hidden": 0,
+ "hide_custom": 0,
+ "sequence_id": 1,
+ "link_type": "DocType",
+ "content": "[{\"id\": \"h-1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h3\\\"><b>Property Operations</b></span>\", \"col\": 12}}, {\"id\": \"p-2\", \"type\": \"paragraph\", \"data\": {\"text\": \"Real estate management overview: portfolio, tenants, leases, collections and maintenance.\", \"col\": 12}}, {\"id\": \"h-3\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Live overview</b></span>\", \"col\": 12}}, {\"id\": \"n-4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Total Properties\", \"col\": 4}}, {\"id\": \"n-5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Total Units\", \"col\": 4}}, {\"id\": \"n-6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Occupied Units\", \"col\": 4}}, {\"id\": \"n-7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Vacant Units\", \"col\": 4}}, {\"id\": \"n-8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Active Leases\", \"col\": 4}}, {\"id\": \"n-9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Overdue Installments\", \"col\": 4}}, {\"id\": \"h-10\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Operational alerts</b></span>\", \"col\": 12}}, {\"id\": \"n-11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Overdue Rent Amount\", \"col\": 3}}, {\"id\": \"n-12\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Expiring Leases\", \"col\": 3}}, {\"id\": \"n-13\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Open Maintenance\", \"col\": 3}}, {\"id\": \"n-14\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE PDCs Awaiting Deposit\", \"col\": 3}}, {\"id\": \"h-15\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick actions &amp; shortcuts</b></span>\", \"col\": 12}}, {\"id\": \"s-16\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Properties\", \"col\": 3}}, {\"id\": \"s-17\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Units\", \"col\": 3}}, {\"id\": \"s-18\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tenants\", \"col\": 3}}, {\"id\": \"s-19\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Owners\", \"col\": 3}}, {\"id\": \"s-20\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Active Leases\", \"col\": 3}}, {\"id\": \"s-21\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"New Lease\", \"col\": 3}}, {\"id\": \"s-22\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Rent Schedules\", \"col\": 3}}, {\"id\": \"s-23\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Installments\", \"col\": 3}}, {\"id\": \"s-24\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"PDC Management\", \"col\": 3}}, {\"id\": \"s-25\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Deposits\", \"col\": 3}}, {\"id\": \"s-26\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance\", \"col\": 3}}, {\"id\": \"s-27\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inspections\", \"col\": 3}}, {\"id\": \"s-28\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"RE Leads\", \"col\": 3}}, {\"id\": \"s-29\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"RE Deals\", \"col\": 3}}, {\"id\": \"s-30\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Listings\", \"col\": 3}}, {\"id\": \"s-31\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Customer Threads\", \"col\": 3}}, {\"id\": \"h-32\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Analytics</b></span>\", \"col\": 12}}, {\"id\": \"c-33\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Units by Status\", \"col\": 6}}, {\"id\": \"c-34\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Occupied Units by Property\", \"col\": 6}}, {\"id\": \"c-35\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Rent Billed vs Collected\", \"col\": 6}}, {\"id\": \"c-36\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Rent Arrears Ageing\", \"col\": 6}}, {\"id\": \"c-37\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Lease Expirations by Month\", \"col\": 6}}, {\"id\": \"c-38\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Maintenance by Status\", \"col\": 6}}, {\"id\": \"c-39\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE PDC Lifecycle\", \"col\": 6}}, {\"id\": \"h-40\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Needs attention</b></span>\", \"col\": 12}}, {\"id\": \"q-41\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Leases Expiring\", \"col\": 4}}, {\"id\": \"q-42\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Maintenance\", \"col\": 4}}, {\"id\": \"q-43\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"PDCs To Deposit\", \"col\": 4}}, {\"id\": \"h-44\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Modules</b></span>\", \"col\": 12}}, {\"id\": \"k-45\", \"type\": \"card\", \"data\": {\"card_name\": \"01 \\u00b7 Portfolio Management\", \"col\": 4}}, {\"id\": \"k-46\", \"type\": \"card\", \"data\": {\"card_name\": \"02 \\u00b7 Tenant Management\", \"col\": 4}}, {\"id\": \"k-47\", \"type\": \"card\", \"data\": {\"card_name\": \"03 \\u00b7 Lease Management\", \"col\": 4}}, {\"id\": \"k-48\", \"type\": \"card\", \"data\": {\"card_name\": \"04 \\u00b7 Finance & Collections\", \"col\": 4}}, {\"id\": \"k-49\", \"type\": \"card\", \"data\": {\"card_name\": \"05 \\u00b7 Maintenance\", \"col\": 4}}, {\"id\": \"k-50\", \"type\": \"card\", \"data\": {\"card_name\": \"06 \\u00b7 Reports & Settings\", \"col\": 4}}, {\"id\": \"k-51\", \"type\": \"card\", \"data\": {\"card_name\": \"07 \\u00b7 CRM & Leasing Sales (re_crm)\", \"col\": 4}}, {\"id\": \"k-52\", \"type\": \"card\", \"data\": {\"card_name\": \"08 \\u00b7 Portal & Listings (RE-Portal)\", \"col\": 4}}, {\"id\": \"k-53\", \"type\": \"card\", \"data\": {\"card_name\": \"09 \\u00b7 Voice & Messaging (RE-Voice)\", \"col\": 4}}]",
+ "charts": [
+  {
+   "chart_name": "RE Units by Status",
+   "label": "Units by Status"
+  },
+  {
+   "chart_name": "RE Occupied Units by Property",
+   "label": "Occupied Units by Property"
+  },
+  {
+   "chart_name": "RE Rent Billed vs Collected",
+   "label": "Rent Billed vs Collected"
+  },
+  {
+   "chart_name": "RE Rent Arrears Ageing",
+   "label": "Rent Arrears Ageing"
+  },
+  {
+   "chart_name": "RE Lease Expirations by Month",
+   "label": "Lease Expirations by Month"
+  },
+  {
+   "chart_name": "RE Maintenance by Status",
+   "label": "Maintenance by Status"
+  },
+  {
+   "chart_name": "RE PDC Lifecycle",
+   "label": "PDC Lifecycle"
+  }
+ ],
+ "number_cards": [
+  {
+   "number_card_name": "RE Total Properties",
+   "label": "Total Properties"
+  },
+  {
+   "number_card_name": "RE Total Units",
+   "label": "Total Units"
+  },
+  {
+   "number_card_name": "RE Occupied Units",
+   "label": "Occupied Units"
+  },
+  {
+   "number_card_name": "RE Vacant Units",
+   "label": "Vacant Units"
+  },
+  {
+   "number_card_name": "RE Active Leases",
+   "label": "Active Leases"
+  },
+  {
+   "number_card_name": "RE Overdue Installments",
+   "label": "Overdue Installments"
+  },
+  {
+   "number_card_name": "RE Overdue Rent Amount",
+   "label": "Overdue Rent Amount"
+  },
+  {
+   "number_card_name": "RE Expiring Leases",
+   "label": "Leases Expiring"
+  },
+  {
+   "number_card_name": "RE Open Maintenance",
+   "label": "Open Maintenance Requests"
+  },
+  {
+   "number_card_name": "RE PDCs Awaiting Deposit",
+   "label": "PDCs Awaiting Deposit"
+  }
+ ],
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Properties",
+   "link_to": "Property",
+   "type": "DocType",
+   "stats_filter": "{\"status\": \"Active\"}"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Units",
+   "link_to": "Unit",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Tenants",
+   "link_to": "Tenant",
+   "type": "DocType",
+   "stats_filter": "{\"disabled\": 0}"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Owners",
+   "link_to": "Property Owner",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "",
+   "label": "Active Leases",
+   "link_to": "Lease Contract",
+   "type": "DocType",
+   "stats_filter": "{\"docstatus\": 1, \"status\": \"Active\"}"
+  },
+  {
+   "color": "Green",
+   "doc_view": "New",
+   "label": "New Lease",
+   "link_to": "Lease Contract",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "label": "Rent Schedules",
+   "link_to": "Rent Schedule",
+   "type": "DocType",
+   "stats_filter": "{\"status\": \"Active\"}"
+  },
+  {
+   "color": "Red",
+   "doc_view": "",
+   "label": "Installments",
+   "link_to": "RE Outstanding Rent",
+   "type": "Report",
+   "report_ref_doctype": "Rent Schedule"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "",
+   "label": "PDC Management",
+   "link_to": "Post Dated Cheque",
+   "type": "DocType",
+   "stats_filter": "{\"docstatus\": 1, \"status\": \"Received\"}"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "",
+   "label": "Deposits",
+   "link_to": "Security Deposit",
+   "type": "DocType",
+   "stats_filter": "{\"docstatus\": 1, \"status\": \"Held\"}"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "label": "Maintenance",
+   "link_to": "Maintenance Request",
+   "type": "DocType",
+   "stats_filter": "{\"status\": [\"in\", [\"Open\", \"In Progress\", \"On Hold\"]]}"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "",
+   "label": "Inspections",
+   "link_to": "Move In Out Inspection",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "RE Leads",
+   "link_to": "RE Lead",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "RE Deals",
+   "link_to": "RE Deal",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "Listings",
+   "link_to": "Listing",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "Customer Threads",
+   "link_to": "Customer Thread",
+   "type": "DocType"
+  }
+ ],
+ "quick_lists": [
+  {
+   "document_type": "Lease Contract",
+   "label": "Leases Expiring",
+   "quick_list_filter": "[[\"Lease Contract\", \"docstatus\", \"=\", 1], [\"Lease Contract\", \"status\", \"=\", \"Expiring\"]]"
+  },
+  {
+   "document_type": "Maintenance Request",
+   "label": "Open Maintenance",
+   "quick_list_filter": "[[\"Maintenance Request\", \"status\", \"in\", [\"Open\", \"In Progress\", \"On Hold\"]]]"
+  },
+  {
+   "document_type": "Post Dated Cheque",
+   "label": "PDCs To Deposit",
+   "quick_list_filter": "[[\"Post Dated Cheque\", \"docstatus\", \"=\", 1], [\"Post Dated Cheque\", \"status\", \"=\", \"Received\"]]"
+  }
+ ],
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "01 · Portfolio Management",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Property",
+   "link_count": 0,
+   "link_to": "Property",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Unit",
+   "link_count": 0,
+   "link_to": "Unit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Property Owner",
+   "link_count": 0,
+   "link_to": "Property Owner",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Amenity",
+   "link_count": 0,
+   "link_to": "Amenity",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "02 · Tenant Management",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenant",
+   "link_count": 0,
+   "link_to": "Tenant",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Utility Account",
+   "link_count": 0,
+   "link_to": "Utility Account",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Move In Out Inspection",
+   "link_count": 0,
+   "link_to": "Move In Out Inspection",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "03 · Lease Management",
+   "link_count": 5,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lease Contract",
+   "link_count": 0,
+   "link_to": "Lease Contract",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rent Schedule",
+   "link_count": 0,
+   "link_to": "Rent Schedule",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tenancy Bulk Payment",
+   "link_count": 0,
+   "link_to": "Tenancy Bulk Payment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Rent Credit Balance",
+   "link_count": 0,
+   "link_to": "Rent Credit Balance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rent Installments (Outstanding)",
+   "link_count": 0,
+   "link_to": "RE Outstanding Rent",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "report_ref_doctype": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "04 · Finance & Collections",
+   "link_count": 7,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Post Dated Cheque",
+   "link_count": 0,
+   "link_to": "Post Dated Cheque",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Security Deposit",
+   "link_count": 0,
+   "link_to": "Security Deposit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Owner Statement",
+   "link_count": 0,
+   "link_to": "Owner Statement",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Expense Property",
+   "link_count": 0,
+   "link_to": "Expense Property",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Invoice",
+   "link_count": 0,
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Entry",
+   "link_count": 0,
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Accounts Receivable",
+   "link_count": 0,
+   "link_to": "Accounts Receivable",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "report_ref_doctype": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "05 · Maintenance",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Maintenance Request",
+   "link_count": 0,
+   "link_to": "Maintenance Request",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Maintenance Job",
+   "link_count": 0,
+   "link_to": "Maintenance Job",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Move In Out Inspection",
+   "link_count": 0,
+   "link_to": "Move In Out Inspection",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Maintenance Overview",
+   "link_count": 0,
+   "link_to": "RE Maintenance Overview",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "report_ref_doctype": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "06 · Reports & Settings",
+   "link_count": 7,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rent Roll",
+   "link_count": 0,
+   "link_to": "Rent Roll",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "report_ref_doctype": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Rent Collection",
+   "link_count": 0,
+   "link_to": "RE Rent Collection",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "report_ref_doctype": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Outstanding Rent",
+   "link_count": 0,
+   "link_to": "RE Outstanding Rent",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "report_ref_doctype": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Lease Expiry",
+   "link_count": 0,
+   "link_to": "RE Lease Expiry",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "report_ref_doctype": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "PDC Status",
+   "link_count": 0,
+   "link_to": "RE PDC Status",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "report_ref_doctype": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Maintenance Overview",
+   "link_count": 0,
+   "link_to": "RE Maintenance Overview",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link",
+   "report_ref_doctype": ""
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Property Settings",
+   "link_count": 0,
+   "link_to": "Property Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "07 · CRM & Leasing Sales (re_crm)",
+   "link_count": 10,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Lead",
+   "link_count": 0,
+   "link_to": "RE Lead",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Deal",
+   "link_count": 0,
+   "link_to": "RE Deal",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reservation",
+   "link_count": 0,
+   "link_to": "Reservation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Site Visit",
+   "link_count": 0,
+   "link_to": "Site Visit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Agent",
+   "link_count": 0,
+   "link_to": "RE Agent",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Commission Entry",
+   "link_count": 0,
+   "link_to": "Commission Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lead Source RE",
+   "link_count": 0,
+   "link_to": "Lead Source RE",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE CRM Settings",
+   "link_count": 0,
+   "link_to": "RE CRM Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Settings",
+   "link_count": 0,
+   "link_to": "WhatsApp Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Message Log",
+   "link_count": 0,
+   "link_to": "WhatsApp Message Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "08 · Portal & Listings (RE-Portal)",
+   "link_count": 6,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Listing",
+   "link_count": 0,
+   "link_to": "Listing",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Listing Inquiry",
+   "link_count": 0,
+   "link_to": "Listing Inquiry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Portal Chat Session",
+   "link_count": 0,
+   "link_to": "Portal Chat Session",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Listing Feed Settings",
+   "link_count": 0,
+   "link_to": "Listing Feed Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Portal Chat Settings",
+   "link_count": 0,
+   "link_to": "Portal Chat Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "RE Portal Settings",
+   "link_count": 0,
+   "link_to": "RE Portal Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "09 · Voice & Messaging (RE-Voice)",
+   "link_count": 13,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer Thread",
+   "link_count": 0,
+   "link_to": "Customer Thread",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Conversation Session",
+   "link_count": 0,
+   "link_to": "Conversation Session",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Message",
+   "link_count": 0,
+   "link_to": "Voice Message",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Command",
+   "link_count": 0,
+   "link_to": "Voice Command",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Intent",
+   "link_count": 0,
+   "link_to": "Voice Intent",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lead Score Log",
+   "link_count": 0,
+   "link_to": "Lead Score Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Lead Score Model",
+   "link_count": 0,
+   "link_to": "Lead Score Model",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sentiment Reading",
+   "link_count": 0,
+   "link_to": "Sentiment Reading",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Template",
+   "link_count": 0,
+   "link_to": "WhatsApp Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "WhatsApp Webhook Log",
+   "link_count": 0,
+   "link_to": "WhatsApp Webhook Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Usage Log",
+   "link_count": 0,
+   "link_to": "Voice Usage Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Voice Locale Profile",
+   "link_count": 0,
+   "link_to": "Voice Locale Profile",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AI Settings",
+   "link_count": 0,
+   "link_to": "AI Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "custom_blocks": [],
+ "roles": [
+  {
+   "role": "RE Manager"
+  },
+  {
+   "role": "Property Manager"
+  },
+  {
+   "role": "Leasing Officer"
+  },
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Maintenance Supervisor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
+}

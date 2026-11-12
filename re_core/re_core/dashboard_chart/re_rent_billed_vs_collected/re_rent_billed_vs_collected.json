@@ -1,0 +1,23 @@
+{
+ "creation": "2026-11-11 19:50:00.000000",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "idx": 0,
+ "modified": "2026-11-11 19:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "RE Rent Billed vs Collected",
+ "owner": "Administrator",
+ "chart_name": "RE Rent Billed vs Collected",
+ "chart_type": "Custom",
+ "source": "RE Rent Billed vs Collected",
+ "type": "Bar",
+ "filters_json": "{}",
+ "is_public": 1,
+ "is_standard": 1,
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "time_interval": "Monthly",
+ "show_values_over_chart": 1,
+ "roles": []
+}

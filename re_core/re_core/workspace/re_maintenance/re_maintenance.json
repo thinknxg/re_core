@@ -1,0 +1,108 @@
+{
+ "creation": "2026-11-11 19:50:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "idx": 0,
+ "modified": "2026-11-11 19:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "RE Maintenance",
+ "owner": "Administrator",
+ "app": "re_core",
+ "label": "RE Maintenance",
+ "title": "RE Maintenance",
+ "public": 1,
+ "type": "Workspace",
+ "icon": "wrench",
+ "indicator_color": "orange",
+ "is_hidden": 0,
+ "hide_custom": 0,
+ "sequence_id": 3,
+ "link_type": "DocType",
+ "content": "[{\"id\": \"h-1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h3\\\"><b>Maintenance</b></span>\", \"col\": 12}}, {\"id\": \"p-2\", \"type\": \"paragraph\", \"data\": {\"text\": \"Requests, jobs and inspections from report to completion.\", \"col\": 12}}, {\"id\": \"h-3\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Maintenance at a glance</b></span>\", \"col\": 12}}, {\"id\": \"n-4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Open Maintenance\", \"col\": 4}}, {\"id\": \"n-5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Emergency Maintenance\", \"col\": 4}}, {\"id\": \"n-6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"RE Draft Maintenance Jobs\", \"col\": 4}}, {\"id\": \"h-7\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Shortcuts</b></span>\", \"col\": 12}}, {\"id\": \"s-8\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Requests\", \"col\": 3}}, {\"id\": \"s-9\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Jobs\", \"col\": 3}}, {\"id\": \"s-10\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Inspections\", \"col\": 3}}, {\"id\": \"s-11\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Maintenance Overview\", \"col\": 3}}, {\"id\": \"h-12\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Analytics</b></span>\", \"col\": 12}}, {\"id\": \"c-13\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Maintenance by Status\", \"col\": 6}}, {\"id\": \"c-14\", \"type\": \"chart\", \"data\": {\"chart_name\": \"RE Maintenance by Category\", \"col\": 6}}, {\"id\": \"h-15\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Needs attention</b></span>\", \"col\": 12}}, {\"id\": \"q-16\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Open Requests\", \"col\": 6}}, {\"id\": \"q-17\", \"type\": \"quick_list\", \"data\": {\"quick_list_name\": \"Emergency Requests\", \"col\": 6}}]",
+ "charts": [
+  {
+   "chart_name": "RE Maintenance by Status",
+   "label": "Maintenance by Status"
+  },
+  {
+   "chart_name": "RE Maintenance by Category",
+   "label": "Maintenance by Category"
+  }
+ ],
+ "number_cards": [
+  {
+   "number_card_name": "RE Open Maintenance",
+   "label": "Open Maintenance Requests"
+  },
+  {
+   "number_card_name": "RE Emergency Maintenance",
+   "label": "Emergency Requests"
+  },
+  {
+   "number_card_name": "RE Draft Maintenance Jobs",
+   "label": "Maintenance Jobs In Draft"
+  }
+ ],
+ "shortcuts": [
+  {
+   "color": "Orange",
+   "doc_view": "",
+   "label": "Requests",
+   "link_to": "Maintenance Request",
+   "type": "DocType",
+   "stats_filter": "{\"status\": [\"in\", [\"Open\", \"In Progress\", \"On Hold\"]]}"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Jobs",
+   "link_to": "Maintenance Job",
+   "type": "DocType",
+   "stats_filter": "{\"docstatus\": 0}"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "",
+   "label": "Inspections",
+   "link_to": "Move In Out Inspection",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "",
+   "label": "Maintenance Overview",
+   "link_to": "RE Maintenance Overview",
+   "type": "Report",
+   "report_ref_doctype": "Maintenance Request"
+  }
+ ],
+ "quick_lists": [
+  {
+   "document_type": "Maintenance Request",
+   "label": "Open Requests",
+   "quick_list_filter": "[[\"Maintenance Request\", \"status\", \"in\", [\"Open\", \"In Progress\", \"On Hold\"]]]"
+  },
+  {
+   "document_type": "Maintenance Request",
+   "label": "Emergency Requests",
+   "quick_list_filter": "[[\"Maintenance Request\", \"status\", \"in\", [\"Open\", \"In Progress\", \"On Hold\"]], [\"Maintenance Request\", \"priority\", \"=\", \"Emergency\"]]"
+  }
+ ],
+ "links": [],
+ "custom_blocks": [],
+ "roles": [
+  {
+   "role": "RE Manager"
+  },
+  {
+   "role": "Property Manager"
+  },
+  {
+   "role": "Maintenance Supervisor"
+  },
+  {
+   "role": "System Manager"
+  }
+ ]
+}

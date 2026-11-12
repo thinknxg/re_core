@@ -1,0 +1,13 @@
+{
+ "creation": "2026-11-11 19:50:00.000000",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2026-11-11 19:50:00.000000",
+ "modified_by": "Administrator",
+ "module": "RE Core",
+ "name": "RE Rent Billed vs Collected",
+ "owner": "Administrator",
+ "source_name": "RE Rent Billed vs Collected",
+ "timeseries": 0
+}

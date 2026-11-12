@@ -16,6 +16,22 @@ via ERPNext tax templates; Ejari/RERA/Tawtheeq compliance fields).
 - Tenant portal user provisioning (role: Tenant) with row-level permission query conditions
 - Roles + Property Ops workspace shipped as fixtures
 
+## Property Operations workspace (v16)
+Standard workspaces shipped from the module folder (synced by `bench migrate`, no manual setup):
+- **Property Operations** - main control panel: 10 Number Cards, 7 Dashboard Charts, 12 shortcuts,
+  3 Quick Lists and six link sections. Visible to RE Manager, Property Manager, Leasing Officer,
+  Accounts User, Maintenance Supervisor.
+- **RE Finance** (Accounts User / managers) and **RE Maintenance** (Maintenance Supervisor / managers):
+  focused dashboards reusing the same cards and charts.
+- Sidebar: `fixtures/workspace_sidebar.json` (sections for Portfolio, Tenants, Leases, Collections,
+  Maintenance, Reports, Settings). The original **RE Core** workspace remains as the hub for CRM,
+  listings and portal.
+- Reports: RE Outstanding Rent, RE Rent Collection, RE Lease Expiry, RE PDC Status, RE Maintenance
+  Overview (plus the existing Rent Roll). Rent charts/reports resolve permitted Rent Schedules first, so
+  company/user permissions and the Tenant row-level rule still apply.
+The workspace also surfaces the companion apps (sections 07-09 and four shortcuts): **re_crm** (RE CRM), **RE-Portal** (RE Portal) and **RE-Voice** (Voice CRM). Links to apps that are not installed on a site are simply hidden by Frappe.
+Workspace visibility is not a substitute for document permissions; those stay unchanged.
+
 ## Install
 ```bash
 bench get-app /path/to/re_core
