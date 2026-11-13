@@ -331,3 +331,9 @@ def load_data(company=None, dry_run=0):
     frappe.clear_cache()
     print(f"\nlinks cleared (target missing / accounting): {stats or 'none'}")
     print(f"done: {len(inserted)} records inserted, {errors} errors")
+
+
+@frappe.whitelist()
+def run_load(dry_run=0):
+    frappe.only_for("System Manager")
+    return load_data(dry_run=int(dry_run))
