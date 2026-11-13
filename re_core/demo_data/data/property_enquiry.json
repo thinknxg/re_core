@@ -1,0 +1,79 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Property Enquiry",
+  "enquiry_id": "ENQ-00001",
+  "enquiry_type": "General Enquiry",
+  "idx": 0,
+  "linked_lead": "CRM-LEAD-2026-00001",
+  "message": "pls contact me",
+  "name": "ENQ-00001",
+  "property": "PROP-2026-0074",
+  "status": "New",
+  "unit": "UNIT-00075"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Property Enquiry",
+  "enquiry_id": "ENQ-00002",
+  "enquiry_type": "General Enquiry",
+  "idx": 0,
+  "linked_lead": "CRM-LEAD-2026-00001",
+  "message": "test",
+  "name": "ENQ-00002",
+  "property": "PROP-2026-0109",
+  "status": "New",
+  "unit": "UNIT-00110"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Property Enquiry",
+  "enquiry_id": "ENQ-00003",
+  "enquiry_type": "General Enquiry",
+  "idx": 0,
+  "linked_lead": "CRM-LEAD-2026-00001",
+  "message": "test",
+  "name": "ENQ-00003",
+  "property": "PROP-2026-0058",
+  "status": "New",
+  "unit": "UNIT-00059"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Property Enquiry",
+  "enquiry_id": "ENQ-00005",
+  "enquiry_type": "General Enquiry",
+  "idx": 0,
+  "message": "Testing notify fix",
+  "name": "ENQ-00005",
+  "property": "PROP-2026-0109",
+  "status": "New",
+  "unit": "UNIT-00110"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Property Enquiry",
+  "enquiry_id": "ENQ-00006",
+  "enquiry_type": "General Enquiry",
+  "idx": 0,
+  "linked_lead": "CRM-LEAD-2026-00001",
+  "message": "Testing RE Lead bridge",
+  "name": "ENQ-00006",
+  "property": "PROP-2026-0109",
+  "status": "New",
+  "unit": "UNIT-00110"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Property Enquiry",
+  "enquiry_id": "ENQ-00007",
+  "enquiry_type": "General Enquiry",
+  "idx": 0,
+  "linked_lead": "CRM-LEAD-2026-00001",
+  "message": "Testing dedup",
+  "name": "ENQ-00007",
+  "property": "PROP-2026-0109",
+  "status": "New",
+  "unit": "UNIT-00110"
+ }
+]

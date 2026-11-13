@@ -1,0 +1,64 @@
+[
+ {
+  "agent": "AGT-008",
+  "base_amount": 6000.0,
+  "commission_amount": 150.0,
+  "company": "SRS (Demo)",
+  "deal": "DEAL-2026-0036",
+  "docstatus": 0,
+  "doctype": "Commission Entry",
+  "idx": 0,
+  "lease_contract": "LEASE-2026-0034",
+  "name": "COM-00050",
+  "remarks": "Auto-seeded test commission",
+  "status": "Draft"
+ },
+ {
+  "agent": "AGT-009",
+  "base_amount": 6000.0,
+  "commission_amount": 150.0,
+  "company": "SRS (Demo)",
+  "deal": "DEAL-2026-0037",
+  "docstatus": 0,
+  "doctype": "Commission Entry",
+  "idx": 0,
+  "lease_contract": "LEASE-2026-0035",
+  "name": "COM-00051",
+  "remarks": "Auto-seeded test commission",
+  "status": "Approved"
+ },
+ {
+  "agent": "AGT-009",
+  "base_amount": 25000.0,
+  "commission_amount": 1000.0,
+  "company": "SRS (Demo)",
+  "docstatus": 0,
+  "doctype": "Commission Entry",
+  "idx": 0,
+  "name": "COM-00056",
+  "status": "Draft"
+ },
+ {
+  "agent": "AGT-009",
+  "base_amount": 25000.0,
+  "commission_amount": 1000.0,
+  "company": "SRS (Demo)",
+  "docstatus": 0,
+  "doctype": "Commission Entry",
+  "idx": 0,
+  "name": "COM-00057",
+  "status": "Approved"
+ },
+ {
+  "agent": "AGT-009",
+  "base_amount": 1666.666666667,
+  "commission_amount": 33.333,
+  "company": "SRS (Demo)",
+  "docstatus": 0,
+  "doctype": "Commission Entry",
+  "idx": 0,
+  "lease_contract": "LEASE-2026-0077",
+  "name": "COM-00078",
+  "status": "Draft"
+ }
+]

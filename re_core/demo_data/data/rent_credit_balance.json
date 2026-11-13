@@ -1,0 +1,15 @@
+[
+ {
+  "amount": 0.333,
+  "amount_used": 0.0,
+  "docstatus": 0,
+  "doctype": "Rent Credit Balance",
+  "idx": 0,
+  "lease_contract": "LEASE-2026-0079",
+  "name": "RCB-2026-00001",
+  "rent_schedule": "RS-00080",
+  "source_installment": "7hm20idmdu",
+  "status": "Available",
+  "tenant": "Khalid Al Harthy"
+ }
+]

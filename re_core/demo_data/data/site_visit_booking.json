@@ -1,0 +1,26 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Site Visit Booking",
+  "idx": 0,
+  "lead": "CRM-LEAD-2026-00001",
+  "name": "m4o6c5i3nq",
+  "property": "PROP-2026-0074",
+  "status": "Requested",
+  "unit": "UNIT-00075",
+  "visit_date": "2026-08-05",
+  "visit_time_slot": "10:00 - 12:00"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Site Visit Booking",
+  "idx": 0,
+  "lead": "CRM-LEAD-2026-00001",
+  "name": "obpiv09jf1",
+  "property": "PROP-2026-0109",
+  "status": "Requested",
+  "unit": "UNIT-00110",
+  "visit_date": "2026-08-15",
+  "visit_time_slot": "10:00 - 12:00"
+ }
+]

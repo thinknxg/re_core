@@ -1,0 +1,30 @@
+[
+ {
+  "bedrooms": 2,
+  "docstatus": 0,
+  "doctype": "Saved Search",
+  "enabled": 1,
+  "idx": 0,
+  "last_checked": "2026-11-12 10:26:58.151908",
+  "lead": "CRM-LEAD-2026-00001",
+  "location": "Muscat",
+  "max_rent": 0.0,
+  "min_rent": 0.0,
+  "name": "v2ngt9oefn",
+  "unit_type": "3BR"
+ },
+ {
+  "bedrooms": 3,
+  "docstatus": 0,
+  "doctype": "Saved Search",
+  "enabled": 1,
+  "idx": 0,
+  "last_checked": "2026-11-12 10:26:58.144119",
+  "lead": "CRM-LEAD-2026-00001",
+  "location": "Qatar",
+  "max_rent": 0.0,
+  "min_rent": 0.0,
+  "name": "v438kua97j",
+  "unit_type": "3BR"
+ }
+]

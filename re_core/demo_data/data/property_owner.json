@@ -1,0 +1,13 @@
+[
+ {
+  "company": "SRS (Demo)",
+  "docstatus": 0,
+  "doctype": "Property Owner",
+  "idx": 4,
+  "management_fee_percent": 5.0,
+  "name": "OWN-0001",
+  "owner_name": "Test Owner LLC",
+  "owner_type": "Company",
+  "supplier": "Test Owner LLC"
+ }
+]

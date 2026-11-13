@@ -1,0 +1,19 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Property Document",
+  "document_type": "Title Deed",
+  "idx": 0,
+  "name": "PD-00001",
+  "property": "PROP-2026-0092"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Property Document",
+  "document_type": "Municipality License",
+  "expiry_date": "2026-09-13",
+  "idx": 0,
+  "name": "PD-00004",
+  "property": "PROP-2026-0109"
+ }
+]

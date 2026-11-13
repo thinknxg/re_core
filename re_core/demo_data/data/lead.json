@@ -1,0 +1,30 @@
+[
+ {
+  "annual_revenue": 0.0,
+  "blog_subscriber": 0,
+  "company": "SRS (Demo)",
+  "country": "India",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Lead",
+  "email_id": "user09832506@example.com",
+  "first_name": "Salim Al Rawahi",
+  "idx": 1,
+  "image": "",
+  "language": "en",
+  "lead_name": "Salim Al Rawahi",
+  "lead_owner": "Guest",
+  "mobile_no": "+96895138118",
+  "name": "CRM-LEAD-2026-00001",
+  "naming_series": "CRM-LEAD-.YYYY.-",
+  "no_of_employees": "1-10",
+  "notes": [],
+  "phone": "+96895138118",
+  "qualification_status": "Unqualified",
+  "request_type": "",
+  "status": "Lead",
+  "title": "Salim Al Rawahi",
+  "type": "",
+  "unsubscribed": 0
+ }
+]

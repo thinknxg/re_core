@@ -1,0 +1,30 @@
+[
+ {
+  "amount": 280.0,
+  "company": "SRS (Demo)",
+  "docstatus": 1,
+  "doctype": "Expense Property",
+  "expense_date": "2026-07-26",
+  "expense_type": "Maintenance",
+  "idx": 0,
+  "journal_entry": "ACC-JV-2026-00003",
+  "name": "EXP-PROP-2026-00001",
+  "naming_series": "EXP-PROP-.YYYY.-",
+  "outstanding_amount": 180.0,
+  "paid_amount": 100.0,
+  "partial_payments": [
+   {
+    "docstatus": 0,
+    "doctype": "Partial Payment Table",
+    "idx": 1,
+    "journal_entry": "ACC-JV-2026-00004",
+    "outstanding_amount": 180.0,
+    "paid_amount": 100.0,
+    "payment_date": "2026-07-26"
+   }
+  ],
+  "property": "PROP-2026-0074",
+  "status": "Partially Paid",
+  "supplier": "Summit Traders Ltd."
+ }
+]

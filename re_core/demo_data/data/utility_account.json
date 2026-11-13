@@ -1,0 +1,98 @@
+[
+ {
+  "account_number": "AC12922846",
+  "docstatus": 0,
+  "doctype": "Utility Account",
+  "idx": 0,
+  "in_tenant_name": 0,
+  "meter_number": "MTR-101",
+  "name": "UTIL-00012",
+  "provider": "Oman Electricity",
+  "unit": "UNIT-00005",
+  "utility_type": "Electricity"
+ },
+ {
+  "account_number": "AC72059207",
+  "docstatus": 0,
+  "doctype": "Utility Account",
+  "idx": 0,
+  "in_tenant_name": 1,
+  "meter_number": "WMTR-101",
+  "name": "UTIL-00013",
+  "provider": "Muscat Water",
+  "unit": "UNIT-00005",
+  "utility_type": "Water"
+ },
+ {
+  "account_number": "AC12922846",
+  "docstatus": 0,
+  "doctype": "Utility Account",
+  "idx": 0,
+  "in_tenant_name": 0,
+  "meter_number": "MTR-101",
+  "name": "UTIL-00014",
+  "provider": "Oman Electricity",
+  "unit": "UNIT-00003",
+  "utility_type": "Electricity"
+ },
+ {
+  "account_number": "AC72059207",
+  "docstatus": 0,
+  "doctype": "Utility Account",
+  "idx": 0,
+  "in_tenant_name": 1,
+  "meter_number": "WMTR-101",
+  "name": "UTIL-00015",
+  "provider": "Muscat Water",
+  "unit": "UNIT-00003",
+  "utility_type": "Water"
+ },
+ {
+  "account_number": "AC12922846",
+  "docstatus": 0,
+  "doctype": "Utility Account",
+  "idx": 0,
+  "in_tenant_name": 0,
+  "meter_number": "MTR-101",
+  "name": "UTIL-00026",
+  "provider": "Oman Electricity",
+  "unit": "UNIT-00005",
+  "utility_type": "Electricity"
+ },
+ {
+  "account_number": "AC72059207",
+  "docstatus": 0,
+  "doctype": "Utility Account",
+  "idx": 0,
+  "in_tenant_name": 1,
+  "meter_number": "WMTR-101",
+  "name": "UTIL-00027",
+  "provider": "Muscat Water",
+  "unit": "UNIT-00005",
+  "utility_type": "Water"
+ },
+ {
+  "account_number": "AC12922846",
+  "docstatus": 0,
+  "doctype": "Utility Account",
+  "idx": 0,
+  "in_tenant_name": 0,
+  "meter_number": "MTR-101",
+  "name": "UTIL-00028",
+  "provider": "Oman Electricity",
+  "unit": "UNIT-00003",
+  "utility_type": "Electricity"
+ },
+ {
+  "account_number": "AC72059207",
+  "docstatus": 0,
+  "doctype": "Utility Account",
+  "idx": 0,
+  "in_tenant_name": 1,
+  "meter_number": "WMTR-101",
+  "name": "UTIL-00029",
+  "provider": "Muscat Water",
+  "unit": "UNIT-00003",
+  "utility_type": "Water"
+ }
+]

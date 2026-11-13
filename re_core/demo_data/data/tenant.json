@@ -1,0 +1,114 @@
+[
+ {
+  "customer": "Ahmed Al Balushi",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Tenant",
+  "email": "user35945721@example.com",
+  "enable_portal": 0,
+  "idx": 0,
+  "kyc_documents": [
+   {
+    "docstatus": 0,
+    "doctype": "Tenant KYC Document",
+    "expiry_date": "2028-07-06",
+    "id_number": "ID4083296",
+    "id_type": "National ID",
+    "idx": 1
+   },
+   {
+    "docstatus": 0,
+    "doctype": "Tenant KYC Document",
+    "expiry_date": "2015-12-10",
+    "id_number": "52552",
+    "id_type": "National ID",
+    "idx": 2
+   }
+  ],
+  "mobile": "+96892897755",
+  "name": "TEN-00006",
+  "nationality": "Omani",
+  "request_source": "Admin",
+  "tenant_name": "Ahmed Al Balushi",
+  "tenant_type": "Individual",
+  "whatsapp_number": "+96892897755"
+ },
+ {
+  "customer": "Fatima Al Kindi",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Tenant",
+  "email": "user55719566@example.com",
+  "enable_portal": 0,
+  "idx": 0,
+  "kyc_documents": [
+   {
+    "docstatus": 0,
+    "doctype": "Tenant KYC Document",
+    "expiry_date": "2028-07-06",
+    "id_number": "ID3674597",
+    "id_type": "Passport",
+    "idx": 1
+   }
+  ],
+  "mobile": "+96890169331",
+  "name": "TEN-00007",
+  "nationality": "Omani",
+  "request_source": "Admin",
+  "tenant_name": "Fatima Al Kindi",
+  "tenant_type": "Individual",
+  "whatsapp_number": "+96890169331"
+ },
+ {
+  "customer": "Fatima Al Kindi",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Tenant",
+  "email": "user55719566@example.com",
+  "enable_portal": 0,
+  "idx": 0,
+  "kyc_documents": [],
+  "mobile": "+96890169331",
+  "name": "TEN-00021",
+  "nationality": "Omani",
+  "request_source": "Admin",
+  "tenant_name": "Fatima Al Kindi",
+  "tenant_type": "Individual",
+  "whatsapp_number": "+96890169331"
+ },
+ {
+  "customer": "Khalid Al Harthy",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Tenant",
+  "email": "user91275560@example.com",
+  "enable_portal": 1,
+  "idx": 3,
+  "kyc_documents": [],
+  "mobile": "+96892172465",
+  "name": "TEN-00060",
+  "nationality": "Dubai",
+  "portal_user": "user91275560@example.com",
+  "request_source": "Admin",
+  "tenant_name": "Khalid Al Harthy",
+  "tenant_type": "Individual",
+  "whatsapp_number": "+96892172465"
+ },
+ {
+  "customer": "Salim Al Rawahi",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Tenant",
+  "email": "user09832506@example.com",
+  "enable_portal": 1,
+  "idx": 2,
+  "kyc_documents": [],
+  "mobile": "+96895138118",
+  "name": "TEN-00107",
+  "portal_user": "user09832506@example.com",
+  "request_source": "Portal",
+  "tenant_name": "Salim Al Rawahi",
+  "tenant_type": "Individual",
+  "whatsapp_number": "+96895138118"
+ }
+]

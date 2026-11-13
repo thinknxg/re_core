@@ -1,0 +1,94 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Move In Out Inspection",
+  "estimated_damage_cost": 0.0,
+  "idx": 0,
+  "inspected_by": "Administrator",
+  "inspection_date": "2026-05-09",
+  "inspection_type": "Move In",
+  "items": [
+   {
+    "condition": "Good",
+    "docstatus": 0,
+    "doctype": "Inspection Item",
+    "idx": 1,
+    "item": "Walls",
+    "remarks": "No marks",
+    "room": "Living Room"
+   },
+   {
+    "condition": "Fair",
+    "docstatus": 0,
+    "doctype": "Inspection Item",
+    "idx": 2,
+    "item": "Cabinets",
+    "remarks": "Minor scuff",
+    "room": "Kitchen"
+   }
+  ],
+  "lease_contract": "LEASE-2026-0034",
+  "name": "INSP-00048",
+  "summary": "Unit handed over in good condition.",
+  "tenant_present": 1,
+  "unit": "UNIT-00005"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Move In Out Inspection",
+  "estimated_damage_cost": 0.0,
+  "idx": 0,
+  "inspected_by": "Administrator",
+  "inspection_date": "2026-05-09",
+  "inspection_type": "Move In",
+  "items": [
+   {
+    "condition": "Good",
+    "docstatus": 0,
+    "doctype": "Inspection Item",
+    "idx": 1,
+    "item": "Walls",
+    "remarks": "No marks",
+    "room": "Living Room"
+   },
+   {
+    "condition": "Fair",
+    "docstatus": 0,
+    "doctype": "Inspection Item",
+    "idx": 2,
+    "item": "Cabinets",
+    "remarks": "Minor scuff",
+    "room": "Kitchen"
+   }
+  ],
+  "lease_contract": "LEASE-2026-0035",
+  "name": "INSP-00049",
+  "summary": "Unit handed over in good condition.",
+  "tenant_present": 1,
+  "unit": "UNIT-00003"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Move In Out Inspection",
+  "estimated_damage_cost": 0.0,
+  "idx": 0,
+  "inspected_by": "Administrator",
+  "inspection_date": "2025-12-10",
+  "inspection_type": "Move In",
+  "items": [
+   {
+    "condition": "Damaged",
+    "docstatus": 0,
+    "doctype": "Inspection Item",
+    "idx": 1,
+    "item": "Furniture",
+    "remarks": "Furniture damaged ",
+    "room": "bed"
+   }
+  ],
+  "lease_contract": "LEASE-2026-0035",
+  "name": "INSP-00055",
+  "tenant_present": 1,
+  "unit": "UNIT-00003"
+ }
+]

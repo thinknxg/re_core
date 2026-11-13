@@ -1,0 +1,59 @@
+[
+ {
+  "agent_name": "Yousuf Al Hinai",
+  "commission_type": "Percent",
+  "docstatus": 0,
+  "doctype": "RE Agent",
+  "flat_amount": 0.0,
+  "idx": 0,
+  "in_assignment_pool": 1,
+  "is_active": 1,
+  "mobile": "+96895226125",
+  "name": "AGT-008",
+  "percent": 2.5,
+  "slabs": [],
+  "user": "user45222586@example.com",
+  "voice_enabled": 0
+ },
+ {
+  "agent_name": "Layla Al Farsi",
+  "commission_type": "Tiered",
+  "docstatus": 0,
+  "doctype": "RE Agent",
+  "flat_amount": 0.0,
+  "idx": 0,
+  "in_assignment_pool": 1,
+  "is_active": 1,
+  "mobile": "+96899412154",
+  "name": "AGT-009",
+  "percent": 0.0,
+  "slabs": [
+   {
+    "docstatus": 0,
+    "doctype": "Commission Slab",
+    "from_amount": 1000.0,
+    "idx": 1,
+    "percent": 2.0,
+    "to_amount": 5000.0
+   },
+   {
+    "docstatus": 0,
+    "doctype": "Commission Slab",
+    "from_amount": 5001.0,
+    "idx": 2,
+    "percent": 3.0,
+    "to_amount": 20000.0
+   },
+   {
+    "docstatus": 0,
+    "doctype": "Commission Slab",
+    "from_amount": 20001.0,
+    "idx": 3,
+    "percent": 4.0,
+    "to_amount": 100000.0
+   }
+  ],
+  "user": "Administrator",
+  "voice_enabled": 0
+ }
+]

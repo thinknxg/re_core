@@ -1,0 +1,15 @@
+[
+ {
+  "agent": "AGT-008",
+  "client_mobile": "+96899911928",
+  "deal": "DEAL-2026-0067",
+  "docstatus": 0,
+  "doctype": "Site Visit",
+  "idx": 0,
+  "name": "SV-00068",
+  "outcome": "",
+  "reminder_sent": 0,
+  "unit": "UNIT-00063",
+  "visit_datetime": "2026-07-06 12:44:00"
+ }
+]

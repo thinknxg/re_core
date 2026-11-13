@@ -1,0 +1,14 @@
+[
+ {
+  "category": "Electrical",
+  "description": "wiring",
+  "docstatus": 0,
+  "doctype": "Maintenance Request",
+  "idx": 0,
+  "name": "MR-2026-0069",
+  "priority": "Emergency",
+  "property": "PROP-2026-0058",
+  "status": "Open",
+  "unit": "UNIT-00059"
+ }
+]
